@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Memory Benchmark</title>
+    <meta
+      name="description"
+      content="A fair, reproducible benchmark for agent long-term memory systems."
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <div class="title-block">
+          <h1>Agent Memory Benchmark</h1>
+          <p class="tagline">
+            How well do memory systems retrieve the right context for an agent?
+          </p>
+        </div>
+        <nav class="links" aria-label="Links">
+          <a id="gh-link" href="#" rel="noopener">GitHub</a>
+          <a href="../METHODOLOGY.md">Methodology</a>
+          <a href="../README.md">README</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <!-- Control bar: benchmark + answerer model selectors + system toggles -->
+      <section id="controls" class="controls" aria-label="Filters">
+        <div class="control-group">
+          <span class="control-label">Benchmark</span>
+          <div id="benchmark-pills" class="pills" role="group"></div>
+        </div>
+        <div class="control-group">
+          <span class="control-label">Answerer model</span>
+          <div id="model-pills" class="pills" role="group"></div>
+        </div>
+        <div class="control-group control-group--systems">
+          <span class="control-label">Systems</span>
+          <div id="system-toggles" class="toggles" role="group"></div>
+        </div>
+      </section>
+
+      <section id="board" class="board"></section>
+
+      <section class="methodology">
+        <p>
+          Every system is reached only through its public client; one fixed
+          answerer reads the retrieved context; raw metrics first.
+          <a href="../METHODOLOGY.md">Read the methodology &rarr;</a>
+        </p>
+        <p class="reproduce-label">Reproduce a run:</p>
+        <pre class="reproduce"><code id="reproduce-cmd"></code></pre>
+      </section>
+    </main>
+
+    <footer class="site-footer wrap">
+      <p id="footer-meta" class="muted"></p>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

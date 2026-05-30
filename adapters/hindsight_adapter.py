@@ -16,6 +16,8 @@ Hindsight performs LLM fact-extraction at retain time (its core value-add), so
 ingest is synchronous (async=False) to guarantee facts are queryable before the
 questions run.
 """
+from __future__ import annotations
+
 import hashlib
 import json
 import os

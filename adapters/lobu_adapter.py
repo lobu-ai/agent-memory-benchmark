@@ -19,6 +19,8 @@ client-side (with over-fetch). Content from prior scenarios is superseded via
 tombstones on reset where possible. This is the honest API-only behavior; see
 METHODOLOGY.md "Isolation".
 """
+from __future__ import annotations
+
 import json
 import os
 import time
@@ -95,7 +97,9 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
             "save_memory",
             {
                 "content": content,
-                "semantic_type": step.get("semanticType") or "memory",
+                # Suite semanticType (e.g. "conversation_session") is not a
+                # built-in Lobu event kind; store as a generic "fact".
+                "semantic_type": "fact",
                 "metadata": {
                     "benchmark_step_id": str(step.get("id")),
                     "benchmark_scenario_id": scenario.get("id"),
@@ -111,7 +115,7 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
     deadline = time.time() + EMBED_WAIT_S
     probe = (steps[0] or {}).get("content", "")[:80] if steps else ""
     while time.time() < deadline:
-        res = call_tool("search_memory", {"query": probe or "memory", "limit": 1})
+        res = call_tool("read_knowledge", {"query": probe or "memory", "limit": 4})
         if _has_scenario_hit(res, scenario.get("id")):
             break
         time.sleep(2)
@@ -119,7 +123,7 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
 
 
 def _has_scenario_hit(res: Any, scenario_id: Any) -> bool:
-    items = (res or {}).get("content") or (res or {}).get("matches") or []
+    items = (res or {}).get("content") or []
     for it in items:
         meta = it.get("metadata") if isinstance(it, dict) else None
         if isinstance(meta, dict) and meta.get("benchmark_scenario_id") == scenario_id:
