@@ -56,6 +56,34 @@ ANSWERER_MAX_CONCURRENCY=3 Z_AI_API_KEY=... \
 
 Reports (JSON + Markdown leaderboard) land in `results/`.
 
+## Continuous benchmarking (GitHub Actions)
+
+`.github/workflows/benchmark.yml` runs the whole thing in CI — it stands up the
+self-hosted systems (Hindsight via `pip`, Lobu via `lobu run` with embedded
+Postgres), captures **each system's version under test**, runs the benchmark
+against the cloud systems, regenerates the leaderboard data, and uploads/commits
+the result artifacts. This keeps results reproducible and version-tracked over
+time (`systems[].version` in every report).
+
+Trigger it from the **Actions → benchmark → Run workflow** button, or let the
+weekly schedule run it.
+
+Required repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Used for |
+|---|---|
+| `Z_AI_API_KEY` | the shared answerer (glm-5.1) + Hindsight's internal LLM |
+| `MEM0_API_KEY` | Mem0 cloud |
+| `SUPERMEMORY_API_KEY` | Supermemory cloud |
+| `ZEP_API_KEY` | Zep cloud |
+
+```bash
+gh secret set Z_AI_API_KEY -R lobu-ai/agent-memory-benchmark
+gh secret set MEM0_API_KEY -R lobu-ai/agent-memory-benchmark
+gh secret set SUPERMEMORY_API_KEY -R lobu-ai/agent-memory-benchmark
+gh secret set ZEP_API_KEY -R lobu-ai/agent-memory-benchmark
+```
+
 ## Add a system (PR)
 
 1. Add `adapters/<system>_adapter.py` implementing the `reset/setup/ingest/retrieve`

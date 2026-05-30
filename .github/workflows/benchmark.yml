@@ -1,0 +1,138 @@
+name: benchmark
+
+# Runs the agent-memory benchmark in CI and publishes the result artifacts +
+# leaderboard data. Each system's version under test is captured so scores stay
+# comparable over time.
+#
+# Required repository secrets:
+#   Z_AI_API_KEY          answerer (glm-5.1) + Hindsight's internal LLM
+#   MEM0_API_KEY          Mem0 cloud
+#   SUPERMEMORY_API_KEY   Supermemory cloud
+#   ZEP_API_KEY           Zep cloud
+#
+# Trigger manually (Actions tab -> benchmark -> Run workflow) or on schedule.
+
+on:
+  workflow_dispatch:
+    inputs:
+      config:
+        description: "Config file under configs/"
+        default: "longmemeval-oracle-10.all.json"
+        type: string
+      commit_results:
+        description: "Commit results + leaderboard data back to the repo"
+        default: true
+        type: boolean
+  schedule:
+    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
+
+concurrency:
+  group: benchmark
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CONFIG: ${{ inputs.config || 'longmemeval-oracle-10.all.json' }}
+      ANSWERER_MAX_CONCURRENCY: "2"
+      # self-hosted servers
+      HINDSIGHT_BASE_URL: http://localhost:8888
+      LOBU_BASE_URL: http://localhost:8799
+      LOBU_DATA_DIR: ${{ runner.temp }}/lobu-data
+      ENCRYPTION_KEY: ${{ secrets.LOBU_ENCRYPTION_KEY || 'ci0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: latest }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - name: Install harness deps
+        run: bun install
+
+      # --- Self-hosted system: Hindsight (embedded pg0, glm-5.1 via z.ai) ------
+      - name: Install Hindsight
+        run: pip install hindsight-all
+      - name: Capture Hindsight version
+        run: echo "HINDSIGHT_VERSION=$(pip show hindsight-api | awk '/^Version:/{print $2}')" >> "$GITHUB_ENV"
+      - name: Start Hindsight server
+        env:
+          HINDSIGHT_API_LLM_PROVIDER: openai
+          HINDSIGHT_API_LLM_BASE_URL: https://api.z.ai/api/coding/paas/v4
+          HINDSIGHT_API_LLM_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+          HINDSIGHT_API_LLM_MODEL: glm-5.1
+          HINDSIGHT_API_RETAIN_LLM_PROVIDER: openai
+          HINDSIGHT_API_RETAIN_LLM_BASE_URL: https://api.z.ai/api/coding/paas/v4
+          HINDSIGHT_API_RETAIN_LLM_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+          HINDSIGHT_API_RETAIN_LLM_MODEL: glm-5.1
+        run: |
+          nohup hindsight-api --port 8888 > hindsight.log 2>&1 &
+          for i in $(seq 1 60); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8888/health)" = "200" ] && break
+            sleep 5
+          done
+          curl -sf http://localhost:8888/health || { echo "Hindsight failed to start"; cat hindsight.log; exit 1; }
+
+      # --- Self-hosted system: Lobu (lobu run, embedded postgres) -------------
+      - name: Install Lobu CLI
+        run: npm i -g @lobu/cli@latest
+      - name: Capture Lobu version
+        run: echo "LOBU_VERSION=$(lobu --version | tail -1)" >> "$GITHUB_ENV"
+      - name: Start Lobu server + provision org/token
+        run: |
+          mkdir -p "$LOBU_DATA_DIR"
+          nohup lobu run --port 8799 > lobu.log 2>&1 &
+          for i in $(seq 1 60); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8799/health)" = "200" ] && break
+            sleep 5
+          done
+          curl -sf http://localhost:8799/health || { echo "Lobu failed to start"; cat lobu.log; exit 1; }
+          INIT=$(curl -sf -X POST http://localhost:8799/api/local-init -H 'X-Lobu-Client: ci')
+          echo "LOBU_API_TOKEN=$(echo "$INIT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["device_token"])')" >> "$GITHUB_ENV"
+          echo "LOBU_ORG_SLUG=$(echo "$INIT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["organization"]["slug"])')" >> "$GITHUB_ENV"
+
+      # --- Cloud system versions (SDK version is the comparable identifier) ----
+      - name: Capture cloud system versions
+        run: |
+          pip install mem0ai supermemory zep-cloud >/dev/null 2>&1 || true
+          echo "MEM0_VERSION=$(pip show mem0ai        | awk '/^Version:/{print $2}' || echo cloud)" >> "$GITHUB_ENV"
+          echo "SUPERMEMORY_VERSION=$(pip show supermemory | awk '/^Version:/{print $2}' || echo cloud)" >> "$GITHUB_ENV"
+          echo "ZEP_VERSION=$(pip show zep-cloud      | awk '/^Version:/{print $2}' || echo cloud)" >> "$GITHUB_ENV"
+
+      # --- Run the benchmark ---------------------------------------------------
+      - name: Run benchmark
+        env:
+          Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+          MEM0_API_KEY: ${{ secrets.MEM0_API_KEY }}
+          SUPERMEMORY_API_KEY: ${{ secrets.SUPERMEMORY_API_KEY }}
+          ZEP_API_KEY: ${{ secrets.ZEP_API_KEY }}
+        run: bun run scripts/run.ts --config "configs/$CONFIG"
+
+      - name: Regenerate leaderboard data
+        run: bun website/build-data.mjs
+
+      - name: Upload result artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.run_id }}
+          path: |
+            results/*.json
+            results/*.md
+            website/public/data.json
+
+      - name: Commit results + leaderboard data
+        if: ${{ inputs.commit_results != false }}
+        run: |
+          git config user.name "lobu-benchmark-bot"
+          git config user.email "bot@lobu.ai"
+          git add -f results/*.json results/*.md website/public/data.json
+          git commit -m "benchmark run ${{ github.run_id }} (versions captured)" || { echo "no changes"; exit 0; }
+          git push
