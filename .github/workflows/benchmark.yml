@@ -60,7 +60,11 @@ jobs:
 
       # --- Self-hosted system: Hindsight (embedded pg0, glm-5.1 via z.ai) ------
       - name: Install Hindsight
-        run: pip install hindsight-all
+        run: |
+          # CPU-only torch first so hindsight-all doesn't pull the multi-GB CUDA
+          # build (it only needs torch for local embeddings + cross-encoder rerank).
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install hindsight-all
       - name: Capture Hindsight version
         run: echo "HINDSIGHT_VERSION=$(pip show hindsight-api | awk '/^Version:/{print $2}')" >> "$GITHUB_ENV"
       - name: Start Hindsight server
