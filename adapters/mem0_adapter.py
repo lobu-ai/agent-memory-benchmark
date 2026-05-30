@@ -142,10 +142,29 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
                     'user_id': user_id,
                     'messages': [{'role': 'user', 'content': part}],
                     'metadata': metadata,
-                    'infer': False,
+                    # infer:true so Mem0 processes + embeds the content (its
+                    # intended mode). infer:false stores raw text that is never
+                    # indexed for semantic search, so search returns nothing.
+                    'infer': True,
                 },
             )
             created += 1
+
+    # Mem0 processes writes asynchronously (queued, ~30-60s). Poll search until
+    # this scope is retrievable before letting the questions run, otherwise
+    # recall is artificially zero.
+    if created:
+        deadline = time.time() + int(os.environ.get('MEM0_INGEST_WAIT', '120'))
+        while time.time() < deadline:
+            res = request_json(
+                'POST',
+                '/v2/memories/search/',
+                {'query': 'memory', 'filters': {'user_id': user_id}},
+            )
+            entries = res if isinstance(res, list) else (res.get('results') or [])
+            if entries:
+                break
+            time.sleep(5)
 
     return {'created': created}
 

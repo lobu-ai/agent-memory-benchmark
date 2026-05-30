@@ -101,16 +101,21 @@
 
   // Given the visible systems + a column, compute background color per cell.
   function columnHeat(systems, col) {
-    const vals = systems
-      .map((s) => s.summary[col.key])
-      .filter((v) => v != null);
+    let vals = systems.map((s) => s.summary[col.key]).filter((v) => v != null);
+    // For lower-is-better columns (latency, context tokens), a 0 means the
+    // system retrieved nothing / made no real call — a failure, not "leanest".
+    // Exclude zeros from the best-end of the scale so a failed system isn't
+    // painted green; they're colored worst below.
+    if (!col.higherIsBetter) vals = vals.filter((v) => v > 0);
     if (vals.length < 2) return () => null; // no contrast to show
     const min = Math.min(...vals);
     const max = Math.max(...vals);
     if (max === min) return () => null;
     return (v) => {
       if (v == null) return null;
+      if (!col.higherIsBetter && v <= 0) return heatColor(0); // failed => worst
       let t = (v - min) / (max - min); // 0..1, higher value => 1
+      t = Math.max(0, Math.min(1, t));
       if (!col.higherIsBetter) t = 1 - t; // invert for latency / tokens
       return heatColor(t);
     };
