@@ -7,6 +7,10 @@ function assert(condition: unknown, message: string): asserts condition {
 }
 
 function resolveEnvValue(value: string): string {
+  // ${VAR:-default} — optional env with a fallback (used for version vars that
+  // are populated in CI but absent locally).
+  const optional = value.match(/^\$\{([A-Za-z0-9_]+):-(.*)\}$/);
+  if (optional) return process.env[optional[1]!] ?? optional[2]!;
   if (!value.startsWith("$")) return value;
   const envName = value.slice(1);
   const resolved = process.env[envName];

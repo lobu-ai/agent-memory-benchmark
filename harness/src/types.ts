@@ -138,6 +138,8 @@ export interface BenchmarkAdapter {
   setup(ctx: TrialContext): Promise<void>;
   ingestScenario(ctx: ScenarioContext): Promise<void>;
   retrieve(ctx: RetrieveContext): Promise<RetrievalResult>;
+  /** Version of the system under test (recorded per system in the report). */
+  version?(): Promise<string | null>;
   dispose?(): Promise<void>;
 }
 
@@ -258,6 +260,8 @@ export interface AggregateSummary extends TrialSummary {
 export interface AggregateSystemResult {
   systemId: string;
   systemLabel: string;
+  /** Version of the system under test, recorded at run time (null if unknown). */
+  version?: string | null;
   trials: TrialResult[];
   summary: AggregateSummary;
   byCategory: CategorySummary[];

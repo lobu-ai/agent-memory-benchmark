@@ -48,6 +48,15 @@ def serve(actions: Dict[str, ActionHandler]) -> int:
             continue
 
         handler = actions.get(action) if isinstance(action, str) else None
+        if handler is None and action == 'version':
+            # Built-in version reporting: every system reports the version under
+            # test so results are comparable over time. The runner records this
+            # per system. Sourced from BENCH_SYSTEM_VERSION, which CI populates
+            # from the actually-installed package / server / API version.
+            import os
+            _write({'id': request_id, 'ok': True,
+                    'result': os.environ.get('BENCH_SYSTEM_VERSION', 'unknown')})
+            continue
         if handler is None:
             _write({'id': request_id, 'ok': False, 'error': f'unsupported action {action!r}'})
             continue

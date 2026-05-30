@@ -98,6 +98,8 @@ export async function runBenchmark(
     totalAnswererCompletionTokens: 0,
   };
 
+  const systemVersions = new Map<string, string | null>();
+
   async function runSystem(
     adapter: BenchmarkAdapter,
     systemIndex: number
@@ -107,6 +109,10 @@ export async function runBenchmark(
       config.systems.find((system) => system.id === adapter.id)?.topK ?? topK;
 
     try {
+      systemVersions.set(
+        adapter.id,
+        adapter.version ? await adapter.version().catch(() => null) : null
+      );
       logProgress(
         `system ${systemIndex + 1}/${adapters.length} start id=${adapter.id} label="${adapter.label}" topK=${systemTopK}`
       );
@@ -286,7 +292,10 @@ export async function runBenchmark(
       scenarioIsolation: "per-scenario",
       latencyMeasurement: "retrieval-only",
     },
-    systems: aggregateSystemResults(systemResults),
+    systems: aggregateSystemResults(systemResults).map((s) => ({
+      ...s,
+      version: systemVersions.get(s.systemId) ?? null,
+    })),
   };
 }
 

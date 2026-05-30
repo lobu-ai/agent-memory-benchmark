@@ -1,4 +1,4 @@
-import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
+import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import type {
   BenchmarkAdapter,
   CommandSystemConfig,
@@ -6,7 +6,7 @@ import type {
   RetrieveContext,
   ScenarioContext,
   TrialContext,
-} from '../types';
+} from "../types";
 
 interface PendingRequest {
   resolve: (value: unknown) => void;
@@ -36,8 +36,8 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
   readonly label: string;
 
   private child: ChildProcessWithoutNullStreams | null = null;
-  private stdoutBuf = '';
-  private stderrBuf = '';
+  private stdoutBuf = "";
+  private stderrBuf = "";
   private requestCounter = 0;
   private readonly pending = new Map<number, PendingRequest>();
   private exitError: Error | null = null;
@@ -61,20 +61,20 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
         ...process.env,
         ...(this.config.env ?? {}),
         // Force unbuffered stdout so responses arrive as soon as the adapter writes them.
-        PYTHONUNBUFFERED: '1',
+        PYTHONUNBUFFERED: "1",
       },
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     });
 
-    child.stdout.setEncoding('utf-8');
-    child.stderr.setEncoding('utf-8');
+    child.stdout.setEncoding("utf-8");
+    child.stderr.setEncoding("utf-8");
 
-    child.stdout.on('data', (chunk: string) => {
+    child.stdout.on("data", (chunk: string) => {
       this.stdoutBuf += chunk;
       this.drainStdout();
     });
 
-    child.stderr.on('data', (chunk: string) => {
+    child.stderr.on("data", (chunk: string) => {
       this.stderrBuf += chunk;
       // Cap stderr buffer so a chatty adapter doesn't grow unbounded.
       if (this.stderrBuf.length > 64 * 1024) {
@@ -82,13 +82,13 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
       }
     });
 
-    child.on('error', (err) => {
+    child.on("error", (err) => {
       this.failPending(err);
     });
 
-    child.on('exit', (code, signal) => {
+    child.on("exit", (code, signal) => {
       const stderr = this.stderrBuf.trim();
-      const detail = stderr ? `: ${stderr}` : '';
+      const detail = stderr ? `: ${stderr}` : "";
       const err = new Error(
         `Command adapter '${this.id}' exited (code=${code}, signal=${signal})${detail}`
       );
@@ -103,7 +103,7 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
 
   private drainStdout(): void {
     while (true) {
-      const newline = this.stdoutBuf.indexOf('\n');
+      const newline = this.stdoutBuf.indexOf("\n");
       if (newline === -1) return;
       const line = this.stdoutBuf.slice(0, newline).trim();
       this.stdoutBuf = this.stdoutBuf.slice(newline + 1);
@@ -121,11 +121,13 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
         return;
       }
 
-      const id = typeof message.id === 'number' ? message.id : undefined;
+      const id = typeof message.id === "number" ? message.id : undefined;
       if (id === undefined) {
         // Unsolicited message — surface the error if any, otherwise ignore.
         if (!message.ok && message.error) {
-          this.failPending(new Error(`Command adapter '${this.id}': ${message.error}`));
+          this.failPending(
+            new Error(`Command adapter '${this.id}': ${message.error}`)
+          );
         }
         continue;
       }
@@ -138,7 +140,7 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
       } else {
         pending.reject(
           new Error(
-            `Command adapter '${this.id}' action '${pending.action}' failed: ${message.error ?? 'unknown error'}`
+            `Command adapter '${this.id}' action '${pending.action}' failed: ${message.error ?? "unknown error"}`
           )
         );
       }
@@ -152,7 +154,10 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
     this.pending.clear();
   }
 
-  private runCommand<T>(action: string, payload: Record<string, unknown>): Promise<T> {
+  private runCommand<T>(
+    action: string,
+    payload: Record<string, unknown>
+  ): Promise<T> {
     const child = this.ensureChild();
     const id = ++this.requestCounter;
     return new Promise<T>((resolve, reject) => {
@@ -170,28 +175,42 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
       });
       if (!ok) {
         // Backpressure — wait for drain. Not an error, just tracked here for clarity.
-        child.stdin.once('drain', () => {});
+        child.stdin.once("drain", () => {});
       }
     });
   }
 
   async reset(ctx: TrialContext): Promise<void> {
-    await this.runCommand('reset', ctx as unknown as Record<string, unknown>);
+    await this.runCommand("reset", ctx as unknown as Record<string, unknown>);
   }
 
   async setup(ctx: TrialContext): Promise<void> {
-    await this.runCommand('setup', ctx as unknown as Record<string, unknown>);
+    await this.runCommand("setup", ctx as unknown as Record<string, unknown>);
   }
 
   async ingestScenario(ctx: ScenarioContext): Promise<void> {
-    await this.runCommand('ingest', ctx as unknown as Record<string, unknown>);
+    await this.runCommand("ingest", ctx as unknown as Record<string, unknown>);
   }
 
   async retrieve(ctx: RetrieveContext): Promise<RetrievalResult> {
     return await this.runCommand<RetrievalResult>(
-      'retrieve',
+      "retrieve",
       ctx as unknown as Record<string, unknown>
     );
+  }
+
+  async version(): Promise<string | null> {
+    try {
+      const res = await this.runCommand<{ version?: string } | string | null>(
+        "version",
+        {}
+      );
+      if (res == null) return null;
+      const v = typeof res === "string" ? res : res.version;
+      return v && v !== "unknown" ? v : null;
+    } catch {
+      return null;
+    }
   }
 
   async dispose(): Promise<void> {
@@ -203,7 +222,7 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
         resolve();
         return;
       }
-      child.once('exit', () => resolve());
+      child.once("exit", () => resolve());
     });
     this.child = null;
   }
