@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-05-30T13:21:04.338Z",
+  "builtAt": "2026-05-30T13:41:48.309Z",
   "benchmarks": [
     {
       "suiteId": "longmemeval-oracle-10",
@@ -86,23 +86,6 @@
             "averageAnswererPromptTokens": 7086.3,
             "averageAnswererCompletionTokens": 50.7,
             "overallScore": 0.79623686568976
-          }
-        },
-        {
-          "systemId": "mem0",
-          "systemLabel": "Mem0",
-          "summary": {
-            "questionCount": 10,
-            "answerAccuracy": 0,
-            "retrievalRecall": 0,
-            "citationRecall": 0,
-            "citationPrecision": 0,
-            "averageLatencyMs": 962.9920375999994,
-            "p95LatencyMs": 1045.6389579999977,
-            "averageContextTokensApprox": 0,
-            "averageAnswererPromptTokens": 0,
-            "averageAnswererCompletionTokens": 0,
-            "overallScore": 0.0018719536503050667
           }
         }
       ]
