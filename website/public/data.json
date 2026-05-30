@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-05-30T13:41:48.309Z",
+  "builtAt": "2026-05-30T14:26:43.105Z",
   "benchmarks": [
     {
       "suiteId": "longmemeval-oracle-10",
@@ -14,29 +14,12 @@
       "suiteId": "longmemeval-oracle-10",
       "suiteLabel": "LongMemEval (oracle, 10)",
       "answererModel": "glm-5.1",
-      "generatedAt": "2026-05-30T13:20:25.587Z",
-      "generatedAtMs": 1780147225587,
+      "generatedAt": "2026-05-30T14:26:43.060Z",
+      "generatedAtMs": 1780151203060,
       "trials": 1,
       "topK": 8,
       "questionCount": 10,
       "systems": [
-        {
-          "systemId": "hindsight",
-          "systemLabel": "Hindsight",
-          "summary": {
-            "questionCount": 10,
-            "answerAccuracy": 0.7,
-            "retrievalRecall": 1,
-            "citationRecall": 0.7333333333333333,
-            "citationPrecision": 0.8,
-            "averageLatencyMs": 167.6095959999941,
-            "p95LatencyMs": 211.86174999996865,
-            "averageContextTokensApprox": 927.2,
-            "averageAnswererPromptTokens": 1250.1,
-            "averageAnswererCompletionTokens": 42.7,
-            "overallScore": 0.7607552103401054
-          }
-        },
         {
           "systemId": "lobu",
           "systemLabel": "Lobu",
@@ -46,29 +29,12 @@
             "retrievalRecall": 1,
             "citationRecall": 0.9666666666666666,
             "citationPrecision": 1,
-            "averageLatencyMs": 36.05352920000065,
-            "p95LatencyMs": 39.917875000000436,
+            "averageLatencyMs": 66.2526408999895,
+            "p95LatencyMs": 72.43637599998465,
             "averageContextTokensApprox": 7662.4,
             "averageAnswererPromptTokens": 6969.4,
-            "averageAnswererCompletionTokens": 50.3,
+            "averageAnswererCompletionTokens": 49.9,
             "overallScore": 0.9450000000000001
-          }
-        },
-        {
-          "systemId": "zep",
-          "systemLabel": "Zep",
-          "summary": {
-            "questionCount": 10,
-            "answerAccuracy": 0.8,
-            "retrievalRecall": 1,
-            "citationRecall": 0.9666666666666666,
-            "citationPrecision": 1,
-            "averageLatencyMs": 389.8186498999934,
-            "p95LatencyMs": 826.7964159999792,
-            "averageContextTokensApprox": 7761.9,
-            "averageAnswererPromptTokens": 7086.3,
-            "averageAnswererCompletionTokens": 50.3,
-            "overallScore": 0.8496243976794403
           }
         },
         {
@@ -76,16 +42,50 @@
           "systemLabel": "Supermemory",
           "summary": {
             "questionCount": 10,
-            "answerAccuracy": 0.7,
+            "answerAccuracy": 0.8,
             "retrievalRecall": 1,
-            "citationRecall": 0.9666666666666666,
+            "citationRecall": 0.9333333333333332,
             "citationPrecision": 1,
-            "averageLatencyMs": 1457.4553041000006,
-            "p95LatencyMs": 4261.642542000004,
+            "averageLatencyMs": 1743.5430903999927,
+            "p95LatencyMs": 2496.39520300002,
             "averageContextTokensApprox": 7761.9,
             "averageAnswererPromptTokens": 7086.3,
-            "averageAnswererCompletionTokens": 50.7,
-            "overallScore": 0.79623686568976
+            "averageAnswererCompletionTokens": 47.5,
+            "overallScore": 0.8418999427448849
+          }
+        },
+        {
+          "systemId": "hindsight",
+          "systemLabel": "Hindsight",
+          "summary": {
+            "questionCount": 10,
+            "answerAccuracy": 0.8,
+            "retrievalRecall": 1,
+            "citationRecall": 0.9166666666666666,
+            "citationPrecision": 1,
+            "averageLatencyMs": 1918.190184600019,
+            "p95LatencyMs": 2727.691199999981,
+            "averageContextTokensApprox": 1019.9,
+            "averageAnswererPromptTokens": 1349.8,
+            "averageAnswererCompletionTokens": 49,
+            "overallScore": 0.8392269570408579
+          }
+        },
+        {
+          "systemId": "mem0",
+          "systemLabel": "Mem0",
+          "summary": {
+            "questionCount": 10,
+            "answerAccuracy": 0.1,
+            "retrievalRecall": 0.3,
+            "citationRecall": 0.05,
+            "citationPrecision": 0.1,
+            "averageLatencyMs": 790.3271692999965,
+            "p95LatencyMs": 1809.9617980000176,
+            "averageContextTokensApprox": 117.7,
+            "averageAnswererPromptTokens": 362.6,
+            "averageAnswererCompletionTokens": 14.5,
+            "overallScore": 0.14169146927206555
           }
         }
       ]
