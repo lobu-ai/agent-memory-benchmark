@@ -66,7 +66,7 @@ jobs:
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install hindsight-all
       - name: Capture Hindsight version
-        run: echo "HINDSIGHT_VERSION=$(pip show hindsight-api | awk '/^Version:/{print $2}')" >> "$GITHUB_ENV"
+        run: echo "HINDSIGHT_VERSION=$(pip show hindsight-all hindsight-api 2>/dev/null | awk '/^Version:/{print $2; exit}')" >> "$GITHUB_ENV"
       - name: Start Hindsight server
         env:
           HINDSIGHT_API_LLM_PROVIDER: openai
@@ -99,7 +99,15 @@ jobs:
             sleep 5
           done
           curl -sf http://localhost:8799/health || { echo "Lobu failed to start"; cat lobu.log; exit 1; }
-          INIT=$(curl -sf -X POST http://localhost:8799/api/local-init -H 'X-Lobu-Client: ci')
+          # /health can go green before the install bootstrap (migrations + org
+          # provisioning) finishes, so local-init may 4xx briefly — retry it.
+          INIT=""
+          for i in $(seq 1 30); do
+            INIT=$(curl -s -X POST http://localhost:8799/api/local-init -H 'X-Lobu-Client: lobu-cli')
+            echo "$INIT" | python3 -c 'import sys,json;json.load(sys.stdin)["device_token"]' 2>/dev/null && break
+            INIT=""; sleep 5
+          done
+          [ -n "$INIT" ] || { echo "local-init never succeeded"; cat lobu.log; exit 1; }
           echo "LOBU_API_TOKEN=$(echo "$INIT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["device_token"])')" >> "$GITHUB_ENV"
           echo "LOBU_ORG_SLUG=$(echo "$INIT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["organization"]["slug"])')" >> "$GITHUB_ENV"
 
