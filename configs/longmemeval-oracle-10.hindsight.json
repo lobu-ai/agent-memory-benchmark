@@ -1,0 +1,24 @@
+{
+  "suitePath": "suites/longmemeval-oracle.10.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "hindsight",
+      "label": "Hindsight",
+      "type": "command",
+      "argv": ["python3", "adapters/hindsight_adapter.py"],
+      "env": { "HINDSIGHT_BASE_URL": "http://localhost:8888" },
+      "topK": 8
+    }
+  ]
+}
