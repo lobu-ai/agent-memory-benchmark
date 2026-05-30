@@ -43,7 +43,7 @@ jobs:
       # self-hosted servers
       HINDSIGHT_BASE_URL: http://localhost:8888
       LOBU_BASE_URL: http://localhost:8799
-      LOBU_DATA_DIR: ${{ runner.temp }}/lobu-data
+      LOBU_DATA_DIR: /tmp/lobu-data
       ENCRYPTION_KEY: ${{ secrets.LOBU_ENCRYPTION_KEY || 'ci0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd' }}
     steps:
       - uses: actions/checkout@v4
