@@ -44,7 +44,9 @@ jobs:
       HINDSIGHT_BASE_URL: http://localhost:8888
       LOBU_BASE_URL: http://localhost:8799
       LOBU_DATA_DIR: /tmp/lobu-data
-      ENCRYPTION_KEY: ${{ secrets.LOBU_ENCRYPTION_KEY || 'ci0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd' }}
+      # Must be a canonical 32-byte hex (64 hex chars) key — ephemeral CI data,
+      # thrown away after the run. Override with the LOBU_ENCRYPTION_KEY secret.
+      ENCRYPTION_KEY: ${{ secrets.LOBU_ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef' }}
     steps:
       - uses: actions/checkout@v4
 
