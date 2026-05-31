@@ -268,7 +268,13 @@
 
       const nameTd = document.createElement("td");
       nameTd.className = "col-system";
-      nameTd.textContent = s.systemLabel;
+      nameTd.appendChild(document.createTextNode(s.systemLabel));
+      if (s.version) {
+        const ver = document.createElement("span");
+        ver.className = "sys-version";
+        ver.textContent = "v" + s.version;
+        nameTd.appendChild(ver);
+      }
       tr.appendChild(nameTd);
 
       for (const col of COLUMNS) {
