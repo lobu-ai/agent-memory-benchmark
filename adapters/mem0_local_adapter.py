@@ -27,10 +27,16 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _bench_protocol import serve  # noqa: E402
+from _bench_protocol import serve, set_output  # noqa: E402
 
-# Keep Mem0/Chroma chatter off stdout (the protocol channel).
+# Mem0/Chroma/litellm print to stdout, which would corrupt the JSONL protocol.
+# Keep a private dup of the real stdout for protocol writes and route ALL other
+# stdout (Python + C-level fd 1) to stderr.
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
+_PROTO = os.fdopen(os.dup(1), "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
+set_output(_PROTO)
 
 _LLM_KEY = os.environ.get("Z_AI_API_KEY") or os.environ.get("OPENAI_API_KEY")
 if _LLM_KEY:
@@ -45,10 +51,14 @@ def memory():
         return _MEMORY
     from mem0 import Memory
 
+    # Default to a local retrieval-grade embedder (BGE). Gemini's embed API
+    # needs an asymmetric query/document task_type that Mem0's embedder doesn't
+    # set, so it ranks near-randomly here — BGE is symmetric and retrieval-ready
+    # (the same family Lobu/Hindsight use). Set MEM0_EMBEDDER=gemini to override.
     embedder = (
-        {"provider": "huggingface", "config": {"model": "BAAI/bge-small-en-v1.5"}}
-        if os.environ.get("MEM0_EMBEDDER") == "huggingface"
-        else {"provider": "gemini", "config": {"model": "models/gemini-embedding-001"}}
+        {"provider": "gemini", "config": {"model": "models/gemini-embedding-001"}}
+        if os.environ.get("MEM0_EMBEDDER") == "gemini"
+        else {"provider": "huggingface", "config": {"model": "BAAI/bge-small-en-v1.5"}}
     )
     cfg = {
         "llm": {

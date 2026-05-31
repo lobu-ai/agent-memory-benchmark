@@ -21,10 +21,22 @@ from typing import Any, Callable, Dict
 ActionHandler = Callable[[Dict[str, Any]], Any]
 
 
+# Adapters that import chatty libraries (which print to stdout and would corrupt
+# this JSONL channel) can redirect stdout to stderr and hand us a private dup of
+# the real protocol stream via set_output().
+_OUT = None
+
+
+def set_output(stream) -> None:
+    global _OUT
+    _OUT = stream
+
+
 def _write(message: Dict[str, Any]) -> None:
-    sys.stdout.write(json.dumps(message))
-    sys.stdout.write('\n')
-    sys.stdout.flush()
+    out = _OUT if _OUT is not None else sys.stdout
+    out.write(json.dumps(message))
+    out.write('\n')
+    out.flush()
 
 
 def serve(actions: Dict[str, ActionHandler]) -> int:

@@ -45,6 +45,24 @@ product a user actually gets.
   backoff keeps parallel systems from rate-limiting the shared answerer. This
   was added after a 5-way run where unbounded parallel answerer calls 429'd.
 
+## Per-system fairness notes
+
+- **Mem0 — currently excluded.** A uniform harness cannot reproduce Mem0's
+  published ~66% on LongMemEval. We tried hard to be fair: turn-by-turn
+  (not blob) ingestion, `infer:true`, poll-until-indexed, proper `top_k`, and a
+  fully self-hosted local engine (OSS `mem0` lib + local Chroma, no SaaS quota)
+  with both Gemini and BGE embedders. It still scores near-0% across categories
+  because Mem0's extraction is **user-centric** (it distills facts about "the
+  user" and underweights third-party / assistant facts that several LongMemEval
+  categories require), and because reproducing Mem0's number needs *its own*
+  answerer + ingestion pipeline, not a shared one. Publishing 0% would be
+  unfair to Mem0, so it is excluded pending an eval that matches its intended
+  setup. The local adapter (`adapters/mem0_local_adapter.py`) is kept for that.
+- **Zep, Letta — quota / Docker blocked**, not measured here (Zep over its
+  account episode quota; Letta self-host needs the Docker image).
+- **Supermemory** runs against its hosted API (no clean self-host); **Lobu,
+  Hindsight** run self-hosted with their real pipelines.
+
 ## Honest caveats
 
 - **Sample/category skew.** Small slices (e.g. LongMemEval oracle-10) are not
