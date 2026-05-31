@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 datasets/cache/
 .bench-*/
+.mem0-venv/
+.letta-venv/
+.mixed*venv/
