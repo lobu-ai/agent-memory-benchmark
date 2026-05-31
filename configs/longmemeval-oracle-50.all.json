@@ -1,5 +1,5 @@
 {
-  "suitePath": "suites/longmemeval-oracle.10.json",
+  "suitePath": "suites/longmemeval-oracle.50.json",
   "outputDir": "results",
   "trials": 1,
   "topK": 8,
@@ -81,20 +81,6 @@
       "env": {
         "ZEP_API_KEY": "$ZEP_API_KEY",
         "BENCH_SYSTEM_VERSION": "${ZEP_VERSION:-unknown}"
-      },
-      "topK": 8
-    },
-    {
-      "id": "letta",
-      "label": "Letta",
-      "type": "command",
-      "argv": [
-        "python3",
-        "adapters/letta_adapter.py"
-      ],
-      "env": {
-        "LETTA_API_KEY": "${LETTA_API_KEY:-}",
-        "BENCH_SYSTEM_VERSION": "${LETTA_VERSION:-unknown}"
       },
       "topK": 8
     }

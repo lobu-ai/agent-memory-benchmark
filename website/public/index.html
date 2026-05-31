@@ -52,6 +52,13 @@
           answerer reads the retrieved context; raw metrics first.
           <a href="../METHODOLOGY.md">Read the methodology &rarr;</a>
         </p>
+        <p class="caveat">
+          &#9888; <strong>Latency is not apples-to-apples.</strong> Self-hosted
+          systems (Lobu, Hindsight) run in-process; cloud systems (Mem0,
+          Supermemory, Zep) pay a network round-trip. Read latency next to
+          context size, not as a head-to-head ranking. Answer and retrieval are
+          the primary comparison.
+        </p>
         <p class="reproduce-label">Reproduce a run:</p>
         <pre class="reproduce"><code id="reproduce-cmd"></code></pre>
       </section>

@@ -36,7 +36,7 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     env:
       CONFIG: ${{ inputs.config || 'longmemeval-oracle-10.all.json' }}
       ANSWERER_MAX_CONCURRENCY: "2"
