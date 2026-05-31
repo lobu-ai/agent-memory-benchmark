@@ -1,0 +1,93 @@
+{
+  "suitePath": "suites/longmemeval-mixed-30.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "lobu",
+      "label": "Lobu",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "${LOBU_ORG_SLUG:-local-install}",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "BENCH_SYSTEM_VERSION": "${LOBU_VERSION:-unknown}"
+      },
+      "topK": 8,
+      "mode": "self-hosted"
+    },
+    {
+      "id": "hindsight",
+      "label": "Hindsight",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/hindsight_adapter.py"
+      ],
+      "env": {
+        "HINDSIGHT_BASE_URL": "http://localhost:8888",
+        "BENCH_SYSTEM_VERSION": "${HINDSIGHT_VERSION:-unknown}"
+      },
+      "topK": 8,
+      "mode": "self-hosted"
+    },
+    {
+      "id": "mem0",
+      "label": "Mem0",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/mem0_adapter.py"
+      ],
+      "env": {
+        "MEM0_API_KEY": "$MEM0_API_KEY",
+        "BENCH_SYSTEM_VERSION": "${MEM0_VERSION:-unknown}"
+      },
+      "topK": 8,
+      "mode": "cloud"
+    },
+    {
+      "id": "supermemory",
+      "label": "Supermemory",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/supermemory_adapter.py"
+      ],
+      "env": {
+        "SUPERMEMORY_API_KEY": "$SUPERMEMORY_API_KEY",
+        "BENCH_SYSTEM_VERSION": "${SUPERMEMORY_VERSION:-unknown}"
+      },
+      "topK": 8,
+      "mode": "cloud"
+    },
+    {
+      "id": "zep",
+      "label": "Zep",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/zep_adapter.py"
+      ],
+      "env": {
+        "ZEP_API_KEY": "$ZEP_API_KEY",
+        "BENCH_SYSTEM_VERSION": "${ZEP_VERSION:-unknown}"
+      },
+      "topK": 8,
+      "mode": "cloud"
+    }
+  ]
+}
