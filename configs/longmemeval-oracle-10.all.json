@@ -26,7 +26,8 @@
         "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
         "BENCH_SYSTEM_VERSION": "${LOBU_VERSION:-unknown}"
       },
-      "topK": 8
+      "topK": 8,
+      "mode": "self-hosted"
     },
     {
       "id": "hindsight",
@@ -40,7 +41,8 @@
         "HINDSIGHT_BASE_URL": "http://localhost:8888",
         "BENCH_SYSTEM_VERSION": "${HINDSIGHT_VERSION:-unknown}"
       },
-      "topK": 8
+      "topK": 8,
+      "mode": "self-hosted"
     },
     {
       "id": "mem0",
@@ -54,7 +56,8 @@
         "MEM0_API_KEY": "$MEM0_API_KEY",
         "BENCH_SYSTEM_VERSION": "${MEM0_VERSION:-unknown}"
       },
-      "topK": 8
+      "topK": 8,
+      "mode": "cloud"
     },
     {
       "id": "supermemory",
@@ -68,7 +71,8 @@
         "SUPERMEMORY_API_KEY": "$SUPERMEMORY_API_KEY",
         "BENCH_SYSTEM_VERSION": "${SUPERMEMORY_VERSION:-unknown}"
       },
-      "topK": 8
+      "topK": 8,
+      "mode": "cloud"
     },
     {
       "id": "zep",
@@ -82,7 +86,8 @@
         "ZEP_API_KEY": "$ZEP_API_KEY",
         "BENCH_SYSTEM_VERSION": "${ZEP_VERSION:-unknown}"
       },
-      "topK": 8
+      "topK": 8,
+      "mode": "cloud"
     },
     {
       "id": "letta",
@@ -96,7 +101,8 @@
         "LETTA_API_KEY": "${LETTA_API_KEY:-}",
         "BENCH_SYSTEM_VERSION": "${LETTA_VERSION:-unknown}"
       },
-      "topK": 8
+      "topK": 8,
+      "mode": "cloud"
     }
   ]
 }

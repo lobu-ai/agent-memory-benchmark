@@ -180,6 +180,8 @@ export interface CommandSystemConfig extends BenchSystemConfigBase {
   type: "command";
   argv: string[];
   env?: Record<string, string>;
+  /** Deployment under test: "self-hosted" or "cloud". Shown on the board. */
+  mode?: string;
 }
 
 export type BenchSystemConfig = CommandSystemConfig;
@@ -262,6 +264,8 @@ export interface AggregateSystemResult {
   systemLabel: string;
   /** Version of the system under test, recorded at run time (null if unknown). */
   version?: string | null;
+  /** Deployment mode under test: "self-hosted" or "cloud" (null if unset). */
+  mode?: string | null;
   trials: TrialResult[];
   summary: AggregateSummary;
   byCategory: CategorySummary[];

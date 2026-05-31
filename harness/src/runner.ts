@@ -295,6 +295,7 @@ export async function runBenchmark(
     systems: aggregateSystemResults(systemResults).map((s) => ({
       ...s,
       version: systemVersions.get(s.systemId) ?? null,
+      mode: config.systems.find((sys) => sys.id === s.systemId)?.mode ?? null,
     })),
   };
 }

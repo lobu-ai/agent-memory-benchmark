@@ -269,6 +269,13 @@
       const nameTd = document.createElement("td");
       nameTd.className = "col-system";
       nameTd.appendChild(document.createTextNode(s.systemLabel));
+      if (s.mode) {
+        const tag = document.createElement("span");
+        tag.className =
+          "sys-mode " + (s.mode === "self-hosted" ? "mode-self" : "mode-cloud");
+        tag.textContent = s.mode;
+        nameTd.appendChild(tag);
+      }
       if (s.version) {
         const ver = document.createElement("span");
         ver.className = "sys-version";

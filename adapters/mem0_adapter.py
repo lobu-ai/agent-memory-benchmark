@@ -106,6 +106,36 @@ def action_setup(payload: Dict[str, Any]) -> Any:
     return None
 
 
+def parse_turns(content: str) -> List[Dict[str, str]]:
+    """Parse a benchmark session into role-attributed messages.
+
+    Sessions look like `Turn 1 (user [evidence]): ...` / `Turn 2 (assistant): ...`
+    with an optional `Session date: ...` header. Mem0 is built to extract facts
+    from a CONVERSATION (proper user/assistant turns) — feeding it a single blob
+    message degrades extraction badly, so reconstruct the turns here. Falls back
+    to one user message if the format doesn't match.
+    """
+    import re
+
+    msgs: List[Dict[str, str]] = []
+    header = None
+    for chunk in re.split(r'\n(?=Turn \d+ \()', content):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        m = re.match(r'Turn \d+ \((user|assistant)[^)]*\):\s*(.*)', chunk, re.S)
+        if m:
+            text = m.group(2).strip()
+            if text:
+                msgs.append({'role': m.group(1), 'content': text})
+        elif header is None:
+            header = chunk  # e.g. "Session date: ..."
+    if header and msgs:
+        # Keep the session date so temporal questions stay answerable.
+        msgs.insert(0, {'role': 'user', 'content': header})
+    return msgs or [{'role': 'user', 'content': content.strip()}]
+
+
 def action_ingest(payload: Dict[str, Any]) -> Any:
     scenario = payload.get('scenario') or {}
     steps = scenario.get('steps') or []
@@ -117,8 +147,8 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
         if not isinstance(content, str) or not content.strip():
             continue
 
-        base_metadata = normalize_metadata(step.get('metadata'))
-        base_metadata.update(
+        metadata = normalize_metadata(step.get('metadata'))
+        metadata.update(
             {
                 'benchmark_id': step.get('id'),
                 'scenario_id': scenario.get('id'),
@@ -126,44 +156,41 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
             }
         )
         if step.get('kind') == 'memory':
-            base_metadata['semantic_type'] = step.get('semanticType')
-        elif step.get('kind') == 'relationship':
-            base_metadata['relationship_type'] = step.get('relationshipType')
+            metadata['semantic_type'] = step.get('semanticType')
 
-        parts = split_content(content)
-        for index, part in enumerate(parts):
-            metadata = dict(base_metadata)
-            metadata['chunk_index'] = index
-            metadata['chunk_count'] = len(parts)
-            request_json(
-                'POST',
-                '/v1/memories/',
-                {
-                    'user_id': user_id,
-                    'messages': [{'role': 'user', 'content': part}],
-                    'metadata': metadata,
-                    # infer:true so Mem0 processes + embeds the content (its
-                    # intended mode). infer:false stores raw text that is never
-                    # indexed for semantic search, so search returns nothing.
-                    'infer': True,
-                },
-            )
-            created += 1
+        # infer:true (Mem0's intended mode) so it extracts + embeds facts; fed as
+        # role-attributed turns rather than a blob.
+        request_json(
+            'POST',
+            '/v1/memories/',
+            {
+                'user_id': user_id,
+                'messages': parse_turns(content),
+                'metadata': metadata,
+                'infer': True,
+            },
+        )
+        created += 1
 
-    # Mem0 processes writes asynchronously (queued, ~30-60s). Poll search until
-    # this scope is retrievable before letting the questions run, otherwise
-    # recall is artificially zero.
+    # Mem0 indexes asynchronously at HIGHLY variable latency. Poll the memory
+    # count until it stops growing for a stability window (or timeout), so
+    # retrieval never runs against a half-processed scope (which silently zeroed
+    # recall before).
     if created:
-        deadline = time.time() + int(os.environ.get('MEM0_INGEST_WAIT', '120'))
+        deadline = time.time() + int(os.environ.get('MEM0_INGEST_WAIT', '240'))
+        last_count = -1
+        stable_for = 0
         while time.time() < deadline:
-            res = request_json(
-                'POST',
-                '/v2/memories/search/',
-                {'query': 'memory', 'filters': {'user_id': user_id}},
-            )
+            res = request_json('GET', f'/v1/memories/?user_id={user_id}')
             entries = res if isinstance(res, list) else (res.get('results') or [])
-            if entries:
-                break
+            count = len(entries)
+            if count > 0 and count == last_count:
+                stable_for += 5
+                if stable_for >= 20:
+                    break
+            else:
+                stable_for = 0
+            last_count = count
             time.sleep(5)
 
     return {'created': created}
@@ -177,6 +204,9 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
         {
             'query': payload.get('prompt') or '',
             'filters': {'user_id': scope_user_id(payload)},
+            # Ask for enough candidates that the dedupe-to-source-steps below can
+            # still fill topK (Mem0 returns extracted facts, many per source).
+            'top_k': max(int(payload.get('topK') or 8) * 4, 20),
         },
     )
     latency_ms = (time.perf_counter() - started) * 1000

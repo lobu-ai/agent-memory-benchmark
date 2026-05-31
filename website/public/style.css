@@ -354,3 +354,17 @@ td.heat {
   padding: 0.5rem 0.7rem;
   max-width: 70ch;
 }
+
+/* Deployment-mode tag (self-hosted vs cloud) next to the system name. */
+.sys-mode {
+  margin-left: 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+.mode-self { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.mode-cloud { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
