@@ -7,6 +7,11 @@ name: pages
 on:
   push:
     branches: [main]
+  # Re-deploy after a benchmark run commits new results (a bot push with the
+  # default GITHUB_TOKEN does not itself trigger `push`, so chain explicitly).
+  workflow_run:
+    workflows: [benchmark]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -29,7 +34,14 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with: { bun-version: latest }
       - name: Rebuild leaderboard data from committed results
-        run: bun website/build-data.mjs || echo "no results yet; using committed data.json"
+        # Only rebuild when results exist, so an empty results/ never clobbers
+        # the committed data.json that the site ships.
+        run: |
+          if ls results/*.json >/dev/null 2>&1; then
+            bun website/build-data.mjs
+          else
+            echo "no committed results; keeping existing website/public/data.json"
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
