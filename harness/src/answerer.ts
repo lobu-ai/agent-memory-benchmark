@@ -61,6 +61,7 @@ function buildPrompt(
     "You answer benchmark questions using only the provided contexts.",
     "Many questions require temporal reasoning over session dates, relative time expressions, event ordering, and simple arithmetic.",
     "Use the session dates/times and evidence text to infer chronology when needed.",
+    "If two or more contexts give DIFFERENT values for the same fact about the same subject (an amount, location, status, count, or preference that changed over time), treat the value from the MOST RECENT session date as the current, correct answer — unless the question explicitly asks for an earlier, original, or prior value.",
     "If the question asks which of several options happened first, last, earlier, later, or most recently, answer with exactly one option text from the question.",
     "If the question asks for a time, date, duration, or count and it can be inferred from the contexts, infer it and answer concisely.",
     'For "when" questions, your answer MUST be an absolute date written in day-month-year form as it appears in the evidence (e.g. "20 May 2023", "June 2023", "2022"). Never return relative phrases like "last year", "last week", "this month", "next month", "a while ago", or "last Friday" — always resolve them against the Session date index first.',
