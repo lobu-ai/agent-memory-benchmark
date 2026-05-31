@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-05-31T13:17:00.590Z",
+  "builtAt": "2026-05-31T13:17:47.348Z",
   "benchmarks": [
     {
       "suiteId": "longmemeval-oracle-10",
@@ -21,24 +21,6 @@
       "questionCount": 10,
       "systems": [
         {
-          "systemId": "hindsight",
-          "systemLabel": "Hindsight",
-          "version": "0.7.1",
-          "summary": {
-            "questionCount": 10,
-            "answerAccuracy": 0.8,
-            "retrievalRecall": 1,
-            "citationRecall": 0.9166666666666666,
-            "citationPrecision": 1,
-            "averageLatencyMs": 1918.190184600019,
-            "p95LatencyMs": 2727.691199999981,
-            "averageContextTokensApprox": 1019.9,
-            "averageAnswererPromptTokens": 1349.8,
-            "averageAnswererCompletionTokens": 49,
-            "overallScore": 0.8392269570408579
-          }
-        },
-        {
           "systemId": "lobu",
           "systemLabel": "Lobu",
           "version": "10.2.0",
@@ -57,24 +39,6 @@
           }
         },
         {
-          "systemId": "zep",
-          "systemLabel": "Zep",
-          "version": null,
-          "summary": {
-            "questionCount": 10,
-            "answerAccuracy": 0.8,
-            "retrievalRecall": 1,
-            "citationRecall": 0.9666666666666666,
-            "citationPrecision": 1,
-            "averageLatencyMs": 389.8186498999934,
-            "p95LatencyMs": 826.7964159999792,
-            "averageContextTokensApprox": 7761.9,
-            "averageAnswererPromptTokens": 7086.3,
-            "averageAnswererCompletionTokens": 50.3,
-            "overallScore": 0.8496243976794403
-          }
-        },
-        {
           "systemId": "supermemory",
           "systemLabel": "Supermemory",
           "version": "3.43.0",
@@ -90,6 +54,24 @@
             "averageAnswererPromptTokens": 7086.3,
             "averageAnswererCompletionTokens": 47.5,
             "overallScore": 0.8418999427448849
+          }
+        },
+        {
+          "systemId": "hindsight",
+          "systemLabel": "Hindsight",
+          "version": "0.7.1",
+          "summary": {
+            "questionCount": 10,
+            "answerAccuracy": 0.8,
+            "retrievalRecall": 1,
+            "citationRecall": 0.9166666666666666,
+            "citationPrecision": 1,
+            "averageLatencyMs": 1918.190184600019,
+            "p95LatencyMs": 2727.691199999981,
+            "averageContextTokensApprox": 1019.9,
+            "averageAnswererPromptTokens": 1349.8,
+            "averageAnswererCompletionTokens": 49,
+            "overallScore": 0.8392269570408579
           }
         },
         {
