@@ -84,6 +84,15 @@ def action_setup(payload: Dict[str, Any]) -> Any:
     return None
 
 
+def session_date_iso(meta: Dict[str, Any]) -> str:
+    """Extract YYYY-MM-DD from a LongMemEval session_date like
+    '2023/04/10 (Mon) 17:50'. Empty string if absent."""
+    import re
+
+    m = re.search(r"(\d{4})[/-](\d{1,2})[/-](\d{1,2})", str((meta or {}).get("session_date") or ""))
+    return f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}" if m else ""
+
+
 def action_ingest(payload: Dict[str, Any]) -> Any:
     scenario = payload.get("scenario") or {}
     steps = scenario.get("steps") or []
@@ -93,20 +102,24 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
         content = step.get("content")
         if not isinstance(content, str) or not content.strip():
             continue
-        call_tool(
-            "save_memory",
-            {
-                "content": content,
-                # Suite semanticType (e.g. "conversation_session") is not a
-                # built-in Lobu event kind; store as a generic "fact".
-                "semantic_type": "fact",
-                "metadata": {
-                    "benchmark_step_id": str(step.get("id")),
-                    "benchmark_scenario_id": scenario.get("id"),
-                    "benchmark_run_id": run_id,
-                },
+        iso = session_date_iso(step.get("metadata") or {})
+        args: Dict[str, Any] = {
+            "content": content,
+            # Suite semanticType (e.g. "conversation_session") is not a
+            # built-in Lobu event kind; store as a generic "fact".
+            "semantic_type": "fact",
+            "metadata": {
+                "benchmark_step_id": str(step.get("id")),
+                "benchmark_scenario_id": scenario.get("id"),
+                "benchmark_run_id": run_id,
+                "session_date": iso,
             },
-        )
+        }
+        # Give Lobu the REAL chronology so recency is grounded in when the fact
+        # was stated, not when it happened to be ingested.
+        if iso:
+            args["occurred_at"] = iso
+        call_tool("save_memory", args)
         created += 1
 
     # Wait for the real async embedding pipeline to make these searchable, the
@@ -164,6 +177,12 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
             order.append(step_id)
 
     items = [grouped[s] for s in order][:top_k]
+    # Read-time recency: present the relevance-selected set newest-first so the
+    # CURRENT value of any updated fact leads (no superseding, history intact).
+    items.sort(
+        key=lambda it: (it.get("metadata") or {}).get("session_date") or "",
+        reverse=True,
+    )
     return {"items": items, "latencyMs": latency_ms}
 
 
