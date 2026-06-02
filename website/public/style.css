@@ -368,3 +368,11 @@ td.heat {
 }
 .mode-self { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
 .mode-cloud { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+
+/* Per-trial range shown under a multi-trial Answer % mean. */
+.spread {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 400;
+  white-space: nowrap;
+}

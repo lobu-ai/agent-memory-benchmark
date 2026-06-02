@@ -294,6 +294,24 @@
           td.textContent = "—";
         } else {
           td.textContent = disp;
+          // Multi-trial Answer %: show the per-trial range under the mean so a
+          // single point can't be over-read (single-trial swings ~±14 points).
+          if (
+            col.key === "answerAccuracy" &&
+            s.accuracySpread &&
+            s.accuracySpread.n > 1
+          ) {
+            const sp = s.accuracySpread;
+            const range = document.createElement("span");
+            range.className = "spread";
+            range.textContent = ` ${(sp.min * 100).toFixed(0)}–${(
+              sp.max * 100
+            ).toFixed(0)}%`;
+            range.title = `${sp.n} trials · mean ${(sp.mean * 100).toFixed(
+              1
+            )}% · σ ${(sp.stdev * 100).toFixed(1)}pp`;
+            td.appendChild(range);
+          }
           const bg = heatFns[col.key](v);
           if (bg) td.style.backgroundColor = bg;
         }

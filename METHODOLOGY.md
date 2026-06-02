@@ -30,7 +30,14 @@ product a user actually gets.
 - **Retrieval recall** — fraction of a question's gold source steps that appear
   in the system's returned items (`retrievedIds` ∩ `expectedSourceStepIds`).
 - **Answer accuracy** — the shared answerer's answer judged against expected
-  answers.
+  answers. **Published numbers use an LLM judge** (`gemini-2.5-flash`, separate
+  from the z.ai/GLM answerer), applied identically to every system, via
+  `scripts/regrade-llm-judge.mjs`. The in-run substring matcher in `scoring.ts`
+  is a fast proxy only — it wrongly fails correct paraphrases ("three and a half
+  weeks" vs "3.5 weeks", "GPS system issue" vs "GPS system not functioning
+  correctly"), so it understates every system. The judge both rescues those and
+  can demote a spurious substring match. Disclosed here because the judge choice
+  is part of the result; a stronger/ensemble judge is the obvious next step.
 - **Citation recall / precision** — overlap of cited ids with gold sources.
 - **Latency** — retrieval-only wall time. Informative, not apples-to-apples
   between a local server and a hosted API; always read it next to context size.
@@ -65,9 +72,27 @@ product a user actually gets.
 
 ## Honest caveats
 
+- **Gold-marker leakage (fixed).** LongMemEval tags the answer-bearing turns
+  with `has_answer`, and the converter was rendering that as a visible
+  `[evidence]` marker in the session text fed to the reader ("Turn 5 (user
+  [evidence]): ..."). That leaks the answer *location* to every system that
+  stores raw content and inflates all scores. The marker is now stripped at the
+  source (`datasets/longmemeval.ts`); any number from before that fix is not
+  comparable. Lesson: audit the content each system actually ingests for
+  annotation leakage before publishing.
 - **Sample/category skew.** Small slices (e.g. LongMemEval oracle-10) are not
   publishable on their own and can favor a system's strongest category. Use the
   full suites with multiple trials for claims.
+- **Single-trial numbers are noise.** On mixed-60 we measured the *same* system
+  swing ~±14 points across trials (one answer flipping moves a 10-question
+  category by 10%). A single run cannot rank two systems whose means are within
+  ~10 points. The leaderboard reports the per-trial range next to each mean for
+  exactly this reason — read the spread, not the point.
+- **single-session-preference scores ~0 for everyone.** Those questions are
+  graded against a meta-description of the user's preference ("would prefer
+  resources tailored to X"), while systems return a concrete recommendation, so
+  the string/judge match fails uniformly. It's an eval-grading mismatch, not a
+  system gap — fixing it (preference-alignment judge) would raise all systems.
 - **Per-system ingest differs by design.** Some systems extract facts with an
   LLM at ingest (front-loading cost to shrink query context); others store raw.
   That difference is part of what's being measured — we report context tokens so

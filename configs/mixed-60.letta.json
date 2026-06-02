@@ -1,0 +1,27 @@
+{
+  "suitePath": "suites/longmemeval-mixed-60.json",
+  "outputDir": "results",
+  "trials": 3,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "letta",
+      "label": "Letta (self-hosted 0.16.8)",
+      "type": "command",
+      "argv": ["python3", "adapters/letta_adapter.py"],
+      "env": {
+        "LETTA_BASE_URL": "http://localhost:8283",
+        "LETTA_EMBEDDING_MODEL": "ollama/nomic-embed-text:latest"
+      },
+      "topK": 8
+    }
+  ]
+}
