@@ -18,6 +18,10 @@ from _bench_protocol import serve  # noqa: E402
 BASE_URL = (os.environ.get('LETTA_BASE_URL') or 'https://api.letta.com').rstrip('/')
 API_KEY = os.environ.get('LETTA_API_KEY')
 STATE_DIR = Path(os.environ.get('LETTA_BENCHMARK_STATE_DIR', '/tmp/lobu-letta-benchmark'))
+# Embedding model handle — must match a model registered in the Letta server.
+# For self-hosted with ollama: 'ollama/nomic-embed-text:latest'
+# For Letta Cloud: 'letta/letta-free'
+EMBEDDING_MODEL = os.environ.get('LETTA_EMBEDDING_MODEL') or 'ollama/nomic-embed-text:latest'
 BENCHMARK_PREFIX = '[[benchmark_id:'
 
 
@@ -131,7 +135,7 @@ def action_setup(payload: Dict[str, Any]) -> Any:
     archive = request_json(
         'POST',
         '/v1/archives/',
-        {'name': f'lobu-bench-{run_id}'[:120]},
+        {'name': f'lobu-bench-{run_id}'[:120], 'embedding': EMBEDDING_MODEL},
     )
     write_state(run_id, {'archive_id': archive['id'], 'passages': [], 'flushed': False})
     return {'archive_id': archive['id']}
@@ -151,7 +155,10 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
         benchmark_id = step.get('id')
         if not isinstance(content, str) or not content.strip() or not benchmark_id:
             continue
-        for part in split_content(content):
+        # nomic-embed-text has a 2048-token context limit (~6 000 chars).
+        # Use 5 500 chars per chunk to stay safely under the limit after the
+        # [[benchmark_id:...]] prefix is prepended in encode_text.
+        for part in split_content(content, max_chars=5500):
             passages.append({'text': encode_text(str(benchmark_id), part)})
             created += 1
 

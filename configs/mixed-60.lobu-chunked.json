@@ -1,0 +1,34 @@
+{
+  "suitePath": "suites/longmemeval-mixed-60.json",
+  "outputDir": "results",
+  "trials": 3,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "lobu-chunked",
+      "label": "Lobu (passage chunks + over-fetch)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "local-install",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "LOBU_EMBED_WAIT": "90",
+        "LOBU_CHUNK_TURNS": "5",
+        "LOBU_OVERFETCH": "900"
+      },
+      "topK": 8
+    }
+  ]
+}

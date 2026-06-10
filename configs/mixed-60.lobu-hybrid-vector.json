@@ -1,0 +1,37 @@
+{
+  "suitePath": "suites/longmemeval-mixed-60.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "lobu-hybrid-vector",
+      "label": "Lobu (hybrid + vector recall + gated overlay)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_agentic_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "local-install",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "GEMINI_API_KEY": "$GEMINI_API_KEY",
+        "LOBU_STORE": "hybrid",
+        "LOBU_EMBED_WAIT": "120",
+        "LOBU_HYBRID_RECALL": "1",
+        "LOBU_RETRIEVE": "hybrid-vector",
+        "LOBU_PREAMBLE_GATED": "1"
+      },
+      "topK": 8
+    }
+  ]
+}

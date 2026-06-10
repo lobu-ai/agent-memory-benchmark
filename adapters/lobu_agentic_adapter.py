@@ -94,7 +94,7 @@ def call_tool(tool: str, args: Dict[str, Any], timeout: int = 120) -> Any:
 
 
 # ------------------------------- Gemini LLM --------------------------------
-def gemini(prompt: str, *, temperature: float = 0.0, timeout: int = 45) -> str:
+def gemini(prompt: str, *, temperature: float = 0.0, timeout: int = 90) -> str:
     url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
            f"{JUDGE_MODEL}:generateContent?key={GEMINI_KEY}")
     body = {
@@ -104,7 +104,7 @@ def gemini(prompt: str, *, temperature: float = 0.0, timeout: int = 45) -> str:
     req = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST",
                                  headers={"Content-Type": "application/json"})
     last = None
-    for attempt in range(4):
+    for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 doc = json.loads(resp.read().decode())
@@ -116,6 +116,13 @@ def gemini(prompt: str, *, temperature: float = 0.0, timeout: int = 45) -> str:
                 time.sleep(2 * (attempt + 1))
                 continue
             raise RuntimeError(f"gemini error {exc.code}: {exc.read().decode()[:200]}") from exc
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            # read/connect timeout — the longer comprehensive prompt occasionally
+            # runs past the socket timeout; back off and retry rather than fail
+            # the whole ingest (the runner treats one ingest error as fatal).
+            last = exc
+            time.sleep(2 * (attempt + 1))
+            continue
     raise RuntimeError(f"gemini failed after retries: {last}")
 
 
@@ -136,30 +143,41 @@ def _parse_json(text: str, default):
 
 
 # --------------------------- extraction + judging --------------------------
-EXTRACT_PROMPT = """You extract STATEFUL FACTS from a chat session — facts about \
-the user or people/things they mention that have a value which could later change \
-or accumulate (locations, counts, amounts, schedules, preferences, statuses, \
-personal records, ownership). Ignore one-off chit-chat and the assistant's generic advice.
+EXTRACT_PROMPT = """Extract a COMPLETE, FAITHFUL set of facts from this chat session \
+so they can answer later questions WITHOUT the raw text. Capture EVERY salient detail \
+the user states or that is established about them or the people/things they mention, and \
+PRESERVE ALL SPECIFICS VERBATIM: numbers, counts, quantities, amounts, money, dates, times, \
+durations, names, brands, models, places, scales, schedules, preferences, statuses, \
+decisions, events, ownership. When the user has MULTIPLE of something (a list or collection \
+— kits owned, trips taken, doctors seen, festivals attended), emit ONE fact PER ITEM; never \
+collapse a collection into a single count or summary. Do not omit detail; do not invent. \
+Ignore only pure pleasantries and the assistant's generic boilerplate advice.
 
 Return a JSON array. Each item: {"subject": "...", "attribute": "...", "value": "...", \
-"statement": "a single self-contained sentence stating the fact"}.
-Keep subject+attribute STABLE and canonical (e.g. subject "user", attribute "number of bikes owned") \
-so a later update to the same thing has the same subject+attribute. Empty array if no stateful facts.
+"statement": "one self-contained sentence stating the fact WITH its specifics"}.
+Make subject+attribute canonical so a genuine later UPDATE to the SAME single thing reuses \
+the same subject+attribute (e.g. subject "user", attribute "home location"); for accumulating \
+items give each a distinct value so they stay separate. Empty array only if there is truly nothing.
 
 SESSION:
 {session}"""
 
-JUDGE_PROMPT = """A new fact was just stated. Decide if it UPDATES (supersedes) any \
-of the prior stored facts — i.e. it is about the SAME subject and SAME attribute and \
-represents the current/changed value (a move, a new count, a new amount, a new schedule, \
-a changed preference). A fact that is merely related or about a different attribute does NOT supersede.
+JUDGE_PROMPT = """A NEW fact was just stated. Decide if it REPLACES a prior fact — i.e. the \
+prior fact's value is NO LONGER TRUE because this one changed it.
+
+CRITICAL RULE: supersede ONLY a genuine REPLACEMENT. If the new fact and a prior fact can both \
+be TRUE AT THE SAME TIME, that is ACCUMULATION, not replacement — do NOT supersede.
+- "lives in Chicago" then "lives in NYC" -> REPLACES (can't live in both) -> supersede.
+- "owns a Spitfire kit" then "owns a Tiger tank kit" -> ADDS (owns both) -> do NOT supersede.
+- "attended festival A" then "attended festival B" -> ADDS -> do NOT supersede.
+- "personal best 25:50" then "personal best 24:30" -> REPLACES -> supersede.
 
 NEW FACT: {new}
 
 PRIOR STORED FACTS (id :: statement):
 {candidates}
 
-Return JSON: {"supersedes_id": <id of the single prior fact this updates, or null>}."""
+Return JSON: {"supersedes_id": <id of the single prior fact this REPLACES, or null>}."""
 
 
 MAX_FACTS_PER_SESSION = int(os.environ.get("LOBU_MAX_FACTS", "15"))
@@ -194,6 +212,51 @@ def judge_supersede(new_fact: Dict[str, str], candidates: List[Dict[str, Any]]) 
     except Exception:
         return None
     return sid if any(c["id"] == sid for c in candidates) else None
+
+
+BATCH_JUDGE_PROMPT = """You are deduplicating a memory store. Below are NEW facts (each
+with an index) and PRIOR stored facts (each with an id). For each NEW fact decide which
+single PRIOR fact it REPLACES — i.e. the prior fact's value is NO LONGER TRUE because the
+new one changed the SAME single thing (a move, a corrected number, a changed status/
+preference).
+
+CRITICAL: only mark a genuine REPLACEMENT. If a new fact and a prior fact can both be TRUE
+AT THE SAME TIME, that is ACCUMULATION — leave supersedes_id null. Owning two kits,
+attending two festivals, visiting two doctors = accumulation, NOT replacement.
+
+NEW FACTS (index :: statement):
+{new}
+
+PRIOR STORED FACTS (id :: statement):
+{prior}
+
+Return a JSON array, one object per NEW fact: [{"i": <index>, "supersedes_id": <prior id it replaces, or null>}, ...]."""
+
+
+def judge_supersede_batch(facts: List[Dict[str, str]],
+                          registry: List[Dict[str, Any]]) -> Dict[int, int]:
+    """One judge call for a whole session's new facts vs the prior registry (vs a
+    call per fact). Returns {new_fact_index: superseded_prior_id}."""
+    if not facts or not registry:
+        return {}
+    new_txt = "\n".join(f"[{i}] {f['statement']}" for i, f in enumerate(facts))
+    prior_txt = "\n".join(f"{r['id']} :: {(r.get('text') or '')[:140]}" for r in registry)
+    valid_ids = {r["id"] for r in registry}
+    res = _parse_json(
+        gemini(BATCH_JUDGE_PROMPT.replace("{new}", new_txt).replace("{prior}", prior_txt)), [])
+    out: Dict[int, int] = {}
+    if isinstance(res, list):
+        for item in res:
+            if not isinstance(item, dict):
+                continue
+            i, sid = item.get("i"), item.get("supersedes_id")
+            try:
+                i, sid = int(i), int(sid)
+            except (TypeError, ValueError):
+                continue
+            if 0 <= i < len(facts) and sid in valid_ids:
+                out[i] = sid
+    return out
 
 
 # --------------------------------- protocol --------------------------------
@@ -281,13 +344,32 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
             over_budget += 1
             continue  # over budget: session stored (hybrid), skip costly extraction
 
-        for fact in extract_facts(content):
-            # GATE: only judge when a plausibly-same prior fact exists this scenario.
-            candidates = _candidates_for(fact, saved)
-            prior_id = None
-            if candidates:
-                judged += 1
-                prior_id = judge_supersede(fact, candidates)
+        try:
+            session_facts = extract_facts(content)
+        except Exception as exc:
+            # A single oversized session can exhaust the extractor's retries/timeout.
+            # Don't fail the whole run: in hybrid mode the raw session is already
+            # stored above, so focused retrieval falls back to it gracefully.
+            sys.stderr.write(f"[ingest] extraction skipped for one session: {exc}\n")
+            over_budget += 1
+            continue
+        # One BATCH judge call per session (vs per fact) decides which new facts
+        # REPLACE a prior fact. LOBU_NO_SUPERSEDE=1 skips it entirely. The judge
+        # marks only genuine replacements, never accumulation, so collections
+        # ("owns kit A", "owns kit B") stay distinct and aggregation/counting works.
+        supersede_map: Dict[int, int] = {}
+        if os.environ.get("LOBU_NO_SUPERSEDE") != "1" and saved and session_facts:
+            judged += 1
+            supersede_map = judge_supersede_batch(session_facts, saved)
+        # A prior may be superseded by at most ONE new fact (Lobu's UNIQUE
+        # supersede-fork guard rejects a second supersede of the same event).
+        # If the batch judge maps two facts to the same prior, only the first
+        # supersedes; the rest are plain adds.
+        consumed_priors: set = set()
+        for i, fact in enumerate(session_facts):
+            prior_id = supersede_map.get(i)
+            if prior_id is not None and prior_id in consumed_priors:
+                prior_id = None
             args = {
                 "content": fact["statement"],
                 "semantic_type": "fact",
@@ -298,9 +380,10 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
                 args["occurred_at"] = iso
             if prior_id is not None:
                 args["supersedes_event_id"] = prior_id
-                args["metadata"]["resolved_update"] = True  # this fact resolved a conflict
+                args["metadata"]["resolved_update"] = True
                 superseded += 1
-                saved = [s for s in saved if s["id"] != prior_id]  # old fact no longer current
+                consumed_priors.add(prior_id)
+                saved = [s for s in saved if s["id"] != prior_id]
             res = call_tool("save_memory", args)
             new_id = (res or {}).get("id")
             facts_saved += 1
@@ -310,7 +393,8 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
 
     # SQL retrieval reads rows directly (no embeddings); any vector path must wait
     # for the async embedder to make this run's SESSIONS searchable before reading.
-    if "vector" in os.environ.get("LOBU_RETRIEVE", "sql").lower():
+    _rmode = os.environ.get("LOBU_RETRIEVE", "sql").lower()
+    if "vector" in _rmode or "focused" in _rmode or "augmented" in _rmode:
         probe = (steps[-1].get("content") or "")[:80] if steps else "memory"
         deadline = time.time() + EMBED_WAIT_S
         while time.time() < deadline:
@@ -473,13 +557,135 @@ def _retrieve_vector(prompt: str, scenario_id: Any, run_id: str, top_k: int) -> 
     return [grouped[k] for k in order][:top_k]
 
 
+def _retrieve_focused(prompt: str, scenario_id: Any, run_id: str, top_k: int) -> List[Dict[str, Any]]:
+    """SM-style focused retrieval: vector-RANK the whole sessions for recall (their
+    embeddings are strong), but hand the reader the session's EXTRACTED FACT-
+    SENTENCES instead of the 10-25k-char raw session. query_sql masks superseded
+    facts so the current value leads. Falls back to raw session text when a
+    matched session has no extracted facts (graceful degradation)."""
+    overfetch = int(os.environ.get("LOBU_OVERFETCH", "400"))
+    res = call_tool("read_knowledge", {"query": prompt, "limit": overfetch})
+    matched_steps: List[str] = []
+    seen: set = set()
+    for row in (res or {}).get("content") or []:
+        meta = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+        if meta.get("benchmark_run_id") != run_id:
+            continue
+        if scenario_id is not None and meta.get("benchmark_scenario_id") != scenario_id:
+            continue
+        if meta.get("layer") != "session":  # rank by session relevance (recall)
+            continue
+        step = str(meta.get("benchmark_step_id") or row.get("id"))
+        if step in seen:
+            continue
+        seen.add(step)
+        matched_steps.append(step)
+        if len(matched_steps) >= top_k:
+            break
+
+    def _by_step(layer: str) -> Dict[str, List[Dict[str, Any]]]:
+        out: Dict[str, List[Dict[str, Any]]] = {}
+        for r in _query_layer(scenario_id, run_id, layer, limit=overfetch):
+            m = r.get("metadata") or {}
+            if isinstance(m, str):
+                try:
+                    m = json.loads(m)
+                except Exception:
+                    m = {}
+            out.setdefault(str(m.get("benchmark_step_id") or ""), []).append(r)
+        return out
+
+    facts_by_step = _by_step("fact")
+    sessions_by_step = _by_step("session")
+    items: List[Dict[str, Any]] = []
+    for step in matched_steps:
+        facts = facts_by_step.get(step) or []
+        if facts:
+            text = "\n".join((r.get("payload_text") or "") for r in facts)
+        else:  # no extracted facts -> serve the raw session (graceful fallback)
+            srows = sessions_by_step.get(step) or []
+            text = (srows[0].get("payload_text") if srows else "") or ""
+        items.append({"id": step, "text": text, "score": 0.7,
+                      "sourceType": "memory", "metadata": {"benchmark_step_id": step}})
+    return items
+
+
+def _retrieve_augmented(prompt: str, scenario_id: Any, run_id: str, top_k: int) -> List[Dict[str, Any]]:
+    """LOSSLESS whole sessions (vector-ranked, like the 80% baseline) PLUS one
+    compact deduplicated fact-list item as a preamble. The whole sessions preserve
+    everything the answerer needs for every category (no regression on the working
+    ones); the fact list is purely a COUNTING/LOOKUP aid that fixes the failure the
+    baseline data exposed — multi-session 'how many X' questions where recall=1.0
+    but the answerer miscounts distinct items scattered across verbose prose.
+    query_sql masks superseded facts, so the list carries current values only."""
+    cap = int(os.environ.get("LOBU_PREAMBLE_CAP", "16"))
+    fact_rows = _query_layer(scenario_id, run_id, "fact", limit=300)
+    ptok = set(re.findall(r"[a-z0-9]+", prompt.lower()))
+    fact_rows.sort(
+        key=lambda r: (len(ptok & set(re.findall(r"[a-z0-9]+", (r.get("payload_text") or "").lower()))),
+                       r.get("occurred_at") or ""),
+        reverse=True,
+    )
+    bullets: List[str] = []
+    seen_f: set = set()
+    for r in fact_rows:
+        t = (r.get("payload_text") or "").strip()
+        if not t or t[:120] in seen_f:
+            continue
+        seen_f.add(t[:120])
+        bullets.append("- " + t)
+        if len(bullets) >= cap:
+            break
+
+    # Vector recall over whole sessions (relevance-ranked, lossless) — same engine
+    # the 80% baseline uses. Over-fetch wide (like the baseline's 400): in hybrid
+    # store the many small FACT events otherwise crowd whole sessions out of a
+    # narrow top-N, starving session recall. We filter to the session layer below.
+    overfetch = int(os.environ.get("LOBU_OVERFETCH", "400"))
+    res = call_tool("read_knowledge", {"query": prompt, "limit": max(overfetch, top_k * 5)})
+    sessions: List[Dict[str, Any]] = []
+    seen: set = set()
+    for row in (res or {}).get("content") or []:
+        meta = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+        if meta.get("benchmark_run_id") != run_id:
+            continue
+        if scenario_id is not None and meta.get("benchmark_scenario_id") != scenario_id:
+            continue
+        if meta.get("layer") != "session":
+            continue
+        key = str(row.get("id"))
+        if key in seen:
+            continue
+        seen.add(key)
+        sessions.append({
+            "id": str(meta.get("benchmark_step_id") or row.get("id")),
+            "text": row.get("text_content") or row.get("payload_text") or "",
+            "score": row.get("combined_score") or row.get("similarity") or 0.5,
+            "sourceType": "memory",
+            "metadata": meta,
+        })
+
+    # Keep the FULL top_k whole sessions (no recall cost) and ride the fact digest
+    # along on the most-relevant session's text, rather than spending a slot on a
+    # separate digest item (which drops one gold session out of the top_k budget).
+    sessions = sessions[:top_k]
+    if bullets and sessions:
+        digest = "Recorded facts across all sessions (current values, deduplicated):\n" + "\n".join(bullets)
+        sessions[0] = {**sessions[0], "text": digest + "\n\n---\n\n" + (sessions[0].get("text") or "")}
+    return sessions
+
+
 def action_retrieve(payload: Dict[str, Any]) -> Any:
     scenario_id = payload.get("scenarioId")
     run_id = scenario_tag(payload)
     top_k = int(payload.get("topK") or 8)
     prompt = payload.get("prompt") or ""
     started = time.perf_counter()
-    if RETRIEVE_MODE == "hybrid-vector":
+    if RETRIEVE_MODE == "augmented":
+        items = _retrieve_augmented(prompt, scenario_id, run_id, top_k)
+    elif RETRIEVE_MODE == "focused":
+        items = _retrieve_focused(prompt, scenario_id, run_id, top_k)
+    elif RETRIEVE_MODE == "hybrid-vector":
         items = _retrieve_hybrid_vector(prompt, scenario_id, run_id, top_k)
     elif RETRIEVE_MODE == "vector":
         items = _retrieve_vector(prompt, scenario_id, run_id, top_k)

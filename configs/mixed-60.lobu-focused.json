@@ -1,0 +1,36 @@
+{
+  "suitePath": "suites/longmemeval-mixed-60.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "lobu-focused",
+      "label": "Lobu (focused retrieval \u2014 Phase 0 proxy)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_agentic_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "local-install",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "GEMINI_API_KEY": "$GEMINI_API_KEY",
+        "LOBU_STORE": "hybrid",
+        "LOBU_EMBED_WAIT": "120",
+        "LOBU_RETRIEVE": "focused",
+        "LOBU_OVERFETCH": "400"
+      },
+      "topK": 8
+    }
+  ]
+}

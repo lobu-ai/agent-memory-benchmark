@@ -1,0 +1,29 @@
+{
+  "suitePath": "suites/longmemeval-mixed-60.json",
+  "outputDir": "results",
+  "trials": 3,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "supermemory",
+      "label": "Supermemory",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/supermemory_adapter.py"
+      ],
+      "env": {
+        "SUPERMEMORY_API_KEY": "$SUPERMEMORY_API_KEY"
+      },
+      "topK": 8
+    }
+  ]
+}

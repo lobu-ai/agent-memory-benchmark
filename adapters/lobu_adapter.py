@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -37,6 +38,52 @@ BASE_URL = os.environ.get("LOBU_BASE_URL", "http://localhost:8787").rstrip("/")
 ORG_SLUG = os.environ.get("LOBU_ORG_SLUG")
 API_TOKEN = os.environ.get("LOBU_API_TOKEN")
 EMBED_WAIT_S = int(os.environ.get("LOBU_EMBED_WAIT", "60"))
+
+# Optional query-rewrite for retrieval recall (LOBU_QUERY_REWRITE=1). Uses an
+# LLM only to turn a CONVERSATIONAL question into focused search queries — a
+# standard, generic RAG step (no test annotations, no per-question tuning).
+ZAI_KEY = os.environ.get("Z_AI_API_KEY")
+ZAI_URL = os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/coding/paas/v4").rstrip("/") + "/chat/completions"
+ZAI_MODEL = os.environ.get("ZAI_REWRITE_MODEL", "glm-4.6")
+
+
+def _zai_rewrite_queries(prompt: str) -> List[str]:
+    """Rewrite a conversational question into up to 4 focused keyword search
+    queries (strip filler like 'I think we discussed / can you remind me';
+    cover synonyms e.g. doctor/physician/specialist). Returns [] on any failure
+    so the caller falls back to the raw prompt — purely additive."""
+    if not ZAI_KEY:
+        return []
+    instr = (
+        "Rewrite the user's question into 3 short keyword search queries that retrieve "
+        "the relevant past conversation sessions from a memory store. Strip conversational "
+        "filler. Include synonym variants (doctor/physician/specialist; job/role/position). "
+        'Return STRICT JSON {"queries":["...","...","..."]} only.\n\nQUESTION: ' + prompt
+    )
+    # thinking disabled (same as the shared answerer's z.ai calls): a reasoning
+    # model burns 5-25s "thinking" about a trivial rewrite, which stacked the
+    # whole retrieve action past the adapter's socket timeout.
+    body = json.dumps({"model": ZAI_MODEL, "temperature": 0,
+                       "thinking": {"type": "disabled"},
+                       "messages": [{"role": "user", "content": instr}]}).encode()
+    req = urllib.request.Request(
+        ZAI_URL, data=body, method="POST",
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {ZAI_KEY}"})
+    for _ in range(2):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                doc = json.loads(resp.read().decode())
+            txt = (((doc.get("choices") or [{}])[0].get("message") or {}).get("content") or "").strip()
+            if txt.startswith("```"):
+                txt = re.sub(r"^```[a-zA-Z]*\n?|\n?```$", "", txt).strip()
+            m = re.search(r"\{.*\}", txt, re.S)
+            if m:
+                qs = json.loads(m.group(0)).get("queries") or []
+                return [q.strip() for q in qs if isinstance(q, str) and q.strip()][:4]
+            return []
+        except Exception:
+            time.sleep(1.5)
+    return []
 
 
 def require_env() -> None:
@@ -180,46 +227,47 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
     top_k = int(payload.get("topK") or 8)
     chunked = int(os.environ.get("LOBU_CHUNK_TURNS", "0")) > 0
     started = time.perf_counter()
+    prompt = payload.get("prompt") or ""
+    overfetch = int(os.environ.get("LOBU_OVERFETCH", "400"))
 
-    # Public read path. Over-fetch so the scenario filter still yields topK; when
-    # chunked, over-fetch more since each session contributes several chunks.
-    res = call_tool(
-        "read_knowledge",
-        # Over-fetch enough to cover the whole accumulated pool, then filter
-        # client-side to this scenario's run_id. reset() is a public-API no-op
-        # (no bulk delete), so memories from prior scenarios pile up in the org;
-        # a small over-fetch lets a scenario's 2-4 sessions get out-ranked and
-        # missed. Supermemory reaches the same end-state via per-run container
-        # isolation. The answerer still receives only topK items.
-        {"query": payload.get("prompt") or "", "limit": int(os.environ.get("LOBU_OVERFETCH", "400"))},
-    )
-    latency_ms = (time.perf_counter() - started) * 1000
+    # Query set. The raw prompt is ALWAYS queried first so its ranking is
+    # preserved; with LOBU_QUERY_REWRITE, focused rewrites are appended so a
+    # recall-miss question (conversational filler that embeds poorly, or a
+    # synonym gap like doctor/physician) still surfaces its gold sessions. Dedup
+    # by step_id keeps the raw query's hits first → rewrites only ADD sessions
+    # the raw query missed (additive, low regression). Over-fetch covers the
+    # accumulated cross-scenario pool; the answerer still receives only topK.
+    queries = [prompt]
+    if os.environ.get("LOBU_QUERY_REWRITE") == "1":
+        queries += _zai_rewrite_queries(prompt)
 
-    rows = (res or {}).get("content") or []
     grouped: Dict[str, Dict[str, Any]] = {}
     order: List[str] = []
-    for row in rows:
-        meta = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
-        if meta.get("benchmark_run_id") != run_id:
-            continue
-        if scenario_id is not None and meta.get("benchmark_scenario_id") != scenario_id:
-            continue
-        step_id = str(meta.get("benchmark_step_id") or row.get("id"))
-        text = row.get("text_content") or row.get("payload_text") or ""
-        if step_id in grouped:
-            # chunked: merge the matched chunks for this session (keeps focused
-            # facts while still one item per source step -> recall preserved).
-            if chunked and text and text not in grouped[step_id]["text"]:
-                grouped[step_id]["text"] = (grouped[step_id]["text"] + "\n" + text).strip()
-            continue
-        grouped[step_id] = {
-            "id": step_id,
-            "text": text,
-            "score": row.get("combined_score") or row.get("similarity") or 0.5,
-            "sourceType": "memory",
-            "metadata": meta,
-        }
-        order.append(step_id)
+    for q in queries:
+        # Generous socket timeout: an over-fetch read over a grown multi-scenario
+        # corpus can exceed the 120s default (one did, killing a whole trial).
+        res = call_tool("read_knowledge", {"query": q, "limit": overfetch}, timeout=300)
+        for row in (res or {}).get("content") or []:
+            meta = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
+            if meta.get("benchmark_run_id") != run_id:
+                continue
+            if scenario_id is not None and meta.get("benchmark_scenario_id") != scenario_id:
+                continue
+            step_id = str(meta.get("benchmark_step_id") or row.get("id"))
+            text = row.get("text_content") or row.get("payload_text") or ""
+            if step_id in grouped:
+                if chunked and text and text not in grouped[step_id]["text"]:
+                    grouped[step_id]["text"] = (grouped[step_id]["text"] + "\n" + text).strip()
+                continue
+            grouped[step_id] = {
+                "id": step_id,
+                "text": text,
+                "score": row.get("combined_score") or row.get("similarity") or 0.5,
+                "sourceType": "memory",
+                "metadata": meta,
+            }
+            order.append(step_id)
+    latency_ms = (time.perf_counter() - started) * 1000
 
     items = [grouped[s] for s in order][:top_k]
 

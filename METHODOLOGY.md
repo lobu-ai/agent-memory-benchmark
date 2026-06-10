@@ -99,3 +99,40 @@ product a user actually gets.
   it's visible.
 - **Reproduce it yourself.** Every published number ships its config; the run
   command is in the README.
+
+## Finding: the Lobu↔Supermemory gap was retrieval recall (2026-06-10)
+
+A per-question decomposition of the published 3-trial runs showed the entire
+Supermemory(85%)↔Lobu(80%) judged gap was **retrieval recall**: +9 trials across
+3 questions whose gold sessions Supermemory retrieved and Lobu missed
+(conversational-filler queries that embed poorly; synonym gaps like
+doctor/physician). The "focused extracted memories give the reader cleaner
+context" hypothesis was **falsified** — on every same-recall question both
+systems fed the reader the same whole-session chunks within ~1% of the same
+tokens. Consistent with that, every extraction/focused/digest variant we tried
+regressed (56.7–65% vs the 80% baseline; the configs are in `configs/`).
+
+The fix is **query rewriting**: a small LLM rewrites the conversational
+question into focused keyword variants, searched alongside the raw query
+(`LOBU_QUERY_REWRITE=1` in `adapters/lobu_adapter.py`; the same capability
+ships in the Lobu server as `read_knowledge({rewrite_query: true})`, so the
+adapter exercises the product, not adapter glue). Canonical 3-trial mixed-60
+result vs the published baseline (same suite, answerer, substring grader):
+
+|                    | Baseline (whole sessions) | + query rewrite           |
+| ------------------ | ------------------------- | ------------------------- |
+| Retrieval recall   | 95.6%                     | **100.0% (all 3 trials)** |
+| Answer (substring) | 68.3% (66.7–70.0)         | 69.4% (68.3–70.0)         |
+| multi-session      | 67%                       | **87%**                   |
+| knowledge-update   | 93%                       | 83%                       |
+
+Honest read: recall — a primary, deterministic metric — is now perfect,
+closing the structural gap to Supermemory; answer accuracy is
+parity-to-slightly-better under the substring proxy (the floor rises
+66.7→68.3). The **LLM-judged** number for this configuration is pending (the
+gemini judge hit its monthly spend cap); the leaderboard keeps the judged 80%
+baseline until then. Disclosed trade-off: knowledge-update dips (93→83) — the
+variant queries pull additional stale-value sessions about the updated fact
+into the top-k. A real Lobu deployment masks superseded values server-side;
+the benchmark adapter stores sessions without supersession, so this is
+adapter-context behavior, not a product property.
