@@ -48,6 +48,10 @@ const JUDGE_META = {
     label: "glm-5.1 (consistent, incl. query-rewrite config)",
     note: "judge is the same model family as the shared answerer (self-grading); applied identically to every system, so deltas are fair. Judge script committed.",
   },
+  "claude-sonnet-4-6": {
+    label: "claude-sonnet-4-6 (independent)",
+    note: "cross-family judge — independent of the glm-5.1 answerer, so no self-grading. Same rubric as the glm judge; runs via the Claude Code CLI (scripts/regrade-claude-judge.mjs).",
+  },
 };
 const ORIGINAL_JUDGE = "gemini-2.5-flash";
 // The gemini board is frozen to the systems gemini actually judged before the

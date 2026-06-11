@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-06-11T16:39:52.599Z",
+  "builtAt": "2026-06-11T21:20:38.501Z",
   "benchmarks": [
     {
       "suiteId": "longmemeval-mixed-60",
@@ -19,6 +19,11 @@
       "judgeId": "glm-5.1",
       "judgeLabel": "glm-5.1 (consistent, incl. query-rewrite config)",
       "note": "judge is the same model family as the shared answerer (self-grading); applied identically to every system, so deltas are fair. Judge script committed."
+    },
+    {
+      "judgeId": "claude-sonnet-4-6",
+      "judgeLabel": "claude-sonnet-4-6 (independent)",
+      "note": "cross-family judge — independent of the glm-5.1 answerer, so no self-grading. Same rubric as the glm judge; runs via the Claude Code CLI (scripts/regrade-claude-judge.mjs)."
     }
   ],
   "runs": [
@@ -229,6 +234,143 @@
             "min": 0.75,
             "max": 0.7833333333333333,
             "stdev": 0.01360827634879543,
+            "n": 3
+          }
+        }
+      ]
+    },
+    {
+      "suiteId": "longmemeval-mixed-60",
+      "suiteLabel": "Longmemeval Mixed 60",
+      "answererModel": "glm-5.1",
+      "judge": "claude-sonnet-4-6",
+      "generatedAt": "2026-06-11T16:05:41.846Z",
+      "generatedAtMs": 1781193941846,
+      "trials": 3,
+      "topK": 8,
+      "questionCount": 180,
+      "systems": [
+        {
+          "systemId": "lobu",
+          "systemLabel": "Lobu",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 180,
+            "answerAccuracy": 0.8055555555555556,
+            "retrievalRecall": 0.9555555555555557,
+            "citationRecall": 0.7888888888888888,
+            "citationPrecision": 0.9,
+            "averageLatencyMs": 472.0439083333365,
+            "p95LatencyMs": 564.910374999954,
+            "averageContextTokensApprox": 5710.8,
+            "averageAnswererPromptTokens": 5492.65,
+            "averageAnswererCompletionTokens": 52.86666666666667,
+            "overallScore": 0.793888888888889
+          },
+          "trialAccuracies": [
+            0.8333333333333334,
+            0.8,
+            0.7833333333333333
+          ],
+          "accuracySpread": {
+            "mean": 0.8055555555555555,
+            "min": 0.7833333333333333,
+            "max": 0.8333333333333334,
+            "stdev": 0.02078698548207747,
+            "n": 3
+          }
+        },
+        {
+          "systemId": "letta",
+          "systemLabel": "Letta (self-hosted 0.16.8)",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 180,
+            "answerAccuracy": 0.7666666666666667,
+            "retrievalRecall": 0.9958333333333333,
+            "citationRecall": 0.7578703703703703,
+            "citationPrecision": 0.8722222222222222,
+            "averageLatencyMs": 75.39358886675069,
+            "p95LatencyMs": 89.62866700312588,
+            "averageContextTokensApprox": 5101.116666666667,
+            "averageAnswererPromptTokens": 4922.4,
+            "averageAnswererCompletionTokens": 61.294444444444444,
+            "overallScore": 0.7729166666666668
+          },
+          "trialAccuracies": [
+            0.7833333333333333,
+            0.7666666666666667,
+            0.75
+          ],
+          "accuracySpread": {
+            "mean": 0.7666666666666666,
+            "min": 0.75,
+            "max": 0.7833333333333333,
+            "stdev": 0.01360827634879543,
+            "n": 3
+          }
+        },
+        {
+          "systemId": "lobu-rewrite-3x",
+          "systemLabel": "Lobu (query-rewrite, 3-trial)",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 180,
+            "answerAccuracy": 0.85,
+            "retrievalRecall": 1,
+            "citationRecall": 0.8078703703703705,
+            "citationPrecision": 0.9055555555555556,
+            "averageLatencyMs": 5630.707268066676,
+            "p95LatencyMs": 10099.80008399998,
+            "averageContextTokensApprox": 5933.65,
+            "averageAnswererPromptTokens": 5703.472222222223,
+            "averageAnswererCompletionTokens": 59.63333333333333,
+            "overallScore": 0.8136805555555555
+          },
+          "trialAccuracies": [
+            0.8333333333333334,
+            0.8166666666666667,
+            0.9
+          ],
+          "accuracySpread": {
+            "mean": 0.85,
+            "min": 0.8166666666666667,
+            "max": 0.9,
+            "stdev": 0.03600411499115479,
+            "n": 3
+          }
+        },
+        {
+          "systemId": "supermemory",
+          "systemLabel": "Supermemory (self-hosted)",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 180,
+            "answerAccuracy": 0.8055555555555556,
+            "retrievalRecall": 1,
+            "citationRecall": 0.7814814814814814,
+            "citationPrecision": 0.8944444444444445,
+            "averageLatencyMs": 140.29822523799442,
+            "p95LatencyMs": 227.35991698573343,
+            "averageContextTokensApprox": 5917.15,
+            "averageAnswererPromptTokens": 5688.8,
+            "averageAnswererCompletionTokens": 58.97222222222222,
+            "overallScore": 0.8119444444444445
+          },
+          "trialAccuracies": [
+            0.8,
+            0.8166666666666667,
+            0.8
+          ],
+          "accuracySpread": {
+            "mean": 0.8055555555555557,
+            "min": 0.8,
+            "max": 0.8166666666666667,
+            "stdev": 0.007856742013183834,
             "n": 3
           }
         }

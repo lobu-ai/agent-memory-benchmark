@@ -1,0 +1,1115 @@
+{
+  "judgeModel": "claude-sonnet-4-6",
+  "judgedAt": "2026-06-11T21:14:59.553Z",
+  "systems": [
+    {
+      "systemId": "lobu",
+      "systemLabel": "Lobu",
+      "trials": [
+        {
+          "questions": [
+            {
+              "scenarioId": "longmemeval-1-6a1eabeb",
+              "questionId": "6a1eabeb",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-2-6aeb4375",
+              "questionId": "6aeb4375",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-3-830ce83f",
+              "questionId": "830ce83f",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-4-852ce960",
+              "questionId": "852ce960",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-5-945e3d21",
+              "questionId": "945e3d21",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-6-d7c942c3",
+              "questionId": "d7c942c3",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-7-71315a70",
+              "questionId": "71315a70",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-8-89941a93",
+              "questionId": "89941a93",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-9-ce6d2d27",
+              "questionId": "ce6d2d27",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-10-9ea5eabc",
+              "questionId": "9ea5eabc",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-11-gpt4_59c863d7",
+              "questionId": "gpt4_59c863d7",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-12-b5ef892d",
+              "questionId": "b5ef892d",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-13-e831120c",
+              "questionId": "e831120c",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-14-gpt4_d84a3211",
+              "questionId": "gpt4_d84a3211",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-15-aae3761f",
+              "questionId": "aae3761f",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-16-gpt4_f2262a51",
+              "questionId": "gpt4_f2262a51",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-17-dd2973ad",
+              "questionId": "dd2973ad",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-18-gpt4_a56e767c",
+              "questionId": "gpt4_a56e767c",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-19-6cb6f249",
+              "questionId": "6cb6f249",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-20-36b9f61e",
+              "questionId": "36b9f61e",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-21-7161e7e2",
+              "questionId": "7161e7e2",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-22-c4f10528",
+              "questionId": "c4f10528",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-23-89527b6b",
+              "questionId": "89527b6b",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-24-e9327a54",
+              "questionId": "e9327a54",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-25-4c36ccef",
+              "questionId": "4c36ccef",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-26-6ae235be",
+              "questionId": "6ae235be",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-27-7e00a6cb",
+              "questionId": "7e00a6cb",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-28-1903aded",
+              "questionId": "1903aded",
+              "category": "single-session-assistant",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-29-ceb54acb",
+              "questionId": "ceb54acb",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-30-f523d9fe",
+              "questionId": "f523d9fe",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-31-8a2466db",
+              "questionId": "8a2466db",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-32-06878be2",
+              "questionId": "06878be2",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-33-75832dbd",
+              "questionId": "75832dbd",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-34-0edc2aef",
+              "questionId": "0edc2aef",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-35-35a27287",
+              "questionId": "35a27287",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-36-32260d93",
+              "questionId": "32260d93",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-37-195a1a1b",
+              "questionId": "195a1a1b",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-38-afdc33df",
+              "questionId": "afdc33df",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-39-caf03d32",
+              "questionId": "caf03d32",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-40-54026fce",
+              "questionId": "54026fce",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-41-e47becba",
+              "questionId": "e47becba",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-42-118b2229",
+              "questionId": "118b2229",
+              "category": "single-session-user",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-43-51a45a95",
+              "questionId": "51a45a95",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-44-58bf7951",
+              "questionId": "58bf7951",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-45-1e043500",
+              "questionId": "1e043500",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-46-c5e8278d",
+              "questionId": "c5e8278d",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-47-6ade9755",
+              "questionId": "6ade9755",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-48-6f9b354f",
+              "questionId": "6f9b354f",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-49-58ef2f1c",
+              "questionId": "58ef2f1c",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-50-f8c5f88b",
+              "questionId": "f8c5f88b",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-51-gpt4_2655b836",
+              "questionId": "gpt4_2655b836",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-52-gpt4_2487a7cb",
+              "questionId": "gpt4_2487a7cb",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-53-gpt4_76048e76",
+              "questionId": "gpt4_76048e76",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-54-gpt4_2312f94c",
+              "questionId": "gpt4_2312f94c",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-55-0bb5a684",
+              "questionId": "0bb5a684",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-56-08f4fc43",
+              "questionId": "08f4fc43",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-57-2c63a862",
+              "questionId": "2c63a862",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-58-gpt4_385a5000",
+              "questionId": "gpt4_385a5000",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-59-2a1811e2",
+              "questionId": "2a1811e2",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-60-bbf86515",
+              "questionId": "bbf86515",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            }
+          ]
+        },
+        {
+          "questions": [
+            {
+              "scenarioId": "longmemeval-1-6a1eabeb",
+              "questionId": "6a1eabeb",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-2-6aeb4375",
+              "questionId": "6aeb4375",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-3-830ce83f",
+              "questionId": "830ce83f",
+              "category": "knowledge-update",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-4-852ce960",
+              "questionId": "852ce960",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-5-945e3d21",
+              "questionId": "945e3d21",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-6-d7c942c3",
+              "questionId": "d7c942c3",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-7-71315a70",
+              "questionId": "71315a70",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-8-89941a93",
+              "questionId": "89941a93",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-9-ce6d2d27",
+              "questionId": "ce6d2d27",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-10-9ea5eabc",
+              "questionId": "9ea5eabc",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-11-gpt4_59c863d7",
+              "questionId": "gpt4_59c863d7",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-12-b5ef892d",
+              "questionId": "b5ef892d",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-13-e831120c",
+              "questionId": "e831120c",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-14-gpt4_d84a3211",
+              "questionId": "gpt4_d84a3211",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-15-aae3761f",
+              "questionId": "aae3761f",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-16-gpt4_f2262a51",
+              "questionId": "gpt4_f2262a51",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-17-dd2973ad",
+              "questionId": "dd2973ad",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-18-gpt4_a56e767c",
+              "questionId": "gpt4_a56e767c",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-19-6cb6f249",
+              "questionId": "6cb6f249",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-20-36b9f61e",
+              "questionId": "36b9f61e",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-21-7161e7e2",
+              "questionId": "7161e7e2",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-22-c4f10528",
+              "questionId": "c4f10528",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-23-89527b6b",
+              "questionId": "89527b6b",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-24-e9327a54",
+              "questionId": "e9327a54",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-25-4c36ccef",
+              "questionId": "4c36ccef",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-26-6ae235be",
+              "questionId": "6ae235be",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-27-7e00a6cb",
+              "questionId": "7e00a6cb",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-28-1903aded",
+              "questionId": "1903aded",
+              "category": "single-session-assistant",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-29-ceb54acb",
+              "questionId": "ceb54acb",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-30-f523d9fe",
+              "questionId": "f523d9fe",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-31-8a2466db",
+              "questionId": "8a2466db",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-32-06878be2",
+              "questionId": "06878be2",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-33-75832dbd",
+              "questionId": "75832dbd",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-34-0edc2aef",
+              "questionId": "0edc2aef",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-35-35a27287",
+              "questionId": "35a27287",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-36-32260d93",
+              "questionId": "32260d93",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-37-195a1a1b",
+              "questionId": "195a1a1b",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-38-afdc33df",
+              "questionId": "afdc33df",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-39-caf03d32",
+              "questionId": "caf03d32",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-40-54026fce",
+              "questionId": "54026fce",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-41-e47becba",
+              "questionId": "e47becba",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-42-118b2229",
+              "questionId": "118b2229",
+              "category": "single-session-user",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-43-51a45a95",
+              "questionId": "51a45a95",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-44-58bf7951",
+              "questionId": "58bf7951",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-45-1e043500",
+              "questionId": "1e043500",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-46-c5e8278d",
+              "questionId": "c5e8278d",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-47-6ade9755",
+              "questionId": "6ade9755",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-48-6f9b354f",
+              "questionId": "6f9b354f",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-49-58ef2f1c",
+              "questionId": "58ef2f1c",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-50-f8c5f88b",
+              "questionId": "f8c5f88b",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-51-gpt4_2655b836",
+              "questionId": "gpt4_2655b836",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-52-gpt4_2487a7cb",
+              "questionId": "gpt4_2487a7cb",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-53-gpt4_76048e76",
+              "questionId": "gpt4_76048e76",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-54-gpt4_2312f94c",
+              "questionId": "gpt4_2312f94c",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-55-0bb5a684",
+              "questionId": "0bb5a684",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-56-08f4fc43",
+              "questionId": "08f4fc43",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-57-2c63a862",
+              "questionId": "2c63a862",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-58-gpt4_385a5000",
+              "questionId": "gpt4_385a5000",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-59-2a1811e2",
+              "questionId": "2a1811e2",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-60-bbf86515",
+              "questionId": "bbf86515",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            }
+          ]
+        },
+        {
+          "questions": [
+            {
+              "scenarioId": "longmemeval-1-6a1eabeb",
+              "questionId": "6a1eabeb",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-2-6aeb4375",
+              "questionId": "6aeb4375",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-3-830ce83f",
+              "questionId": "830ce83f",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-4-852ce960",
+              "questionId": "852ce960",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-5-945e3d21",
+              "questionId": "945e3d21",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-6-d7c942c3",
+              "questionId": "d7c942c3",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-7-71315a70",
+              "questionId": "71315a70",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-8-89941a93",
+              "questionId": "89941a93",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-9-ce6d2d27",
+              "questionId": "ce6d2d27",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-10-9ea5eabc",
+              "questionId": "9ea5eabc",
+              "category": "knowledge-update",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-11-gpt4_59c863d7",
+              "questionId": "gpt4_59c863d7",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-12-b5ef892d",
+              "questionId": "b5ef892d",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-13-e831120c",
+              "questionId": "e831120c",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-14-gpt4_d84a3211",
+              "questionId": "gpt4_d84a3211",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-15-aae3761f",
+              "questionId": "aae3761f",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-16-gpt4_f2262a51",
+              "questionId": "gpt4_f2262a51",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-17-dd2973ad",
+              "questionId": "dd2973ad",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-18-gpt4_a56e767c",
+              "questionId": "gpt4_a56e767c",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-19-6cb6f249",
+              "questionId": "6cb6f249",
+              "category": "multi-session",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-20-36b9f61e",
+              "questionId": "36b9f61e",
+              "category": "multi-session",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-21-7161e7e2",
+              "questionId": "7161e7e2",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-22-c4f10528",
+              "questionId": "c4f10528",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-23-89527b6b",
+              "questionId": "89527b6b",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-24-e9327a54",
+              "questionId": "e9327a54",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-25-4c36ccef",
+              "questionId": "4c36ccef",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-26-6ae235be",
+              "questionId": "6ae235be",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-27-7e00a6cb",
+              "questionId": "7e00a6cb",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-28-1903aded",
+              "questionId": "1903aded",
+              "category": "single-session-assistant",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-29-ceb54acb",
+              "questionId": "ceb54acb",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-30-f523d9fe",
+              "questionId": "f523d9fe",
+              "category": "single-session-assistant",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-31-8a2466db",
+              "questionId": "8a2466db",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-32-06878be2",
+              "questionId": "06878be2",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-33-75832dbd",
+              "questionId": "75832dbd",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-34-0edc2aef",
+              "questionId": "0edc2aef",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-35-35a27287",
+              "questionId": "35a27287",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-36-32260d93",
+              "questionId": "32260d93",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-37-195a1a1b",
+              "questionId": "195a1a1b",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-38-afdc33df",
+              "questionId": "afdc33df",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-39-caf03d32",
+              "questionId": "caf03d32",
+              "category": "single-session-preference",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-40-54026fce",
+              "questionId": "54026fce",
+              "category": "single-session-preference",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-41-e47becba",
+              "questionId": "e47becba",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-42-118b2229",
+              "questionId": "118b2229",
+              "category": "single-session-user",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-43-51a45a95",
+              "questionId": "51a45a95",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-44-58bf7951",
+              "questionId": "58bf7951",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-45-1e043500",
+              "questionId": "1e043500",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-46-c5e8278d",
+              "questionId": "c5e8278d",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-47-6ade9755",
+              "questionId": "6ade9755",
+              "category": "single-session-user",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-48-6f9b354f",
+              "questionId": "6f9b354f",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-49-58ef2f1c",
+              "questionId": "58ef2f1c",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-50-f8c5f88b",
+              "questionId": "f8c5f88b",
+              "category": "single-session-user",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-51-gpt4_2655b836",
+              "questionId": "gpt4_2655b836",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-52-gpt4_2487a7cb",
+              "questionId": "gpt4_2487a7cb",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-53-gpt4_76048e76",
+              "questionId": "gpt4_76048e76",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-54-gpt4_2312f94c",
+              "questionId": "gpt4_2312f94c",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-55-0bb5a684",
+              "questionId": "0bb5a684",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-56-08f4fc43",
+              "questionId": "08f4fc43",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-57-2c63a862",
+              "questionId": "2c63a862",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-58-gpt4_385a5000",
+              "questionId": "gpt4_385a5000",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-59-2a1811e2",
+              "questionId": "2a1811e2",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-60-bbf86515",
+              "questionId": "bbf86515",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "answerAccuracy": 0.8055555555555556,
+        "perCategory": {
+          "knowledge-update": 0.9666666666666667,
+          "multi-session": 0.7,
+          "single-session-assistant": 0.9,
+          "single-session-preference": 0.4,
+          "single-session-user": 0.8666666666666667,
+          "temporal-reasoning": 1
+        }
+      }
+    }
+  ]
+}
