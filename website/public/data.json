@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-06-11T16:09:18.606Z",
+  "builtAt": "2026-06-11T16:39:52.599Z",
   "benchmarks": [
     {
       "suiteId": "longmemeval-mixed-60",
@@ -27,8 +27,8 @@
       "suiteLabel": "Longmemeval Mixed 60",
       "answererModel": "glm-5.1",
       "judge": "gemini-2.5-flash",
-      "generatedAt": "2026-06-02T00:45:57.573Z",
-      "generatedAtMs": 1780361157573,
+      "generatedAt": "2026-06-02T00:40:58.533Z",
+      "generatedAtMs": 1780360858533,
       "trials": 3,
       "topK": 8,
       "questionCount": 180,
@@ -92,37 +92,6 @@
             "min": 0.7166666666666667,
             "max": 0.7666666666666667,
             "stdev": 0.020786985482077466,
-            "n": 3
-          }
-        },
-        {
-          "systemId": "supermemory",
-          "systemLabel": "Supermemory",
-          "version": null,
-          "mode": null,
-          "summary": {
-            "questionCount": 180,
-            "answerAccuracy": 0.85,
-            "retrievalRecall": 1,
-            "citationRecall": 0.825,
-            "citationPrecision": 0.9333333333333333,
-            "averageLatencyMs": 1475.3123525333388,
-            "p95LatencyMs": 3095.9215000000313,
-            "averageContextTokensApprox": 5934.833333333333,
-            "averageAnswererPromptTokens": 5705.85,
-            "averageAnswererCompletionTokens": 57.15555555555556,
-            "overallScore": 0.8454166666666667
-          },
-          "trialAccuracies": [
-            0.8666666666666667,
-            0.8333333333333334,
-            0.85
-          ],
-          "accuracySpread": {
-            "mean": 0.8500000000000001,
-            "min": 0.8333333333333334,
-            "max": 0.8666666666666667,
-            "stdev": 0.01360827634879543,
             "n": 3
           }
         }
@@ -202,37 +171,6 @@
           }
         },
         {
-          "systemId": "supermemory",
-          "systemLabel": "Supermemory (self-hosted)",
-          "version": null,
-          "mode": null,
-          "summary": {
-            "questionCount": 180,
-            "answerAccuracy": 0.7666666666666667,
-            "retrievalRecall": 1,
-            "citationRecall": 0.7814814814814814,
-            "citationPrecision": 0.8944444444444445,
-            "averageLatencyMs": 140.29822523799442,
-            "p95LatencyMs": 227.35991698573343,
-            "averageContextTokensApprox": 5917.15,
-            "averageAnswererPromptTokens": 5688.8,
-            "averageAnswererCompletionTokens": 58.97222222222222,
-            "overallScore": 0.8119444444444445
-          },
-          "trialAccuracies": [
-            0.75,
-            0.7833333333333333,
-            0.7666666666666667
-          ],
-          "accuracySpread": {
-            "mean": 0.7666666666666666,
-            "min": 0.75,
-            "max": 0.7833333333333333,
-            "stdev": 0.01360827634879543,
-            "n": 3
-          }
-        },
-        {
           "systemId": "lobu-rewrite-3x",
           "systemLabel": "Lobu (query-rewrite, 3-trial)",
           "version": null,
@@ -260,6 +198,37 @@
             "min": 0.7333333333333333,
             "max": 0.8,
             "stdev": 0.027216552697590907,
+            "n": 3
+          }
+        },
+        {
+          "systemId": "supermemory",
+          "systemLabel": "Supermemory (self-hosted)",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 180,
+            "answerAccuracy": 0.7666666666666667,
+            "retrievalRecall": 1,
+            "citationRecall": 0.7814814814814814,
+            "citationPrecision": 0.8944444444444445,
+            "averageLatencyMs": 140.29822523799442,
+            "p95LatencyMs": 227.35991698573343,
+            "averageContextTokensApprox": 5917.15,
+            "averageAnswererPromptTokens": 5688.8,
+            "averageAnswererCompletionTokens": 58.97222222222222,
+            "overallScore": 0.8119444444444445
+          },
+          "trialAccuracies": [
+            0.75,
+            0.7833333333333333,
+            0.7666666666666667
+          ],
+          "accuracySpread": {
+            "mean": 0.7666666666666666,
+            "min": 0.75,
+            "max": 0.7833333333333333,
+            "stdev": 0.01360827634879543,
             "n": 3
           }
         }

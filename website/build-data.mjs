@@ -52,8 +52,11 @@ const JUDGE_META = {
 const ORIGINAL_JUDGE = "gemini-2.5-flash";
 // The gemini board is frozen to the systems gemini actually judged before the
 // quota cap; later experimental configurations only have alternate-judge
-// verdicts and must not change the published gemini numbers.
-const GEMINI_JUDGED_SYSTEM_IDS = new Set(["lobu", "letta", "supermemory"]);
+// verdicts and must not change the published gemini numbers. Supermemory's
+// hosted-API runs were removed from the published boards (2026-06-11) —
+// only the reproducible self-hosted binary is benchmarked now, and it has
+// no gemini verdicts yet.
+const GEMINI_JUDGED_SYSTEM_IDS = new Set(["lobu", "letta"]);
 
 /** Coerce to a finite number or return null. */
 function num(v) {

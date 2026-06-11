@@ -75,9 +75,11 @@ product a user actually gets.
   + `/v4/search` surface in both cases. Self-host gotcha: container tags
   containing `:` silently scope writes and reads to different spaces on
   v0.0.2 (search returns 0), so the adapter uses a colon-free tag.
-  Historical note: the frozen gemini board's Supermemory numbers are from the
-  hosted API (their proprietary extraction models may apply server-side;
-  no way to verify).
+  The earlier hosted-API runs were removed from the published boards
+  entirely (2026-06-11): they can't be reproduced or fairly re-run (their
+  proprietary extraction models may apply server-side; no way to verify),
+  so only the self-hosted binary is benchmarked. The hosted artifacts
+  remain in git history.
 
 ## Honest caveats
 
