@@ -11,13 +11,10 @@
 // `run` per (suiteId, answererModel, judge) combination whose `systems`
 // array is the latest result for each memory system in that combination.
 //
-// Two judge boards:
-//   - gemini-2.5-flash (original): the *.regraded.json reports carry gemini
-//     verdicts (scripts/regrade-llm-judge.mjs). Gemini is quota-capped, so
-//     this board is frozen to the systems judged before the cap.
-//   - alternate judges (e.g. glm-5.1): results/judges/*.judge-<model>.json
-//     verdict files (scripts/regrade-zai-judge.mjs) override answerAccuracy
-//     on their source report; recall/latency/tokens come from the run itself.
+// Judge boards are verdict-file-driven: results/judges/*.judge-<model>.json
+// verdict files (scripts/regrade-{zai,claude,gemini}-judge.mjs) override
+// answerAccuracy on their source report; recall/latency/tokens come from the
+// run itself. One board per distinct judge model.
 //
 // Defensive about missing/renamed fields so a malformed or partial report
 // never crashes the build (non-finite numbers -> null).
@@ -38,29 +35,21 @@ const JUDGES_DIR = join(RESULTS_DIR, "judges");
 const OUT_DIR = join(__dirname, "public");
 const OUT_FILE = join(OUT_DIR, "data.json");
 
-// Judge metadata, in display order (the original gemini board first).
+// Judge metadata, in display order.
 const JUDGE_META = {
-  "gemini-2.5-flash": {
-    label: "gemini-2.5-flash (original)",
-    note: "gemini quota-capped; the query-rewrite configuration is not yet judged by gemini",
-  },
-  "glm-5.1": {
-    label: "glm-5.1 (consistent, incl. query-rewrite config)",
-    note: "judge is the same model family as the shared answerer (self-grading); applied identically to every system, so deltas are fair. Judge script committed.",
-  },
   "claude-sonnet-4-6": {
     label: "claude-sonnet-4-6 (independent)",
-    note: "cross-family judge — independent of the glm-5.1 answerer, so no self-grading. Same rubric as the glm judge; runs via the Claude Code CLI (scripts/regrade-claude-judge.mjs).",
+    note: "cross-family judge — independent of the glm-5.1 answerer, so no self-grading. Same rubric as the other judges; runs via the Claude Code CLI (scripts/regrade-claude-judge.mjs).",
+  },
+  "gemini-2.5-flash": {
+    label: "gemini-2.5-flash (independent)",
+    note: "cross-family judge — independent of the glm-5.1 answerer. Same rubric as the other judges; runs via the Gemini CLI (scripts/regrade-gemini-judge.mjs).",
+  },
+  "glm-5.1": {
+    label: "glm-5.1 (same family as answerer)",
+    note: "judge is the same model family as the shared answerer (self-grading); applied identically to every system, so deltas are fair. Judge script committed (scripts/regrade-zai-judge.mjs).",
   },
 };
-const ORIGINAL_JUDGE = "gemini-2.5-flash";
-// The gemini board is frozen to the systems gemini actually judged before the
-// quota cap; later experimental configurations only have alternate-judge
-// verdicts and must not change the published gemini numbers. Supermemory's
-// hosted-API runs were removed from the published boards (2026-06-11) —
-// only the reproducible self-hosted binary is benchmarked now, and it has
-// no gemini verdicts yet.
-const GEMINI_JUDGED_SYSTEM_IDS = new Set(["lobu", "letta"]);
 
 /** Coerce to a finite number or return null. */
 function num(v) {
@@ -201,17 +190,7 @@ function main() {
   // Each board entry is a report tagged with the judge that graded it.
   const boardReports = [];
 
-  // Original board: *.regraded.json reports carry the gemini verdicts.
-  for (const r of reports) {
-    if (!r.sourceFile.endsWith(".regraded.json")) continue;
-    const systems = r.systems.filter((s) =>
-      GEMINI_JUDGED_SYSTEM_IDS.has(s.systemId)
-    );
-    if (!systems.length) continue;
-    boardReports.push({ ...r, judge: ORIGINAL_JUDGE, systems });
-  }
-
-  // Alternate-judge boards: verdict files override answerAccuracy on their
+  // Judge boards: verdict files override answerAccuracy on their
   // source report; every other metric stays the source run's own number.
   const reportByFile = new Map(reports.map((r) => [r.sourceFile, r]));
   let judgeFiles = [];
@@ -342,7 +321,7 @@ function main() {
   }
 
   // Sort runs: suiteId asc, then answererModel asc, then judge in
-  // JUDGE_META order (original gemini board first).
+  // JUDGE_META order (independent judges first).
   const judgeOrder = Object.keys(JUDGE_META);
   const judgeRank = (j) => {
     const i = judgeOrder.indexOf(j);
