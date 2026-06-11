@@ -4,8 +4,13 @@
  * the cross-file DELTA is fair even though the absolute number isn't the
  * gemini-judged headline. Usage:
  *   node scripts/regrade-zai-judge.mjs results/A.json results/B.json
+ *
+ * Besides the stdout report, persists the verdicts per input file to
+ * results/judges/<basename>.judge-<MODEL>.json (a subdirectory because
+ * .gitignore excludes results/*.json — verdict files must be committable).
  */
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 
 const KEY = process.env.Z_AI_API_KEY;
 if (!KEY) throw new Error("Z_AI_API_KEY required");
@@ -47,6 +52,9 @@ async function judge(question, answer, expected) {
         body: JSON.stringify({
           model: MODEL,
           temperature: 0,
+          // Same convention as the shared answerer's z.ai calls: reasoning
+          // models burn seconds "thinking" about a binary verdict.
+          thinking: { type: "disabled" },
           messages: [{ role: "user", content: prompt }],
         }),
       });
@@ -83,6 +91,7 @@ const pct = (xs) => {
 
 for (const file of process.argv.slice(2)) {
   const data = JSON.parse(readFileSync(file, "utf8"));
+  const judgedSystems = [];
   for (const sys of data.systems) {
     const tasks = [];
     for (const t of sys.trials) for (const q of t.questions) tasks.push(q);
@@ -92,14 +101,41 @@ for (const file of process.argv.slice(2)) {
     let k = 0,
       nullN = 0;
     const allNew = [],
-      cat = {};
-    for (const t of sys.trials)
+      cat = {},
+      outTrials = [];
+    for (const t of sys.trials) {
+      const questions = [];
       for (const q of t.questions) {
         const nv = verdicts[k++];
         if (nv == null) nullN++;
         allNew.push(nv);
         (cat[q.category] ??= []).push(nv);
+        questions.push({
+          scenarioId: q.scenarioId,
+          questionId: q.questionId,
+          category: q.category,
+          verdict: nv,
+        });
       }
+      outTrials.push({ questions });
+    }
+    const frac = (xs) => {
+      const p = pct(xs);
+      return p == null ? null : p / 100;
+    };
+    judgedSystems.push({
+      systemId: sys.systemId,
+      systemLabel: sys.systemLabel,
+      trials: outTrials,
+      summary: {
+        answerAccuracy: frac(allNew),
+        perCategory: Object.fromEntries(
+          Object.keys(cat)
+            .sort()
+            .map((c) => [c, frac(cat[c])])
+        ),
+      },
+    });
     console.log(`\n## ${sys.systemLabel}  (${file.split("/").pop()})`);
     console.log(`  trials=${sys.trials.length}  unjudgeable=${nullN}`);
     console.log(`  OVERALL z.ai-judge: ${pct(allNew)?.toFixed(1)}%`);
@@ -108,4 +144,23 @@ for (const file of process.argv.slice(2)) {
         `    ${c.padEnd(28)} ${pct(cat[c])?.toFixed(0).padStart(4)}%`
       );
   }
+  const outFile = join(
+    dirname(file),
+    "judges",
+    `${basename(file, ".json")}.judge-${MODEL}.json`
+  );
+  mkdirSync(dirname(outFile), { recursive: true });
+  writeFileSync(
+    outFile,
+    JSON.stringify(
+      {
+        judgeModel: MODEL,
+        judgedAt: process.env.JUDGED_AT || new Date().toISOString(),
+        systems: judgedSystems,
+      },
+      null,
+      2
+    ) + "\n"
+  );
+  console.error(`wrote ${outFile}`);
 }

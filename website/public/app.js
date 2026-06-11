@@ -49,6 +49,7 @@
     data: null,
     suiteId: null,
     answererModel: null,
+    judge: null,
     enabledSystems: new Set(), // systemIds currently checked
     sortKey: "answerAccuracy",
     sortDir: "desc",
@@ -70,11 +71,14 @@
   }
 
   // ---- Data lookup ------------------------------------------------------
-  function findRun(suiteId, answererModel) {
+  function findRun(suiteId, answererModel, judge) {
     if (!state.data) return null;
     return (
       state.data.runs.find(
-        (r) => r.suiteId === suiteId && r.answererModel === answererModel
+        (r) =>
+          r.suiteId === suiteId &&
+          r.answererModel === answererModel &&
+          r.judge === judge
       ) || null
     );
   }
@@ -86,6 +90,21 @@
       if (r.suiteId === suiteId && r.answererModel) set.add(r.answererModel);
     }
     return [...set].sort();
+  }
+
+  // Judges available for the current (benchmark, model), in data.judges order.
+  function judgesForRun(suiteId, answererModel) {
+    const present = new Set();
+    for (const r of state.data.runs) {
+      if (r.suiteId === suiteId && r.answererModel === answererModel) {
+        present.add(r.judge);
+      }
+    }
+    return (state.data.judges || []).filter((j) => present.has(j.judgeId));
+  }
+
+  function judgeMeta(judgeId) {
+    return (state.data.judges || []).find((j) => j.judgeId === judgeId) || null;
   }
 
   // ---- Heatmap ----------------------------------------------------------
@@ -132,6 +151,7 @@
   function renderControls() {
     const benchEl = document.getElementById("benchmark-pills");
     const modelEl = document.getElementById("model-pills");
+    const judgeEl = document.getElementById("judge-pills");
     const togEl = document.getElementById("system-toggles");
 
     // Benchmark pills.
@@ -144,6 +164,7 @@
         if (!models.includes(state.answererModel)) {
           state.answererModel = models[0] || null;
         }
+        resetJudgeForRun();
         resetSystemsForRun();
         render();
       });
@@ -156,15 +177,27 @@
     for (const m of models) {
       const btn = pillButton(m, m === state.answererModel, () => {
         state.answererModel = m;
+        resetJudgeForRun();
         resetSystemsForRun();
         render();
       });
       modelEl.appendChild(btn);
     }
 
+    // Judge pills (scoped to current benchmark + model).
+    judgeEl.innerHTML = "";
+    for (const j of judgesForRun(state.suiteId, state.answererModel)) {
+      const btn = pillButton(j.judgeLabel, j.judgeId === state.judge, () => {
+        state.judge = j.judgeId;
+        resetSystemsForRun();
+        render();
+      });
+      judgeEl.appendChild(btn);
+    }
+
     // System toggles (scoped to current run).
     togEl.innerHTML = "";
-    const run = findRun(state.suiteId, state.answererModel);
+    const run = findRun(state.suiteId, state.answererModel, state.judge);
     const systems = run ? run.systems : [];
     for (const s of systems) {
       const label = document.createElement("label");
@@ -193,9 +226,17 @@
     return btn;
   }
 
+  // Keep the selected judge valid for the (benchmark, model) pair.
+  function resetJudgeForRun() {
+    const judges = judgesForRun(state.suiteId, state.answererModel);
+    if (!judges.some((j) => j.judgeId === state.judge)) {
+      state.judge = judges[0] ? judges[0].judgeId : null;
+    }
+  }
+
   // When the selected run changes, default all its systems to enabled.
   function resetSystemsForRun() {
-    const run = findRun(state.suiteId, state.answererModel);
+    const run = findRun(state.suiteId, state.answererModel, state.judge);
     state.enabledSystems = new Set(
       run ? run.systems.map((s) => s.systemId) : []
     );
@@ -205,7 +246,7 @@
     const board = document.getElementById("board");
     board.innerHTML = "";
 
-    const run = findRun(state.suiteId, state.answererModel);
+    const run = findRun(state.suiteId, state.answererModel, state.judge);
     if (!run) {
       board.innerHTML =
         '<div class="empty-state">No results for this benchmark and model yet.</div>';
@@ -220,6 +261,7 @@
     if (run.trials != null) parts.push(`${run.trials} trial(s)`);
     if (run.topK != null) parts.push(`top-K ${run.topK}`);
     if (run.answererModel) parts.push(`answerer ${run.answererModel}`);
+    if (run.judge) parts.push(`judge ${run.judge}`);
     caption.innerHTML =
       `<strong>${escapeHtml(run.suiteLabel)}</strong> · ` +
       parts.map(escapeHtml).join(" · ");
@@ -322,6 +364,15 @@
     table.appendChild(tbody);
     scroll.appendChild(table);
     board.appendChild(scroll);
+
+    // Per-judge footnote (quota caveat / self-grading caveat).
+    const meta = judgeMeta(run.judge);
+    if (meta && meta.note) {
+      const note = document.createElement("p");
+      note.className = "muted judge-note";
+      note.textContent = "⚠ " + meta.note;
+      board.appendChild(note);
+    }
   }
 
   function headCell(label, sortKey, cls) {
@@ -381,7 +432,7 @@
 
   function renderFooter() {
     const el = document.getElementById("footer-meta");
-    const run = findRun(state.suiteId, state.answererModel);
+    const run = findRun(state.suiteId, state.answererModel, state.judge);
     const bits = [];
     if (run && run.generatedAt) {
       const d = new Date(run.generatedAt);
@@ -390,6 +441,7 @@
       );
     }
     if (run && run.answererModel) bits.push(`answerer ${run.answererModel}`);
+    if (run && run.judge) bits.push(`judge ${run.judge}`);
     if (state.data && state.data.builtAt) {
       const d = new Date(state.data.builtAt);
       bits.push(
@@ -414,10 +466,11 @@
         '<div class="empty-state">No benchmark results yet. Run a suite and rebuild <code>data.json</code>.</div>';
       return;
     }
-    // Default selection: first benchmark, first model for it.
+    // Default selection: first benchmark, first model + judge for it.
     state.suiteId = data.benchmarks[0] ? data.benchmarks[0].suiteId : null;
     const models = modelsForSuite(state.suiteId);
     state.answererModel = models[0] || null;
+    resetJudgeForRun();
     resetSystemsForRun();
     render();
   }

@@ -130,8 +130,10 @@ Honest read: recall — a primary, deterministic metric — is now perfect,
 closing the structural gap to Supermemory; answer accuracy is
 parity-to-slightly-better under the substring proxy (the floor rises
 66.7→68.3). The **LLM-judged** number for this configuration is pending (the
-gemini judge hit its monthly spend cap); the leaderboard keeps the judged 80%
-baseline until then. Disclosed trade-off: knowledge-update dips (93→83) — the
+gemini judge hit its monthly spend cap); the website shows BOTH boards — the
+original gemini-judged run and a glm-5.1 consistent re-judge of all four
+systems (same judge everywhere; self-grading disclosed since the judge shares
+the answerer's model family; verdicts persisted under `results/judges/`). Disclosed trade-off: knowledge-update dips (93→83) — the
 variant queries pull additional stale-value sessions about the updated fact
 into the top-k. A real Lobu deployment masks superseded values server-side;
 the benchmark adapter stores sessions without supersession, so this is
