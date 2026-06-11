@@ -67,8 +67,17 @@ product a user actually gets.
   setup. The local adapter (`adapters/mem0_local_adapter.py`) is kept for that.
 - **Zep, Letta — quota / Docker blocked**, not measured here (Zep over its
   account episode quota; Letta self-host needs the Docker image).
-- **Supermemory** runs against its hosted API (no clean self-host); **Lobu,
-  Hindsight** run self-hosted with their real pipelines.
+- **Supermemory** now runs against the official self-hosted binary
+  (`supermemory-server` v0.0.2 from the supermemoryai/supermemory GitHub
+  releases, local bge-base embeddings + embedded PGlite/pgvector engine),
+  replacing the earlier hosted-API runs — so Supermemory, Lobu and Hindsight
+  are all measured self-hosted. The adapter exercises the same `/v4/memories`
+  + `/v4/search` surface in both cases. Self-host gotcha: container tags
+  containing `:` silently scope writes and reads to different spaces on
+  v0.0.2 (search returns 0), so the adapter uses a colon-free tag.
+  Historical note: the frozen gemini board's Supermemory numbers are from the
+  hosted API (their proprietary extraction models may apply server-side;
+  no way to verify).
 
 ## Honest caveats
 

@@ -87,8 +87,10 @@ def chunked(values: List[Any], size: int) -> List[List[Any]]:
 
 
 def container_tag(payload: Dict[str, Any]) -> str:
+    # Colon-free: the self-hosted binary (v0.0.2) silently scopes writes and
+    # reads to different spaces when the tag contains ':' (search returns 0).
     run_id = str(payload.get('runId') or 'benchmark-run')
-    return f'lobu:{run_id}'[:100]
+    return f'lobu_{run_id}'[:100]
 
 
 def normalize_metadata(metadata: Dict[str, Any] | None) -> Dict[str, Any]:
