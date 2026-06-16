@@ -69,6 +69,14 @@ def memory():
                     "MEM0_LLM_BASE_URL", "https://api.z.ai/api/coding/paas/v4/"
                 ),
                 "temperature": 0,
+                # mem0's default max_tokens (2000) TRUNCATES the fact-extraction
+                # JSON on large multi-turn sessions, producing unparseable output
+                # -> 0 memories extracted -> empty store -> near-0 recall. A real
+                # benchmark session (18k chars / 13 turns) extracted 0 facts at
+                # 2000 and 10 facts at 4096. This was a primary cause of Mem0's
+                # bogus ~0% (alongside the distance-vs-similarity ordering bug),
+                # NOT a structural Mem0 limitation.
+                "max_tokens": int(os.environ.get("MEM0_LLM_MAX_TOKENS", "4096")),
             },
         },
         "embedder": embedder,
