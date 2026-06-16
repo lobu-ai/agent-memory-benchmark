@@ -323,6 +323,63 @@ function main() {
     });
   }
 
+  // Cross-answerer aggregate: for each (suiteId, judge) that has >=2 distinct
+  // answerer models, synthesize an "all answerers" run where each system's
+  // answerAccuracy is the MEAN across answerers and accuracySpread carries the
+  // across-answerer min/max/stdev. This makes answerer-robustness visible at a
+  // glance (the existing spread renderer shows the range) instead of forcing the
+  // reader to flip the answerer selector. Recall/latency/tokens are answerer-
+  // independent, so they're taken from one constituent run.
+  const AGG_MODEL = "all answerers (mean±range)";
+  {
+    const bySuiteJudge = new Map();
+    for (const r of runs) {
+      const k = `${r.suiteId} ${r.judge}`;
+      if (!bySuiteJudge.has(k)) bySuiteJudge.set(k, []);
+      bySuiteJudge.get(k).push(r);
+    }
+    for (const group of bySuiteJudge.values()) {
+      const models = new Set(group.map((r) => r.answererModel).filter(Boolean));
+      if (models.size < 2) continue;
+      // systemId -> { accs: number[], any: systemObj }
+      const bySystem = new Map();
+      for (const r of group) {
+        for (const s of r.systems) {
+          const acc = s.summary.answerAccuracy;
+          if (acc == null) continue;
+          if (!bySystem.has(s.systemId))
+            bySystem.set(s.systemId, { accs: [], any: s });
+          bySystem.get(s.systemId).accs.push(acc);
+        }
+      }
+      const aggSystems = [];
+      for (const { accs, any } of bySystem.values()) {
+        const sp = spread(accs);
+        if (!sp) continue;
+        aggSystems.push({
+          ...any,
+          summary: { ...any.summary, answerAccuracy: sp.mean },
+          trialAccuracies: accs,
+          accuracySpread: sp,
+        });
+      }
+      if (!aggSystems.length) continue;
+      const head = group[0];
+      runs.push({
+        suiteId: head.suiteId,
+        suiteLabel: head.suiteLabel,
+        answererModel: AGG_MODEL,
+        judge: head.judge,
+        generatedAt: head.generatedAt,
+        generatedAtMs: head.generatedAtMs,
+        trials: head.trials,
+        topK: head.topK,
+        questionCount: head.questionCount,
+        systems: aggSystems,
+      });
+    }
+  }
+
   // Sort runs: suiteId asc, then answererModel asc, then judge in
   // JUDGE_META order (independent judges first).
   const judgeOrder = Object.keys(JUDGE_META);
