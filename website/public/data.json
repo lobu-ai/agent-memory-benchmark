@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-06-16T13:38:13.593Z",
+  "builtAt": "2026-06-16T13:44:37.453Z",
   "benchmarks": [
     {
       "suiteId": "longmemeval-mixed-60",
@@ -13,12 +13,12 @@
     {
       "judgeId": "claude-sonnet-4-6",
       "judgeLabel": "claude-sonnet-4-6 (independent)",
-      "note": "cross-family judge — independent of the glm-5.1 answerer, so no self-grading. Same rubric as the other judges; runs via the Claude Code CLI (scripts/regrade-claude-judge.mjs)."
+      "note": "cross-family judge \u2014 independent of the glm-5.1 answerer, so no self-grading. Same rubric as the other judges; runs via the Claude Code CLI (scripts/regrade-claude-judge.mjs)."
     },
     {
       "judgeId": "gemini-2.5-flash",
       "judgeLabel": "gemini-2.5-flash (independent)",
-      "note": "cross-family judge — independent of the glm-5.1 answerer. Same rubric as the other judges; runs via the Gemini CLI (scripts/regrade-gemini-judge.mjs)."
+      "note": "cross-family judge \u2014 independent of the glm-5.1 answerer. Same rubric as the other judges; runs via the Gemini CLI (scripts/regrade-gemini-judge.mjs)."
     },
     {
       "judgeId": "glm-4.6",
@@ -66,37 +66,6 @@
             "min": 0.8833333333333333,
             "max": 0.9333333333333333,
             "stdev": 0.023570226039551608,
-            "n": 3
-          }
-        },
-        {
-          "systemId": "lobu-rewrite",
-          "systemLabel": "Lobu (query rewrite)",
-          "version": null,
-          "mode": null,
-          "summary": {
-            "questionCount": 180,
-            "answerAccuracy": 0.8777777777777778,
-            "retrievalRecall": 1,
-            "citationRecall": 0.8212962962962963,
-            "citationPrecision": 0.9333333333333333,
-            "averageLatencyMs": 4136.1659860936925,
-            "p95LatencyMs": 5192.374249978457,
-            "averageContextTokensApprox": 5932.483333333334,
-            "averageAnswererPromptTokens": 5699.805555555556,
-            "averageAnswererCompletionTokens": 56.36666666666667,
-            "overallScore": 0.7689593725941974
-          },
-          "trialAccuracies": [
-            0.8833333333333333,
-            0.9,
-            0.85
-          ],
-          "accuracySpread": {
-            "mean": 0.8777777777777778,
-            "min": 0.85,
-            "max": 0.9,
-            "stdev": 0.020786985482077466,
             "n": 3
           }
         },
@@ -176,37 +145,6 @@
           }
         },
         {
-          "systemId": "lobu-rewrite",
-          "systemLabel": "Lobu (query rewrite)",
-          "version": null,
-          "mode": null,
-          "summary": {
-            "questionCount": 180,
-            "answerAccuracy": 0.8777777777777778,
-            "retrievalRecall": 1,
-            "citationRecall": 0.8212962962962963,
-            "citationPrecision": 0.9333333333333333,
-            "averageLatencyMs": 4136.1659860936925,
-            "p95LatencyMs": 5192.374249978457,
-            "averageContextTokensApprox": 5932.483333333334,
-            "averageAnswererPromptTokens": 5699.805555555556,
-            "averageAnswererCompletionTokens": 56.36666666666667,
-            "overallScore": 0.7689593725941974
-          },
-          "trialAccuracies": [
-            0.8833333333333333,
-            0.9,
-            0.85
-          ],
-          "accuracySpread": {
-            "mean": 0.8777777777777778,
-            "min": 0.85,
-            "max": 0.9,
-            "stdev": 0.020786985482077466,
-            "n": 3
-          }
-        },
-        {
           "systemId": "sm-plain",
           "systemLabel": "Supermemory (self-hosted, plain)",
           "version": null,
@@ -278,37 +216,6 @@
             "min": 0.75,
             "max": 0.85,
             "stdev": 0.04374448818895449,
-            "n": 3
-          }
-        },
-        {
-          "systemId": "lobu-rewrite",
-          "systemLabel": "Lobu (query rewrite)",
-          "version": null,
-          "mode": null,
-          "summary": {
-            "questionCount": 180,
-            "answerAccuracy": 0.7709497206703911,
-            "retrievalRecall": 1,
-            "citationRecall": 0.8212962962962963,
-            "citationPrecision": 0.9333333333333333,
-            "averageLatencyMs": 4136.1659860936925,
-            "p95LatencyMs": 5192.374249978457,
-            "averageContextTokensApprox": 5932.483333333334,
-            "averageAnswererPromptTokens": 5699.805555555556,
-            "averageAnswererCompletionTokens": 56.36666666666667,
-            "overallScore": 0.7689593725941974
-          },
-          "trialAccuracies": [
-            0.7666666666666667,
-            0.7796610169491526,
-            0.7666666666666667
-          ],
-          "accuracySpread": {
-            "mean": 0.7709981167608286,
-            "min": 0.7666666666666667,
-            "max": 0.7796610169491526,
-            "stdev": 0.006125595467906053,
             "n": 3
           }
         },
