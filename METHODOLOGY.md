@@ -65,16 +65,25 @@ product a user actually gets.
   answerer + ingestion pipeline, not a shared one. Publishing 0% would be
   unfair to Mem0, so it is excluded pending an eval that matches its intended
   setup. The local adapter (`adapters/mem0_local_adapter.py`) is kept for that.
-- **Zep, Letta — quota / Docker blocked**, not measured here (Zep over its
-  account episode quota; Letta self-host needs the Docker image).
-- **Hindsight — LLM-quota blocked on the available keys.** The self-hosted
-  `hindsight-api` (0.8.2) does LLM fact-extraction at retain time, bursting many
-  large calls per document. On z.ai (glm-5.x) it hits the per-minute rate limit
-  (HTTP 429); throttled to 1 concurrent it instead exceeds the adapter's retain
-  timeout (a single glm-4.6 extraction measured ~245 s on the throttled key); on
-  Gemini the project's monthly spend cap is exhausted (429 RESOURCE_EXHAUSTED).
-  So it can't be fairly run without a higher-throughput / unmetered LLM key — the
-  same class as Zep's block, documented rather than hammered.
+- **Zep — cloud quota blocked** (over its account episode quota); cloud-only, so
+  not runnable locally. **Letta — hard-blocked on this machine**: self-host is a
+  Docker image and no container runtime (Docker/OrbStack/Colima) is installed.
+- **Hindsight — runs fully local, but throughput-bound by consolidation, not
+  quota.** Earlier notes called this "LLM-quota blocked"; that was wrong. The
+  self-hosted `hindsight-api` (0.8.2) runs entirely offline against local Ollama:
+  embedded Postgres (`pg0`), extraction LLM `ollama/qwen2.5:7b`, embeddings
+  `ollama/nomic-embed-text` (the `openai` embeddings provider pointed at Ollama's
+  `/v1`). It boots healthy and ingests for real — a 20-unit document retains in
+  ~88 s and oracle-10 scenario 1 completed at **100 % retrieval recall**. The wall
+  is Hindsight's **consolidation pass** (its headline feature: an async LLM
+  re-merge of stored memories), which on a local 7B runs at **~19 s/memory** with
+  structured output and serializes on the single Ollama model instance — the
+  worker prints `[STUCK?]` on individual ops. That puts oracle-10 at ~1.5–2.5 h,
+  mixed-60 at ~10+ h, and xAFS (415 files) into days. Consolidation is intrinsic
+  to retain (no off-switch, and bumping its concurrency can't help one local model
+  instance), so a fair Hindsight board number needs faster inference (GPU /
+  unmetered hosted key), not a config change. Runnable-locally: **yes**;
+  board-feasible on this hardware: **no**.
 - **Judges available:** claude-sonnet (via the Claude Code CLI, no key) and
   glm-5.x (z.ai) run; the Gemini judge is currently blocked by the same monthly
   spend cap, so its board column reflects historical runs until the cap resets.
