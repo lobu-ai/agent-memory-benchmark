@@ -131,6 +131,24 @@ function suiteLabel(suiteId) {
     .join(" ");
 }
 
+/**
+ * Canonical systemId. Different configs name the same system differently
+ * (the original board used "lobu-plain"/"sm-plain"; the answerer-matrix configs
+ * used "lobu"/"supermemory"). Collapse aliases so the same system across answerer
+ * runs merges into one row — without this the cross-answerer aggregate counts
+ * "lobu" and "lobu-plain" as two separate systems (n=1 each).
+ */
+const SYSTEM_ALIASES = {
+  lobu: "lobu-plain",
+  "lobu-plain": "lobu-plain",
+  supermemory: "sm-plain",
+  sm: "sm-plain",
+  "sm-plain": "sm-plain",
+};
+function canonicalSystemId(id) {
+  return SYSTEM_ALIASES[id] || id;
+}
+
 /** Parse one raw report into the systems it reports on, plus run metadata. */
 function parseReport(json, filename) {
   const suiteId = json.suiteId || "(unknown suite)";
@@ -145,7 +163,7 @@ function parseReport(json, filename) {
       num(t && t.summary ? t.summary.answerAccuracy : null)
     );
     return {
-      systemId: sys.systemId || "(unknown)",
+      systemId: canonicalSystemId(sys.systemId || "(unknown)"),
       systemLabel: sys.systemLabel || sys.systemId || "(unknown)",
       version:
         typeof sys.version === "string" && sys.version ? sys.version : null,
@@ -218,7 +236,7 @@ function main() {
     }
     const verdictsBySystem = new Map(
       (Array.isArray(doc.systems) ? doc.systems : []).map((s) => [
-        s.systemId,
+        canonicalSystemId(s.systemId),
         s,
       ])
     );

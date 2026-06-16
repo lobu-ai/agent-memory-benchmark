@@ -1,0 +1,45 @@
+{
+  "suitePath": "suites/longmemeval-oracle.10.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-4.6",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "lobu",
+      "label": "Lobu",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "emre",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN"
+      },
+      "topK": 8
+    },
+    {
+      "id": "supermemory",
+      "label": "Supermemory",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/supermemory_adapter.py"
+      ],
+      "env": {
+        "SUPERMEMORY_API_KEY": "dummy-local",
+        "SUPERMEMORY_BASE_URL": "http://localhost:6767"
+      },
+      "topK": 8
+    }
+  ]
+}
