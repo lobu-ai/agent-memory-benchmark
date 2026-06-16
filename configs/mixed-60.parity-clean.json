@@ -1,0 +1,65 @@
+{
+  "suitePath": "suites/longmemeval-mixed-60.json",
+  "outputDir": "results",
+  "trials": 3,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "lobu-plain",
+      "label": "Lobu (raw query, no rewrite)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "local-install",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "LOBU_EMBED_WAIT": "45"
+      },
+      "topK": 8
+    },
+    {
+      "id": "lobu-rewrite",
+      "label": "Lobu (query rewrite)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "local-install",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "LOBU_QUERY_REWRITE": "1",
+        "Z_AI_API_KEY": "$Z_AI_API_KEY",
+        "LOBU_OVERFETCH": "400",
+        "LOBU_EMBED_WAIT": "45"
+      },
+      "topK": 8
+    },
+    {
+      "id": "sm-plain",
+      "label": "Supermemory (self-hosted, plain)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/supermemory_adapter.py"
+      ],
+      "env": {
+        "SUPERMEMORY_BASE_URL": "http://localhost:6767",
+        "SUPERMEMORY_API_KEY": "$SUPERMEMORY_API_KEY"
+      },
+      "topK": 8
+    }
+  ]
+}

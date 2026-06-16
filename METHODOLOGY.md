@@ -67,6 +67,17 @@ product a user actually gets.
   setup. The local adapter (`adapters/mem0_local_adapter.py`) is kept for that.
 - **Zep, Letta — quota / Docker blocked**, not measured here (Zep over its
   account episode quota; Letta self-host needs the Docker image).
+- **Hindsight — LLM-quota blocked on the available keys.** The self-hosted
+  `hindsight-api` (0.8.2) does LLM fact-extraction at retain time, bursting many
+  large calls per document. On z.ai (glm-5.x) it hits the per-minute rate limit
+  (HTTP 429); throttled to 1 concurrent it instead exceeds the adapter's retain
+  timeout (a single glm-4.6 extraction measured ~245 s on the throttled key); on
+  Gemini the project's monthly spend cap is exhausted (429 RESOURCE_EXHAUSTED).
+  So it can't be fairly run without a higher-throughput / unmetered LLM key — the
+  same class as Zep's block, documented rather than hammered.
+- **Judges available:** claude-sonnet (via the Claude Code CLI, no key) and
+  glm-5.x (z.ai) run; the Gemini judge is currently blocked by the same monthly
+  spend cap, so its board column reflects historical runs until the cap resets.
 - **Supermemory** now runs against the official self-hosted binary
   (`supermemory-server` v0.0.2 from the supermemoryai/supermemory GitHub
   releases, local bge-base embeddings + embedded PGlite/pgvector engine),
@@ -80,6 +91,15 @@ product a user actually gets.
   proprietary extraction models may apply server-side; no way to verify),
   so only the self-hosted binary is benchmarked. The hosted artifacts
   remain in git history.
+  - **Supermemory rerank is non-functional self-hosted (so it stays off).**
+    Setting `SUPERMEMORY_RERANK=1` on the v0.0.2 binary throws
+    `Reranking failed: TypeError: undefined is not an object (evaluating
+    'f.AI.run')` on every query — the rerank path is wired to a Cloudflare
+    Workers AI binding (`env.AI.run`) that does not exist in the local binary.
+    On a small slice it degraded answer accuracy (90%→80%) and ~3.6×'d
+    latency before falling over; under concurrent load the repeated failures
+    crashed the server. The plain `searchMode` is therefore the only
+    apples-to-apples self-hosted comparison, which is what these boards use.
 
 ## Honest caveats
 

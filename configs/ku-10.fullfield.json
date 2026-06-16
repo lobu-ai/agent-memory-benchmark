@@ -1,0 +1,73 @@
+{
+  "suitePath": "suites/longmemeval-ku-10.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "lobu-plain",
+      "label": "Lobu 11.3.0 (plain)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/lobu_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "http://localhost:8799",
+        "LOBU_ORG_SLUG": "local-install",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "LOBU_EMBED_WAIT": "45"
+      },
+      "topK": 8
+    },
+    {
+      "id": "supermemory",
+      "label": "Supermemory v0.0.2 (self-hosted)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/supermemory_adapter.py"
+      ],
+      "env": {
+        "SUPERMEMORY_BASE_URL": "http://localhost:6767",
+        "SUPERMEMORY_API_KEY": "$SUPERMEMORY_API_KEY"
+      },
+      "topK": 8
+    },
+    {
+      "id": "hindsight",
+      "label": "Hindsight 0.8.2 (self-hosted)",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/hindsight_adapter.py"
+      ],
+      "env": {
+        "HINDSIGHT_BASE_URL": "http://localhost:8888"
+      },
+      "topK": 8
+    },
+    {
+      "id": "mem0-local",
+      "label": "Mem0 (self-hosted OSS lib)",
+      "type": "command",
+      "argv": [
+        ".mem0-venv/bin/python",
+        "adapters/mem0_local_adapter.py"
+      ],
+      "env": {
+        "Z_AI_API_KEY": "$Z_AI_API_KEY",
+        "GEMINI_API_KEY": "$GEMINI_API_KEY"
+      },
+      "topK": 8
+    }
+  ]
+}
