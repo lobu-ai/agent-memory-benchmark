@@ -117,6 +117,9 @@ function suiteLabel(suiteId) {
     "longmemeval-mixed-30": "LongMemEval (all 6 categories, 30)",
     "longmemeval-oracle-10": "LongMemEval (temporal-only, 10)",
     "longmemeval-oracle": "LongMemEval (oracle)",
+    "longmemeval-mixed-60": "LongMemEval (all 6 categories, 60)",
+    "xafs-5": "xAFS (agentic filesystem, 5 docs / 115 files)",
+    "xafs-7": "xAFS (agentic filesystem, 7 docs / 415 files)",
     locomo: "LoCoMo",
   };
   if (known[suiteId]) return known[suiteId];

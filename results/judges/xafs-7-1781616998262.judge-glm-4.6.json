@@ -1,0 +1,394 @@
+{
+  "judgeModel": "glm-4.6",
+  "judgedAt": "2026-06-16T14:01:52.643Z",
+  "systems": [
+    {
+      "systemId": "lobu-plain",
+      "systemLabel": "Lobu 11.3.0 (stock, raw query)",
+      "trials": [
+        {
+          "questions": [
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q01",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q02",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q03",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q04",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q05",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q06",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q07",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q08",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_001",
+              "questionId": "q09",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q01",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q02",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q03",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q04",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q05",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q06",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q07",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q08",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_002",
+              "questionId": "q09",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q01",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q02",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q03",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q04",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q05",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q06",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q07",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q08",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_003",
+              "questionId": "q09",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q01",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q02",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q03",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q04",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q05",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q06",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q07",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q08",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_004",
+              "questionId": "q09",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q01",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q02",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q03",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q04",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q05",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q06",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q07",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q08",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_005",
+              "questionId": "q09",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q01",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q02",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q03",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q04",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q05",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q06",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q07",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q08",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_006",
+              "questionId": "q09",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q01",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q02",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q03",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q04",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q05",
+              "category": "agentic-filesystem",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q06",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q07",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "xafs-dp_007",
+              "questionId": "q08",
+              "category": "agentic-filesystem",
+              "verdict": 0
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "answerAccuracy": 0.7419354838709676,
+        "perCategory": {
+          "agentic-filesystem": 0.7419354838709676
+        }
+      }
+    }
+  ]
+}

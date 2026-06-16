@@ -72,8 +72,12 @@ def post_json(path: str, body: Dict[str, Any]) -> Any:
         method='POST',
     )
     ssl_context = build_ssl_context()
+    # Self-hosted SM does server-side fact-extraction at retain time, which is
+    # slow on large (xAFS-style) files; the default 60s urlopen timeout fires
+    # mid-ingest. Configurable so large-corpus suites can give it room.
+    timeout = int(os.environ.get('SUPERMEMORY_TIMEOUT', '60'))
     try:
-        with urllib.request.urlopen(req, timeout=60, context=ssl_context) as response:
+        with urllib.request.urlopen(req, timeout=timeout, context=ssl_context) as response:
             return json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as exc:
         body_text = exc.read().decode('utf-8', 'ignore')

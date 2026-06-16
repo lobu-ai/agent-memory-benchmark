@@ -10,3 +10,7 @@ datasets/cache/
 .mem0-venv/
 .letta-venv/
 .mixed*venv/
+.hindsight-venv/
+.supermemory/
+.bin/
+.pi/
