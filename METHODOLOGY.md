@@ -58,17 +58,18 @@ product a user actually gets.
 
 ## Per-system fairness notes
 
-- **Mem0 — currently excluded.** A uniform harness cannot reproduce Mem0's
-  published ~66% on LongMemEval. We tried hard to be fair: turn-by-turn
-  (not blob) ingestion, `infer:true`, poll-until-indexed, proper `top_k`, and a
-  fully self-hosted local engine (OSS `mem0` lib + local Chroma, no SaaS quota)
-  with both Gemini and BGE embedders. It still scores near-0% across categories
-  because Mem0's extraction is **user-centric** (it distills facts about "the
-  user" and underweights third-party / assistant facts that several LongMemEval
-  categories require), and because reproducing Mem0's number needs *its own*
-  answerer + ingestion pipeline, not a shared one. Publishing 0% would be
-  unfair to Mem0, so it is excluded pending an eval that matches its intended
-  setup. The local adapter (`adapters/mem0_local_adapter.py`) is kept for that.
+- **Mem0 — runs fully local (OSS `mem0` lib + local Chroma).** The earlier
+  "near-0%, blame user-centric extraction" claim here was **wrong** — it was an
+  adapter bug, not a Mem0 limitation. A trace showed extraction works well and
+  captures third-party facts ("User's manager is David Chen"); the real cause was
+  ordering: mem0 + Chroma returns `score` as a **distance** (lower = more
+  relevant) and does not order hits best-first, but the harness consumes adapter
+  item *order* directly and truncates to top_k. The adapter took mem0's
+  worst-first order and kept the *least* relevant memories → ~0%. Fixed by
+  sorting hits ascending by distance before truncating
+  (`adapters/mem0_local_adapter.py`); recall jumped from ~0% to ~67% on the first
+  oracle-10 scenario. Lesson: a near-0 score for an established system is a
+  red flag for an integration bug, not a measurement — trace before publishing.
 - **Letta — hard-blocked on this machine**: self-host is a Docker image and no
   container runtime (Docker/OrbStack/Colima) is installed. (Zep is excluded
   entirely: it is cloud-only and can't be run locally, so it is out of scope for

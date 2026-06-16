@@ -155,6 +155,18 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
     latency_ms = (time.perf_counter() - started) * 1000
     hits = res.get("results") if isinstance(res, dict) else res
 
+    # mem0 + Chroma returns `score` as a DISTANCE (lower = more relevant) and does
+    # NOT order hits best-first. The harness consumes adapter item ORDER directly
+    # (retrievedIds = items.map(id); answerer context is built in this order, then
+    # truncated to top_k), so we must sort best-first here. Without this the
+    # adapter kept the LEAST relevant memories and scored ~0% — which was wrongly
+    # attributed to Mem0's extraction rather than this ordering bug.
+    def _dist(h: Dict[str, Any]) -> float:
+        s = h.get("score")
+        return s if isinstance(s, (int, float)) else float("inf")
+
+    hits = sorted(hits or [], key=_dist)
+
     grouped: Dict[str, Dict[str, Any]] = {}
     order: List[str] = []
     for h in hits or []:
