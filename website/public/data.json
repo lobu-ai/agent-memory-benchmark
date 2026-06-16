@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-06-16T18:09:08.820Z",
+  "builtAt": "2026-06-16T18:27:40.485Z",
   "benchmarks": [
     {
       "suiteId": "longmemeval-mixed-60",
@@ -37,9 +37,9 @@
       "suiteLabel": "LongMemEval (all 6 categories, 60)",
       "answererModel": "all answerers (mean±range)",
       "judge": "claude-sonnet-4-6",
-      "generatedAt": "2026-06-16T01:25:08.412Z",
-      "generatedAtMs": 1781573108412,
-      "trials": 3,
+      "generatedAt": "2026-06-16T18:23:48.969Z",
+      "generatedAtMs": 1781634228969,
+      "trials": 1,
       "topK": 8,
       "questionCount": 180,
       "systems": [
@@ -102,6 +102,35 @@
             "stdev": 0.01388888888888884,
             "n": 2
           }
+        },
+        {
+          "systemId": "mem0",
+          "systemLabel": "Mem0",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 60,
+            "answerAccuracy": 0.43333333333333335,
+            "retrievalRecall": 0.8388888888888888,
+            "citationRecall": 0.4861111111111111,
+            "citationPrecision": 0.6166666666666667,
+            "averageLatencyMs": 586.6800353847793,
+            "p95LatencyMs": 1406.0361250012647,
+            "averageContextTokensApprox": 93.43333333333334,
+            "averageAnswererPromptTokens": 544.6833333333333,
+            "averageAnswererCompletionTokens": 29.316666666666666,
+            "overallScore": 0.5301388888888888
+          },
+          "trialAccuracies": [
+            0.43333333333333335
+          ],
+          "accuracySpread": {
+            "mean": 0.43333333333333335,
+            "min": 0.43333333333333335,
+            "max": 0.43333333333333335,
+            "stdev": 0,
+            "n": 1
+          }
         }
       ]
     },
@@ -110,9 +139,9 @@
       "suiteLabel": "LongMemEval (all 6 categories, 60)",
       "answererModel": "all answerers (mean±range)",
       "judge": "glm-4.6",
-      "generatedAt": "2026-06-16T01:25:08.412Z",
-      "generatedAtMs": 1781573108412,
-      "trials": 3,
+      "generatedAt": "2026-06-16T18:23:48.969Z",
+      "generatedAtMs": 1781634228969,
+      "trials": 1,
       "topK": 8,
       "questionCount": 180,
       "systems": [
@@ -174,6 +203,35 @@
             "max": 0.7722222222222223,
             "stdev": 0.019444444444444486,
             "n": 2
+          }
+        },
+        {
+          "systemId": "mem0",
+          "systemLabel": "Mem0",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 60,
+            "answerAccuracy": 0.35,
+            "retrievalRecall": 0.8388888888888888,
+            "citationRecall": 0.4861111111111111,
+            "citationPrecision": 0.6166666666666667,
+            "averageLatencyMs": 586.6800353847793,
+            "p95LatencyMs": 1406.0361250012647,
+            "averageContextTokensApprox": 93.43333333333334,
+            "averageAnswererPromptTokens": 544.6833333333333,
+            "averageAnswererCompletionTokens": 29.316666666666666,
+            "overallScore": 0.5301388888888888
+          },
+          "trialAccuracies": [
+            0.35
+          ],
+          "accuracySpread": {
+            "mean": 0.35,
+            "min": 0.35,
+            "max": 0.35,
+            "stdev": 0,
+            "n": 1
           }
         }
       ]
@@ -325,9 +383,9 @@
       "suiteLabel": "LongMemEval (all 6 categories, 60)",
       "answererModel": "glm-5.1",
       "judge": "claude-sonnet-4-6",
-      "generatedAt": "2026-06-16T01:25:08.412Z",
-      "generatedAtMs": 1781573108412,
-      "trials": 3,
+      "generatedAt": "2026-06-16T18:23:48.969Z",
+      "generatedAtMs": 1781634228969,
+      "trials": 1,
       "topK": 8,
       "questionCount": 180,
       "systems": [
@@ -392,6 +450,35 @@
             "stdev": 0.007856742013183834,
             "n": 3
           }
+        },
+        {
+          "systemId": "mem0",
+          "systemLabel": "Mem0",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 60,
+            "answerAccuracy": 0.43333333333333335,
+            "retrievalRecall": 0.8388888888888888,
+            "citationRecall": 0.4861111111111111,
+            "citationPrecision": 0.6166666666666667,
+            "averageLatencyMs": 586.6800353847793,
+            "p95LatencyMs": 1406.0361250012647,
+            "averageContextTokensApprox": 93.43333333333334,
+            "averageAnswererPromptTokens": 544.6833333333333,
+            "averageAnswererCompletionTokens": 29.316666666666666,
+            "overallScore": 0.5301388888888888
+          },
+          "trialAccuracies": [
+            0.43333333333333335
+          ],
+          "accuracySpread": {
+            "mean": 0.43333333333333335,
+            "min": 0.43333333333333335,
+            "max": 0.43333333333333335,
+            "stdev": 0,
+            "n": 1
+          }
         }
       ]
     },
@@ -400,9 +487,9 @@
       "suiteLabel": "LongMemEval (all 6 categories, 60)",
       "answererModel": "glm-5.1",
       "judge": "glm-4.6",
-      "generatedAt": "2026-06-16T01:25:08.412Z",
-      "generatedAtMs": 1781573108412,
-      "trials": 3,
+      "generatedAt": "2026-06-16T18:23:48.969Z",
+      "generatedAtMs": 1781634228969,
+      "trials": 1,
       "topK": 8,
       "questionCount": 180,
       "systems": [
@@ -466,6 +553,35 @@
             "max": 0.7833333333333333,
             "stdev": 0.01571348402636772,
             "n": 3
+          }
+        },
+        {
+          "systemId": "mem0",
+          "systemLabel": "Mem0",
+          "version": null,
+          "mode": null,
+          "summary": {
+            "questionCount": 60,
+            "answerAccuracy": 0.35,
+            "retrievalRecall": 0.8388888888888888,
+            "citationRecall": 0.4861111111111111,
+            "citationPrecision": 0.6166666666666667,
+            "averageLatencyMs": 586.6800353847793,
+            "p95LatencyMs": 1406.0361250012647,
+            "averageContextTokensApprox": 93.43333333333334,
+            "averageAnswererPromptTokens": 544.6833333333333,
+            "averageAnswererCompletionTokens": 29.316666666666666,
+            "overallScore": 0.5301388888888888
+          },
+          "trialAccuracies": [
+            0.35
+          ],
+          "accuracySpread": {
+            "mean": 0.35,
+            "min": 0.35,
+            "max": 0.35,
+            "stdev": 0,
+            "n": 1
           }
         }
       ]
