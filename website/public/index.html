@@ -57,14 +57,16 @@
           <a href="../METHODOLOGY.md">Read the methodology &rarr;</a>
         </p>
         <p class="caveat">
-          &#9888; <strong>Latency is retrieval-only wall time, not a clean
-          head-to-head.</strong> Every system on these boards (Lobu, Supermemory,
-          Hindsight) runs self-hosted as a local HTTP server, so all pay a
-          comparable localhost round-trip &mdash; differences reflect each
-          system's search path and the context size it returns, not
-          cloud-vs-local. Ingest-time work (heavy for extraction-based systems
-          like Hindsight) is not counted in this number. Read latency next to
-          context size; answer accuracy and retrieval recall are the primary
+          &#9888; <strong>Latency is a fair measurement, but read it next to
+          context size.</strong> Every system gets the same query and is timed the
+          same way (retrieval-only wall time), self-hosted as a local HTTP server
+          &mdash; the measurement itself is apples-to-apples. The thing to avoid is
+          reading &ldquo;lowest number wins&rdquo;: a system that returns far less
+          context (e.g. a handful of extracted facts vs. whole sessions) will clock
+          faster simply because it returned less, not because it is better. Lower
+          latency <em>for the same context size</em> is the real efficiency signal.
+          Ingest-time work (heavy for extraction-based systems) isn&rsquo;t in this
+          number either. Answer accuracy and retrieval recall remain the primary
           comparison.
         </p>
         <p class="reproduce-label">Reproduce a run:</p>
