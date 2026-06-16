@@ -1,0 +1,479 @@
+{
+  "suiteId": "longmemeval-mixed-60-ku10",
+  "suiteVersion": "1.0.0",
+  "generatedAt": "2026-05-31T23:28:56.740Z",
+  "config": {
+    "trials": 1,
+    "topK": 8,
+    "answerer": "glm-5.1 via https://api.z.ai/api/coding/paas/v4",
+    "contextTokenEstimate": "chars_div_4",
+    "scenarioIsolation": "per-scenario",
+    "latencyMeasurement": "retrieval-only"
+  },
+  "systems": [
+    {
+      "systemId": "lobu-agentic",
+      "systemLabel": "Lobu (agentic supersede)",
+      "trials": [
+        {
+          "systemId": "lobu-agentic",
+          "systemLabel": "Lobu (agentic supersede)",
+          "runId": "longmemeval-mixed-60-ku10-lobu-agentic-t1-1780269505440",
+          "trialIndex": 0,
+          "questions": [
+            {
+              "scenarioId": "longmemeval-1-6a1eabeb",
+              "category": "knowledge-update",
+              "questionId": "6a1eabeb",
+              "prompt": "What was my personal best time in the charity 5K run?",
+              "expectedAnswers": [
+                "25 minutes and 50 seconds (or 25:50)"
+              ],
+              "expectedSourceStepIds": [
+                "answer_a25d4a91_1",
+                "answer_a25d4a91_2"
+              ],
+              "retrievedIds": [
+                "answer_a25d4a91_2",
+                "answer_a25d4a91_2",
+                "answer_a25d4a91_2",
+                "answer_a25d4a91_2",
+                "answer_a25d4a91_1",
+                "answer_a25d4a91_1",
+                "answer_a25d4a91_1",
+                "answer_a25d4a91_1",
+                "answer_a25d4a91_1"
+              ],
+              "answer": "25:50",
+              "citedIds": [
+                "answer_a25d4a91_2"
+              ],
+              "latencyMs": 12.620333000000983,
+              "contextTokensApprox": 854,
+              "answererPromptTokens": 1560,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-2-6aeb4375",
+              "category": "knowledge-update",
+              "questionId": "6aeb4375",
+              "prompt": "How many Korean restaurants have I tried in my city?",
+              "expectedAnswers": [
+                "four"
+              ],
+              "expectedSourceStepIds": [
+                "answer_3f9693b7_1",
+                "answer_3f9693b7_2"
+              ],
+              "retrievedIds": [
+                "answer_3f9693b7_2",
+                "answer_3f9693b7_2",
+                "answer_3f9693b7_2",
+                "answer_3f9693b7_2",
+                "answer_3f9693b7_2",
+                "answer_3f9693b7_2",
+                "answer_3f9693b7_2",
+                "answer_3f9693b7_1",
+                "answer_3f9693b7_1"
+              ],
+              "answer": "4",
+              "citedIds": [
+                "answer_3f9693b7_2"
+              ],
+              "latencyMs": 12.862541999993482,
+              "contextTokensApprox": 886,
+              "answererPromptTokens": 1606,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-3-830ce83f",
+              "category": "knowledge-update",
+              "questionId": "830ce83f",
+              "prompt": "Where did Rachel move to after her recent relocation?",
+              "expectedAnswers": [
+                "the suburbs"
+              ],
+              "expectedSourceStepIds": [
+                "answer_0b1a0942_1",
+                "answer_0b1a0942_2"
+              ],
+              "retrievedIds": [
+                "answer_0b1a0942_2",
+                "answer_0b1a0942_2",
+                "answer_0b1a0942_2",
+                "answer_0b1a0942_2",
+                "answer_0b1a0942_2",
+                "answer_0b1a0942_2"
+              ],
+              "answer": "the suburbs",
+              "citedIds": [
+                "answer_0b1a0942_2"
+              ],
+              "latencyMs": 19.59112500000515,
+              "contextTokensApprox": 568,
+              "answererPromptTokens": 1189,
+              "answererCompletionTokens": 38,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 0.5,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-4-852ce960",
+              "category": "knowledge-update",
+              "questionId": "852ce960",
+              "prompt": "What was the amount I was pre-approved for when I got my mortgage from Wells Fargo?",
+              "expectedAnswers": [
+                "$400,000"
+              ],
+              "expectedSourceStepIds": [
+                "answer_3a6f1e82_1",
+                "answer_3a6f1e82_2"
+              ],
+              "retrievedIds": [
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_1",
+                "answer_3a6f1e82_1",
+                "answer_3a6f1e82_1"
+              ],
+              "answer": "$400,000",
+              "citedIds": [
+                "answer_3a6f1e82_2",
+                "answer_3a6f1e82_2"
+              ],
+              "latencyMs": 21.498167000004287,
+              "contextTokensApprox": 1064,
+              "answererPromptTokens": 1868,
+              "answererCompletionTokens": 53,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-5-945e3d21",
+              "category": "knowledge-update",
+              "questionId": "945e3d21",
+              "prompt": "How often do I attend yoga classes to help with my anxiety?",
+              "expectedAnswers": [
+                "Three times a week."
+              ],
+              "expectedSourceStepIds": [
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_2"
+              ],
+              "retrievedIds": [
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_2",
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_1"
+              ],
+              "answer": "three times a week",
+              "citedIds": [
+                "answer_6a4f8626_2"
+              ],
+              "latencyMs": 28.860666000014135,
+              "contextTokensApprox": 1580,
+              "answererPromptTokens": 2582,
+              "answererCompletionTokens": 40,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-6-d7c942c3",
+              "category": "knowledge-update",
+              "questionId": "d7c942c3",
+              "prompt": "Is my mom using the same grocery list method as me?",
+              "expectedAnswers": [
+                "Yes."
+              ],
+              "expectedSourceStepIds": [
+                "answer_eecb10d9_1",
+                "answer_eecb10d9_2"
+              ],
+              "retrievedIds": [
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_2",
+                "answer_eecb10d9_1",
+                "answer_eecb10d9_1",
+                "answer_eecb10d9_1",
+                "answer_eecb10d9_1"
+              ],
+              "answer": "Yes, your mom is using the same grocery list app as you.",
+              "citedIds": [
+                "answer_eecb10d9_2"
+              ],
+              "latencyMs": 17.25395800002616,
+              "contextTokensApprox": 1316,
+              "answererPromptTokens": 2161,
+              "answererCompletionTokens": 47,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-7-71315a70",
+              "category": "knowledge-update",
+              "questionId": "71315a70",
+              "prompt": "How many hours have I spent on my abstract ocean sculpture?",
+              "expectedAnswers": [
+                "10-12 hours"
+              ],
+              "expectedSourceStepIds": [
+                "answer_c44b9df4_1",
+                "answer_c44b9df4_2"
+              ],
+              "retrievedIds": [
+                "answer_c44b9df4_2",
+                "answer_c44b9df4_2",
+                "answer_c44b9df4_2",
+                "answer_c44b9df4_2"
+              ],
+              "answer": "10-12 hours",
+              "citedIds": [
+                "answer_c44b9df4_2"
+              ],
+              "latencyMs": 20.677250000005643,
+              "contextTokensApprox": 410,
+              "answererPromptTokens": 950,
+              "answererCompletionTokens": 38,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 0.5,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-8-89941a93",
+              "category": "knowledge-update",
+              "questionId": "89941a93",
+              "prompt": "How many bikes do I currently own?",
+              "expectedAnswers": [
+                "4"
+              ],
+              "expectedSourceStepIds": [
+                "answer_e1403127_1",
+                "answer_e1403127_2"
+              ],
+              "retrievedIds": [
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_2",
+                "answer_e1403127_1",
+                "answer_e1403127_1",
+                "answer_e1403127_1",
+                "answer_e1403127_1",
+                "answer_e1403127_1"
+              ],
+              "answer": "4",
+              "citedIds": [
+                "answer_e1403127_2"
+              ],
+              "latencyMs": 17.086583000036626,
+              "contextTokensApprox": 1473,
+              "answererPromptTokens": 2327,
+              "answererCompletionTokens": 34,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-9-ce6d2d27",
+              "category": "knowledge-update",
+              "questionId": "ce6d2d27",
+              "prompt": "What day of the week do I take a cocktail-making class?",
+              "expectedAnswers": [
+                "Friday"
+              ],
+              "expectedSourceStepIds": [
+                "answer_73540165_1",
+                "answer_73540165_2"
+              ],
+              "retrievedIds": [
+                "answer_73540165_2",
+                "answer_73540165_2",
+                "answer_73540165_2",
+                "answer_73540165_2",
+                "answer_73540165_2",
+                "answer_73540165_1",
+                "answer_73540165_1",
+                "answer_73540165_1"
+              ],
+              "answer": "Fridays",
+              "citedIds": [
+                "answer_73540165_2"
+              ],
+              "latencyMs": 15.214499999956388,
+              "contextTokensApprox": 792,
+              "answererPromptTokens": 1444,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-10-9ea5eabc",
+              "category": "knowledge-update",
+              "questionId": "9ea5eabc",
+              "prompt": "Where did I go on my most recent family trip?",
+              "expectedAnswers": [
+                "Paris"
+              ],
+              "expectedSourceStepIds": [
+                "answer_02e66dec_1",
+                "answer_02e66dec_2"
+              ],
+              "retrievedIds": [
+                "answer_02e66dec_2",
+                "answer_02e66dec_2",
+                "answer_02e66dec_2",
+                "answer_02e66dec_2",
+                "answer_02e66dec_2",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1",
+                "answer_02e66dec_1"
+              ],
+              "answer": "Paris",
+              "citedIds": [
+                "answer_02e66dec_2"
+              ],
+              "latencyMs": 18.48587500001031,
+              "contextTokensApprox": 1460,
+              "answererPromptTokens": 2248,
+              "answererCompletionTokens": 34,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            }
+          ],
+          "summary": {
+            "questionCount": 10,
+            "answerAccuracy": 0.9,
+            "retrievalRecall": 0.9,
+            "citationRecall": 0.5,
+            "citationPrecision": 1,
+            "averageLatencyMs": 18.415099900005316,
+            "p95LatencyMs": 28.860666000014135,
+            "averageContextTokensApprox": 1040.3,
+            "averageAnswererPromptTokens": 1793.5,
+            "averageAnswererCompletionTokens": 39.5,
+            "totalAnswererPromptTokens": 17935,
+            "totalAnswererCompletionTokens": 395
+          }
+        }
+      ],
+      "summary": {
+        "questionCount": 10,
+        "answerAccuracy": 0.9,
+        "retrievalRecall": 0.9,
+        "citationRecall": 0.5,
+        "citationPrecision": 1,
+        "averageLatencyMs": 18.415099900005316,
+        "p95LatencyMs": 28.860666000014135,
+        "averageContextTokensApprox": 1040.3,
+        "averageAnswererPromptTokens": 1793.5,
+        "averageAnswererCompletionTokens": 39.5,
+        "totalAnswererPromptTokens": 17935,
+        "totalAnswererCompletionTokens": 395,
+        "latencyScore": 1,
+        "overallScore": 0.8500000000000001,
+        "confidence95": {}
+      },
+      "byCategory": [
+        {
+          "category": "knowledge-update",
+          "questionCount": 10,
+          "answerAccuracy": 0.9,
+          "retrievalRecall": 0.9,
+          "citationRecall": 0.5,
+          "citationPrecision": 1,
+          "averageLatencyMs": 18.415099900005316,
+          "p95LatencyMs": 28.860666000014135,
+          "averageContextTokensApprox": 1040.3,
+          "averageAnswererPromptTokens": 1793.5,
+          "averageAnswererCompletionTokens": 39.5,
+          "totalAnswererPromptTokens": 17935,
+          "totalAnswererCompletionTokens": 395
+        }
+      ],
+      "version": null,
+      "mode": null
+    }
+  ]
+}

@@ -1,0 +1,1977 @@
+{
+  "suiteId": "longmemeval-mixed-60",
+  "suiteVersion": "1.0.0",
+  "generatedAt": "2026-06-03T13:45:05.279Z",
+  "config": {
+    "trials": 1,
+    "topK": 8,
+    "answerer": "glm-5.1 via https://api.z.ai/api/coding/paas/v4",
+    "contextTokenEstimate": "chars_div_4",
+    "scenarioIsolation": "per-scenario",
+    "latencyMeasurement": "retrieval-only"
+  },
+  "systems": [
+    {
+      "systemId": "lobu-augmented",
+      "systemLabel": "Lobu (augmented: whole sessions + fact digest)",
+      "trials": [
+        {
+          "systemId": "lobu-augmented",
+          "systemLabel": "Lobu (augmented: whole sessions + fact digest)",
+          "runId": "longmemeval-mixed-60-lobu-augmented-t1-1780480084021",
+          "trialIndex": 0,
+          "questions": [
+            {
+              "scenarioId": "longmemeval-1-6a1eabeb",
+              "category": "knowledge-update",
+              "questionId": "6a1eabeb",
+              "prompt": "What was my personal best time in the charity 5K run?",
+              "expectedAnswers": [
+                "25 minutes and 50 seconds (or 25:50)"
+              ],
+              "expectedSourceStepIds": [
+                "answer_a25d4a91_1",
+                "answer_a25d4a91_2"
+              ],
+              "retrievedIds": [
+                "answer_a25d4a91_2",
+                "answer_a25d4a91_1"
+              ],
+              "answer": "25:50",
+              "citedIds": [
+                "answer_a25d4a91_2"
+              ],
+              "latencyMs": 698.7443750000004,
+              "contextTokensApprox": 8928,
+              "answererPromptTokens": 8430,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-2-6aeb4375",
+              "category": "knowledge-update",
+              "questionId": "6aeb4375",
+              "prompt": "How many Korean restaurants have I tried in my city?",
+              "expectedAnswers": [
+                "four"
+              ],
+              "expectedSourceStepIds": [
+                "answer_3f9693b7_1",
+                "answer_3f9693b7_2"
+              ],
+              "retrievedIds": [
+                "answer_3f9693b7_1",
+                "answer_3f9693b7_2"
+              ],
+              "answer": "four",
+              "citedIds": [
+                "answer_3f9693b7_2"
+              ],
+              "latencyMs": 632.8361249999972,
+              "contextTokensApprox": 6161,
+              "answererPromptTokens": 6137,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-3-830ce83f",
+              "category": "knowledge-update",
+              "questionId": "830ce83f",
+              "prompt": "Where did Rachel move to after her recent relocation?",
+              "expectedAnswers": [
+                "the suburbs"
+              ],
+              "expectedSourceStepIds": [
+                "answer_0b1a0942_1",
+                "answer_0b1a0942_2"
+              ],
+              "retrievedIds": [
+                "answer_0b1a0942_1",
+                "answer_0b1a0942_2"
+              ],
+              "answer": "the suburbs",
+              "citedIds": [
+                "answer_0b1a0942_2"
+              ],
+              "latencyMs": 642.9098330000045,
+              "contextTokensApprox": 6429,
+              "answererPromptTokens": 6054,
+              "answererCompletionTokens": 38,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-4-852ce960",
+              "category": "knowledge-update",
+              "questionId": "852ce960",
+              "prompt": "What was the amount I was pre-approved for when I got my mortgage from Wells Fargo?",
+              "expectedAnswers": [
+                "$400,000"
+              ],
+              "expectedSourceStepIds": [
+                "answer_3a6f1e82_1",
+                "answer_3a6f1e82_2"
+              ],
+              "retrievedIds": [
+                "answer_3a6f1e82_1",
+                "answer_3a6f1e82_2"
+              ],
+              "answer": "$400,000",
+              "citedIds": [
+                "answer_3a6f1e82_2"
+              ],
+              "latencyMs": 691.4464999999836,
+              "contextTokensApprox": 6748,
+              "answererPromptTokens": 6808,
+              "answererCompletionTokens": 39,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-5-945e3d21",
+              "category": "knowledge-update",
+              "questionId": "945e3d21",
+              "prompt": "How often do I attend yoga classes to help with my anxiety?",
+              "expectedAnswers": [
+                "Three times a week."
+              ],
+              "expectedSourceStepIds": [
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_2"
+              ],
+              "retrievedIds": [
+                "answer_6a4f8626_1",
+                "answer_6a4f8626_2"
+              ],
+              "answer": "three times a week",
+              "citedIds": [
+                "answer_6a4f8626_2"
+              ],
+              "latencyMs": 686.0195410000074,
+              "contextTokensApprox": 7578,
+              "answererPromptTokens": 7181,
+              "answererCompletionTokens": 40,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-6-d7c942c3",
+              "category": "knowledge-update",
+              "questionId": "d7c942c3",
+              "prompt": "Is my mom using the same grocery list method as me?",
+              "expectedAnswers": [
+                "Yes."
+              ],
+              "expectedSourceStepIds": [
+                "answer_eecb10d9_1",
+                "answer_eecb10d9_2"
+              ],
+              "retrievedIds": [
+                "answer_eecb10d9_1",
+                "answer_eecb10d9_2"
+              ],
+              "answer": "yes",
+              "citedIds": [
+                "answer_eecb10d9_2"
+              ],
+              "latencyMs": 743.2884170000307,
+              "contextTokensApprox": 5939,
+              "answererPromptTokens": 6047,
+              "answererCompletionTokens": 35,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-7-71315a70",
+              "category": "knowledge-update",
+              "questionId": "71315a70",
+              "prompt": "How many hours have I spent on my abstract ocean sculpture?",
+              "expectedAnswers": [
+                "10-12 hours"
+              ],
+              "expectedSourceStepIds": [
+                "answer_c44b9df4_1",
+                "answer_c44b9df4_2"
+              ],
+              "retrievedIds": [
+                "answer_c44b9df4_1",
+                "answer_c44b9df4_2"
+              ],
+              "answer": "10-12 hours",
+              "citedIds": [
+                "answer_c44b9df4_2"
+              ],
+              "latencyMs": 697.7679579999858,
+              "contextTokensApprox": 9356,
+              "answererPromptTokens": 8535,
+              "answererCompletionTokens": 38,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-8-89941a93",
+              "category": "knowledge-update",
+              "questionId": "89941a93",
+              "prompt": "How many bikes do I currently own?",
+              "expectedAnswers": [
+                "4"
+              ],
+              "expectedSourceStepIds": [
+                "answer_e1403127_1",
+                "answer_e1403127_2"
+              ],
+              "retrievedIds": [
+                "answer_e1403127_2",
+                "answer_e1403127_1"
+              ],
+              "answer": "4",
+              "citedIds": [
+                "answer_e1403127_2"
+              ],
+              "latencyMs": 683.687582999994,
+              "contextTokensApprox": 8574,
+              "answererPromptTokens": 7906,
+              "answererCompletionTokens": 34,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-9-ce6d2d27",
+              "category": "knowledge-update",
+              "questionId": "ce6d2d27",
+              "prompt": "What day of the week do I take a cocktail-making class?",
+              "expectedAnswers": [
+                "Friday"
+              ],
+              "expectedSourceStepIds": [
+                "answer_73540165_1",
+                "answer_73540165_2"
+              ],
+              "retrievedIds": [
+                "answer_73540165_2",
+                "answer_73540165_1"
+              ],
+              "answer": "Fridays",
+              "citedIds": [
+                "answer_73540165_2"
+              ],
+              "latencyMs": 710.1020000000062,
+              "contextTokensApprox": 6530,
+              "answererPromptTokens": 6501,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-10-9ea5eabc",
+              "category": "knowledge-update",
+              "questionId": "9ea5eabc",
+              "prompt": "Where did I go on my most recent family trip?",
+              "expectedAnswers": [
+                "Paris"
+              ],
+              "expectedSourceStepIds": [
+                "answer_02e66dec_1",
+                "answer_02e66dec_2"
+              ],
+              "retrievedIds": [
+                "answer_02e66dec_2",
+                "answer_02e66dec_1"
+              ],
+              "answer": "Paris",
+              "citedIds": [
+                "answer_02e66dec_2"
+              ],
+              "latencyMs": 692.8498329999684,
+              "contextTokensApprox": 8764,
+              "answererPromptTokens": 8229,
+              "answererCompletionTokens": 34,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-11-gpt4_59c863d7",
+              "category": "multi-session",
+              "questionId": "gpt4_59c863d7",
+              "prompt": "How many model kits have I worked on or bought?",
+              "expectedAnswers": [
+                "I have worked on or bought five model kits. The scales of the models are: Revell F-15 Eagle (scale not mentioned), Tamiya 1/48 scale Spitfire Mk.V, 1/16 scale German Tiger I tank, 1/72 scale B-29 bomber, and 1/24 scale '69 Camaro."
+              ],
+              "expectedSourceStepIds": [
+                "answer_593bdffd_1",
+                "answer_593bdffd_2",
+                "answer_593bdffd_3",
+                "answer_593bdffd_4"
+              ],
+              "retrievedIds": [
+                "answer_593bdffd_1",
+                "answer_593bdffd_4",
+                "answer_593bdffd_2",
+                "answer_593bdffd_3"
+              ],
+              "answer": "5",
+              "citedIds": [
+                "answer_593bdffd_1",
+                "answer_593bdffd_2",
+                "answer_593bdffd_3",
+                "answer_593bdffd_4"
+              ],
+              "latencyMs": 688.9284169999428,
+              "contextTokensApprox": 18527,
+              "answererPromptTokens": 17290,
+              "answererCompletionTokens": 67,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-12-b5ef892d",
+              "category": "multi-session",
+              "questionId": "b5ef892d",
+              "prompt": "How many days did I spend on camping trips in the United States this year?",
+              "expectedAnswers": [
+                "8 days."
+              ],
+              "expectedSourceStepIds": [
+                "answer_a8b4290f_2",
+                "answer_a8b4290f_3",
+                "answer_a8b4290f_1"
+              ],
+              "retrievedIds": [
+                "answer_a8b4290f_3",
+                "answer_a8b4290f_2",
+                "answer_a8b4290f_1"
+              ],
+              "answer": "5",
+              "citedIds": [
+                "answer_a8b4290f_1",
+                "answer_a8b4290f_3"
+              ],
+              "latencyMs": 703.4642910000457,
+              "contextTokensApprox": 11966,
+              "answererPromptTokens": 11203,
+              "answererCompletionTokens": 49,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0.6666666666666666,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-13-e831120c",
+              "category": "multi-session",
+              "questionId": "e831120c",
+              "prompt": "How many weeks did it take me to watch all the Marvel Cinematic Universe movies and the main Star Wars films?",
+              "expectedAnswers": [
+                "3.5 weeks"
+              ],
+              "expectedSourceStepIds": [
+                "answer_86c505e7_1",
+                "answer_86c505e7_2"
+              ],
+              "retrievedIds": [
+                "answer_86c505e7_2",
+                "answer_86c505e7_1"
+              ],
+              "answer": "3.5 weeks",
+              "citedIds": [
+                "answer_86c505e7_2"
+              ],
+              "latencyMs": 698.1355420000455,
+              "contextTokensApprox": 5751,
+              "answererPromptTokens": 6874,
+              "answererCompletionTokens": 39,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0.5,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-14-gpt4_d84a3211",
+              "category": "multi-session",
+              "questionId": "gpt4_d84a3211",
+              "prompt": "How much total money have I spent on bike-related expenses since the start of the year?",
+              "expectedAnswers": [
+                "$185"
+              ],
+              "expectedSourceStepIds": [
+                "answer_2880eb6c_3",
+                "answer_2880eb6c_1",
+                "answer_2880eb6c_4",
+                "answer_2880eb6c_2"
+              ],
+              "retrievedIds": [
+                "answer_2880eb6c_3",
+                "answer_2880eb6c_4",
+                "answer_2880eb6c_1",
+                "answer_2880eb6c_2"
+              ],
+              "answer": "$65",
+              "citedIds": [
+                "answer_2880eb6c_2"
+              ],
+              "latencyMs": 726.8222090000336,
+              "contextTokensApprox": 13866,
+              "answererPromptTokens": 12736,
+              "answererCompletionTokens": 36,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0.25,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-15-aae3761f",
+              "category": "multi-session",
+              "questionId": "aae3761f",
+              "prompt": "How many hours in total did I spend driving to my three road trip destinations combined?",
+              "expectedAnswers": [
+                "15 hours for getting to the three destinations (or 30 hours for the round trip)"
+              ],
+              "expectedSourceStepIds": [
+                "answer_526354c8_1",
+                "answer_526354c8_2",
+                "answer_526354c8_3"
+              ],
+              "retrievedIds": [
+                "answer_526354c8_2",
+                "answer_526354c8_1",
+                "answer_526354c8_3"
+              ],
+              "answer": "17 hours",
+              "citedIds": [
+                "answer_526354c8_2",
+                "answer_526354c8_1",
+                "answer_526354c8_3"
+              ],
+              "latencyMs": 726.3452500000085,
+              "contextTokensApprox": 11329,
+              "answererPromptTokens": 10663,
+              "answererCompletionTokens": 63,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-16-gpt4_f2262a51",
+              "category": "multi-session",
+              "questionId": "gpt4_f2262a51",
+              "prompt": "How many different doctors did I visit?",
+              "expectedAnswers": [
+                "I visited three different doctors: a primary care physician, an ENT specialist, and a dermatologist."
+              ],
+              "expectedSourceStepIds": [
+                "answer_55a6940c_3",
+                "answer_55a6940c_1",
+                "answer_55a6940c_2"
+              ],
+              "retrievedIds": [
+                "answer_55a6940c_3"
+              ],
+              "answer": "2",
+              "citedIds": [
+                "answer_55a6940c_3"
+              ],
+              "latencyMs": 688.8233339998351,
+              "contextTokensApprox": 3981,
+              "answererPromptTokens": 3897,
+              "answererCompletionTokens": 36,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 0.3333333333333333,
+                "citationRecall": 0.3333333333333333,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-17-dd2973ad",
+              "category": "multi-session",
+              "questionId": "dd2973ad",
+              "prompt": "What time did I go to bed on the day before I had a doctor's appointment?",
+              "expectedAnswers": [
+                "2 AM"
+              ],
+              "expectedSourceStepIds": [
+                "answer_f9de4602_1",
+                "answer_f9de4602_2"
+              ],
+              "retrievedIds": [
+                "answer_f9de4602_2",
+                "answer_f9de4602_1"
+              ],
+              "answer": "2 AM",
+              "citedIds": [
+                "answer_f9de4602_2",
+                "answer_f9de4602_1"
+              ],
+              "latencyMs": 674.8138340001333,
+              "contextTokensApprox": 6577,
+              "answererPromptTokens": 6510,
+              "answererCompletionTokens": 48,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-18-gpt4_a56e767c",
+              "category": "multi-session",
+              "questionId": "gpt4_a56e767c",
+              "prompt": "How many movie festivals that I attended?",
+              "expectedAnswers": [
+                "I attended four movie festivals."
+              ],
+              "expectedSourceStepIds": [
+                "answer_cf9e3940_1",
+                "answer_cf9e3940_2",
+                "answer_cf9e3940_3"
+              ],
+              "retrievedIds": [
+                "answer_cf9e3940_3",
+                "answer_cf9e3940_1",
+                "answer_cf9e3940_2"
+              ],
+              "answer": "3",
+              "citedIds": [
+                "answer_cf9e3940_3",
+                "answer_cf9e3940_1",
+                "answer_cf9e3940_2"
+              ],
+              "latencyMs": 665.969584000095,
+              "contextTokensApprox": 13581,
+              "answererPromptTokens": 11824,
+              "answererCompletionTokens": 59,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-19-6cb6f249",
+              "category": "multi-session",
+              "questionId": "6cb6f249",
+              "prompt": "How many days did I take social media breaks in total?",
+              "expectedAnswers": [
+                "17 days"
+              ],
+              "expectedSourceStepIds": [
+                "answer_a4204937_1",
+                "answer_a4204937_2"
+              ],
+              "retrievedIds": [
+                "answer_a4204937_1",
+                "answer_a4204937_2"
+              ],
+              "answer": "17",
+              "citedIds": [
+                "answer_a4204937_1",
+                "answer_a4204937_2"
+              ],
+              "latencyMs": 42469.40325000014,
+              "contextTokensApprox": 8115,
+              "answererPromptTokens": 7669,
+              "answererCompletionTokens": 34,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-20-36b9f61e",
+              "category": "multi-session",
+              "questionId": "36b9f61e",
+              "prompt": "What is the total amount I spent on luxury items in the past few months?",
+              "expectedAnswers": [
+                "$2,500"
+              ],
+              "expectedSourceStepIds": [
+                "answer_ef74281f_2",
+                "answer_ef74281f_3",
+                "answer_ef74281f_1"
+              ],
+              "retrievedIds": [
+                "answer_ef74281f_1",
+                "answer_ef74281f_3",
+                "answer_ef74281f_2"
+              ],
+              "answer": "$2,500",
+              "citedIds": [
+                "answer_ef74281f_1",
+                "answer_ef74281f_2",
+                "answer_ef74281f_3"
+              ],
+              "latencyMs": 751.0708340000747,
+              "contextTokensApprox": 11961,
+              "answererPromptTokens": 10891,
+              "answererCompletionTokens": 40,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-21-7161e7e2",
+              "category": "single-session-assistant",
+              "questionId": "7161e7e2",
+              "prompt": "I'm checking our previous chat about the shift rotation sheet for GM social media agents. Can you remind me what was the rotation for Admon on a Sunday?",
+              "expectedAnswers": [
+                "Admon was assigned to the 8 am - 4 pm (Day Shift) on Sundays."
+              ],
+              "expectedSourceStepIds": [
+                "answer_sharegpt_5Lzox6N_0"
+              ],
+              "retrievedIds": [
+                "answer_sharegpt_5Lzox6N_0"
+              ],
+              "answer": "8 am - 4 pm (Day Shift)",
+              "citedIds": [
+                "answer_sharegpt_5Lzox6N_0"
+              ],
+              "latencyMs": 841.8984999998429,
+              "contextTokensApprox": 2044,
+              "answererPromptTokens": 2934,
+              "answererCompletionTokens": 47,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-22-c4f10528",
+              "category": "single-session-assistant",
+              "questionId": "c4f10528",
+              "prompt": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
+              "expectedAnswers": [
+                "Miss Bee Providore"
+              ],
+              "expectedSourceStepIds": [
+                "answer_ultrachat_234453"
+              ],
+              "retrievedIds": [
+                "answer_ultrachat_234453"
+              ],
+              "answer": "Miss Bee Providore",
+              "citedIds": [
+                "answer_ultrachat_234453"
+              ],
+              "latencyMs": 853.1811670000025,
+              "contextTokensApprox": 2285,
+              "answererPromptTokens": 2529,
+              "answererCompletionTokens": 38,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-23-89527b6b",
+              "category": "single-session-assistant",
+              "questionId": "89527b6b",
+              "prompt": "I'm going back to our previous conversation about the children's book on dinosaurs. Can you remind me what color was the scaly body of the Plesiosaur in the image?",
+              "expectedAnswers": [
+                "The Plesiosaur had a blue scaly body."
+              ],
+              "expectedSourceStepIds": [
+                "answer_sharegpt_YkWn1Ne_0"
+              ],
+              "retrievedIds": [
+                "answer_sharegpt_YkWn1Ne_0"
+              ],
+              "answer": "blue",
+              "citedIds": [
+                "answer_sharegpt_YkWn1Ne_0"
+              ],
+              "latencyMs": 859.5913340000152,
+              "contextTokensApprox": 929,
+              "answererPromptTokens": 1366,
+              "answererCompletionTokens": 38,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-24-e9327a54",
+              "category": "single-session-assistant",
+              "questionId": "e9327a54",
+              "prompt": "I'm planning to revisit Orlando. I was wondering if you could remind me of that unique dessert shop with the giant milkshakes we talked about last time?",
+              "expectedAnswers": [
+                "The Sugar Factory at Icon Park."
+              ],
+              "expectedSourceStepIds": [
+                "answer_ultrachat_480665"
+              ],
+              "retrievedIds": [
+                "answer_ultrachat_480665"
+              ],
+              "answer": "The Sugar Factory",
+              "citedIds": [
+                "answer_ultrachat_480665"
+              ],
+              "latencyMs": 813.7796250002793,
+              "contextTokensApprox": 2479,
+              "answererPromptTokens": 2585,
+              "answererCompletionTokens": 36,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-25-4c36ccef",
+              "category": "single-session-assistant",
+              "questionId": "4c36ccef",
+              "prompt": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
+              "expectedAnswers": [
+                "Roscioli"
+              ],
+              "expectedSourceStepIds": [
+                "answer_ultrachat_448704"
+              ],
+              "retrievedIds": [
+                "answer_ultrachat_448704"
+              ],
+              "answer": "Roscioli",
+              "citedIds": [
+                "answer_ultrachat_448704"
+              ],
+              "latencyMs": 842.2203340001033,
+              "contextTokensApprox": 864,
+              "answererPromptTokens": 1257,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-26-6ae235be",
+              "category": "single-session-assistant",
+              "questionId": "6ae235be",
+              "prompt": "I remember you told me about the refining processes at CITGO's three refineries earlier. Can you remind me what kind of processes are used at the Lake Charles Refinery?",
+              "expectedAnswers": [
+                "Atmospheric distillation, fluid catalytic cracking (FCC), alkylation, and hydrotreating."
+              ],
+              "expectedSourceStepIds": [
+                "answer_sharegpt_IUWQYGQ_0"
+              ],
+              "retrievedIds": [
+                "answer_sharegpt_IUWQYGQ_0"
+              ],
+              "answer": "The Lake Charles Refinery uses the following refining processes:\n- Atmospheric distillation\n- Fluid catalytic cracking (FCC)\n- Alkylation\n- Hydrotreating",
+              "citedIds": [
+                "answer_sharegpt_IUWQYGQ_0"
+              ],
+              "latencyMs": 863.6472089997369,
+              "contextTokensApprox": 2259,
+              "answererPromptTokens": 2181,
+              "answererCompletionTokens": 74,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-27-7e00a6cb",
+              "category": "single-session-assistant",
+              "questionId": "7e00a6cb",
+              "prompt": "I'm planning my trip to Amsterdam again and I was wondering, what was the name of that hostel near the Red Light District that you recommended last time?",
+              "expectedAnswers": [
+                "International Budget Hostel"
+              ],
+              "expectedSourceStepIds": [
+                "answer_ultrachat_370515"
+              ],
+              "retrievedIds": [
+                "answer_ultrachat_370515"
+              ],
+              "answer": "unknown",
+              "citedIds": [],
+              "latencyMs": 793.8283749999755,
+              "contextTokensApprox": 939,
+              "answererPromptTokens": 1315,
+              "answererCompletionTokens": 21,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0,
+                "citationPrecision": 0
+              }
+            },
+            {
+              "scenarioId": "longmemeval-28-1903aded",
+              "category": "single-session-assistant",
+              "questionId": "1903aded",
+              "prompt": "I think we discussed work from home jobs for seniors earlier. Can you remind me what was the 7th job in the list you provided?",
+              "expectedAnswers": [
+                "Transcriptionist."
+              ],
+              "expectedSourceStepIds": [
+                "answer_sharegpt_hA7AkP3_0"
+              ],
+              "retrievedIds": [],
+              "answer": "unknown",
+              "citedIds": [],
+              "latencyMs": 943.8670000004095,
+              "contextTokensApprox": 0,
+              "answererPromptTokens": 0,
+              "answererCompletionTokens": 0,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 0,
+                "citationRecall": 0,
+                "citationPrecision": 0
+              }
+            },
+            {
+              "scenarioId": "longmemeval-29-ceb54acb",
+              "category": "single-session-assistant",
+              "questionId": "ceb54acb",
+              "prompt": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
+              "expectedAnswers": [
+                "I suggested 'sexual fixations', 'problematic sexual behaviors', 'sexual impulsivity', and 'compulsive sexuality'."
+              ],
+              "expectedSourceStepIds": [
+                "answer_sharegpt_cGdjmYo_0"
+              ],
+              "retrievedIds": [
+                "answer_sharegpt_cGdjmYo_0"
+              ],
+              "answer": "Sexual fixations, Problematic sexual behaviors, Sexual impulsivity, and Compulsive sexuality",
+              "citedIds": [
+                "answer_sharegpt_cGdjmYo_0"
+              ],
+              "latencyMs": 810.9493749998364,
+              "contextTokensApprox": 383,
+              "answererPromptTokens": 812,
+              "answererCompletionTokens": 54,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-30-f523d9fe",
+              "category": "single-session-assistant",
+              "questionId": "f523d9fe",
+              "prompt": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
+              "expectedAnswers": [
+                "Doc Martin"
+              ],
+              "expectedSourceStepIds": [
+                "answer_sharegpt_m2xJfjo_0"
+              ],
+              "retrievedIds": [
+                "answer_sharegpt_m2xJfjo_0"
+              ],
+              "answer": "doc martin",
+              "citedIds": [
+                "answer_sharegpt_m2xJfjo_0"
+              ],
+              "latencyMs": 1032.4080000000322,
+              "contextTokensApprox": 1417,
+              "answererPromptTokens": 1783,
+              "answererCompletionTokens": 39,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-31-8a2466db",
+              "category": "single-session-preference",
+              "questionId": "8a2466db",
+              "prompt": "Can you recommend some resources where I can learn more about video editing?",
+              "expectedAnswers": [
+                "The user would prefer responses that suggest resources specifically tailored to Adobe Premiere Pro, especially those that delve into its advanced settings. They might not prefer general video editing resources or resources related to other video editing software."
+              ],
+              "expectedSourceStepIds": [
+                "answer_edb03329"
+              ],
+              "retrievedIds": [
+                "answer_edb03329"
+              ],
+              "answer": "You can learn more about video editing through:\n- Adobe Premiere Pro's official documentation and tutorials\n- YouTube channels like Premiere Bro, Video Copilot, and Adobe Creative Cloud\n- Online courses on platforms like Udemy, LinkedIn Learning, and Skillshare\n- Premiere Pro communities and forums, such as Reddit's r/premierepro and Adobe's Premiere Pro forum",
+              "citedIds": [
+                "answer_edb03329"
+              ],
+              "latencyMs": 777.9586669998935,
+              "contextTokensApprox": 6514,
+              "answererPromptTokens": 5938,
+              "answererCompletionTokens": 105,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-32-06878be2",
+              "category": "single-session-preference",
+              "questionId": "06878be2",
+              "prompt": "Can you suggest some accessories that would complement my current photography setup?",
+              "expectedAnswers": [
+                "The user would prefer suggestions of Sony-compatible accessories or high-quality photography gear that can enhance their photography experience. They may not prefer suggestions of other brands' equipment or low-quality gear."
+              ],
+              "expectedSourceStepIds": [
+                "answer_555dfb94"
+              ],
+              "retrievedIds": [
+                "answer_555dfb94"
+              ],
+              "answer": "To complement your current photography setup, which includes a Sony A7R IV camera, a Godox V1 flash, a Sony 24-70mm f/2.8 lens, and a Gitzo GT3543LS tripod, you might consider the following accessories:\n\n* **Camera Bags:** You were looking for a comfortable and durable camera bag designed for your gear. Great brands to explore include Think Tank Photo, Lowepro, F-Stop Gear, Peak Design, and MindShift Gear.\n* **Flash Protection:** To protect your Godox V1 flash, you can consider the Godox V1 Hard Case, a Nanuk 915 or Pelican 1060 hard case, or soft pouches from Think Tank Photo, Lowepro, or Vello.\n* **Power Banks:** For charging your camera and other devices on the go, excellent USB-C PD battery pack options include the Anker PowerCore 20000 PD, Mophie Powerstation XXL, or Jackery Titan S 20000.\n* **Tripod Head:** Since you are interested in the Gitzo GT3543LS tripod, you will need a compatible head for it, such as the Gitzo GH3382QD ballhead.",
+              "citedIds": [
+                "answer_555dfb94"
+              ],
+              "latencyMs": 670.4323750000185,
+              "contextTokensApprox": 4882,
+              "answererPromptTokens": 5076,
+              "answererCompletionTokens": 292,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-33-75832dbd",
+              "category": "single-session-preference",
+              "questionId": "75832dbd",
+              "prompt": "Can you recommend some recent publications or conferences that I might find interesting?",
+              "expectedAnswers": [
+                "The user would prefer suggestions related to recent research papers, articles, or conferences that focus on artificial intelligence in healthcare, particularly those that involve deep learning for medical image analysis. They would not be interested in general AI topics or those unrelated to healthcare."
+              ],
+              "expectedSourceStepIds": [
+                "answer_d87a6ef8"
+              ],
+              "retrievedIds": [],
+              "answer": "unknown",
+              "citedIds": [],
+              "latencyMs": 760.5292500002179,
+              "contextTokensApprox": 0,
+              "answererPromptTokens": 0,
+              "answererCompletionTokens": 0,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 0,
+                "citationRecall": 0,
+                "citationPrecision": 0
+              }
+            },
+            {
+              "scenarioId": "longmemeval-34-0edc2aef",
+              "category": "single-session-preference",
+              "questionId": "0edc2aef",
+              "prompt": "Can you suggest a hotel for my upcoming trip to Miami?",
+              "expectedAnswers": [
+                "The user would prefer suggestions of hotels in Miami that offer great views, possibly of the ocean or the city skyline, and have unique features such as a rooftop pool or a hot tub on the balcony. They may not prefer suggestions of basic or budget hotels without these features."
+              ],
+              "expectedSourceStepIds": [
+                "answer_d586e9cd"
+              ],
+              "retrievedIds": [
+                "answer_d586e9cd"
+              ],
+              "answer": "unknown",
+              "citedIds": [],
+              "latencyMs": 656.9799159997274,
+              "contextTokensApprox": 4682,
+              "answererPromptTokens": 4421,
+              "answererCompletionTokens": 21,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0,
+                "citationPrecision": 0
+              }
+            },
+            {
+              "scenarioId": "longmemeval-35-35a27287",
+              "category": "single-session-preference",
+              "questionId": "35a27287",
+              "prompt": "Can you recommend some interesting cultural events happening around me this weekend?",
+              "expectedAnswers": [
+                "The user would prefer responses that suggest cultural events where they can practice their language skills, particularly Spanish and French. They would also appreciate if the event has a focus on language learning resources. They would not prefer events that do not provide opportunities for language practice or cultural exchange."
+              ],
+              "expectedSourceStepIds": [
+                "answer_9b182436"
+              ],
+              "retrievedIds": [
+                "answer_9b182436"
+              ],
+              "answer": "unknown",
+              "citedIds": [],
+              "latencyMs": 736.4827920000607,
+              "contextTokensApprox": 5578,
+              "answererPromptTokens": 4825,
+              "answererCompletionTokens": 21,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0,
+                "citationPrecision": 0
+              }
+            },
+            {
+              "scenarioId": "longmemeval-36-32260d93",
+              "category": "single-session-preference",
+              "questionId": "32260d93",
+              "prompt": "Can you recommend a show or movie for me to watch tonight?",
+              "expectedAnswers": [
+                "The user would prefer recommendations for stand-up comedy specials on Netflix, especially those that are known for their storytelling. They may not prefer recommendations for other genres or platforms."
+              ],
+              "expectedSourceStepIds": [
+                "answer_0250ae1c"
+              ],
+              "retrievedIds": [
+                "answer_0250ae1c"
+              ],
+              "answer": "unknown",
+              "citedIds": [],
+              "latencyMs": 670.109666999906,
+              "contextTokensApprox": 4360,
+              "answererPromptTokens": 4119,
+              "answererCompletionTokens": 21,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0,
+                "citationPrecision": 0
+              }
+            },
+            {
+              "scenarioId": "longmemeval-37-195a1a1b",
+              "category": "single-session-preference",
+              "questionId": "195a1a1b",
+              "prompt": "Can you suggest some activities that I can do in the evening?",
+              "expectedAnswers": [
+                "The user would prefer suggestions that involve relaxing activities that can be done in the evening, preferably before 9:30 pm. They would not prefer suggestions that involve using their phone or watching TV, as these activities have been affecting their sleep quality."
+              ],
+              "expectedSourceStepIds": [
+                "answer_6dc4305e"
+              ],
+              "retrievedIds": [
+                "answer_6dc4305e"
+              ],
+              "answer": "Here are some evening activities you can do to wind down:\n\n**Relaxation Techniques:**\n* Reading a book that's not too engaging\n* Meditation (using apps like Headspace, Calm, or Insight Timer)\n* Deep breathing exercises\n* Yoga or gentle stretching\n* Listening to soothing music or nature sounds\n\n**Other Wind-Down Activities:**\n* Disconnecting from electronic devices\n* Preparing your sleep environment (dimming lights, making the bed)\n* Getting ready for bed (brushing teeth, changing into pajamas)\n* Writing in a journal to reflect on your day",
+              "citedIds": [
+                "answer_6dc4305e"
+              ],
+              "latencyMs": 707.5415419999445,
+              "contextTokensApprox": 4572,
+              "answererPromptTokens": 4618,
+              "answererCompletionTokens": 160,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-38-afdc33df",
+              "category": "single-session-preference",
+              "questionId": "afdc33df",
+              "prompt": "My kitchen's becoming a bit of a mess again. Any tips for keeping it clean?",
+              "expectedAnswers": [
+                "The user would prefer responses that acknowledge and build upon their existing efforts to organize their kitchen, such as utilizing their new utensil holder to keep countertops clutter-free. They would also appreciate tips that address their concern for maintaining their granite surface, particularly around the sink area. Preferred responses would provide practical and actionable steps to maintain cleanliness, leveraging the user's current tools and setup. They might not prefer generic or vague suggestions that do not take into account their specific kitchen setup or concerns."
+              ],
+              "expectedSourceStepIds": [
+                "answer_8549e5e0"
+              ],
+              "retrievedIds": [
+                "answer_8549e5e0"
+              ],
+              "answer": "Here are some tips to help you keep your kitchen clean and organized:\n\n**Garbage Disposal:**\n• Run cold water while the disposal is running to help move food particles.\n• Grind ice and rock salt to scrub away debris and odors.\n• Deodorize by grinding small pieces of lemon or orange.\n\n**Countertops:**\n• Clean your granite countertops regularly to prevent dirt and debris from accumulating.\n• Always use cutting boards, coasters, and pads under pots and pans to prevent scratches.\n• Avoid harsh chemicals or abrasive cleaners, and use soft cloths to wipe surfaces.\n\n**Utensil Organization:**\n• Store your most frequently used utensils front and center for easy access.\n• Use dividers to separate groups of utensils.\n• Clean your utensil holder regularly to prevent bacteria growth.\n\n**Faucet Maintenance:**\n• Regularly inspect and maintain your faucet to prevent leaks and extend its lifespan.\n• For a leaky faucet, check and clean the aerator or replace worn-out O-rings and gaskets. \n\n**Slow Cooker Yogurt:**\n• Use a thermometer when making yogurt to ensure your milk is at the correct temperatures.",
+              "citedIds": [
+                "answer_8549e5e0"
+              ],
+              "latencyMs": 712.8677910000079,
+              "contextTokensApprox": 5263,
+              "answererPromptTokens": 5312,
+              "answererCompletionTokens": 293,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-39-caf03d32",
+              "category": "single-session-preference",
+              "questionId": "caf03d32",
+              "prompt": "I've been struggling with my slow cooker recipes. Any advice on getting better results?",
+              "expectedAnswers": [
+                "The user would prefer responses that provide tips and advice specifically tailored to their slow cooker experiences, utilizing their recent success with beef stew and interest in making yogurt in the slow cooker. They might not prefer general slow cooker recipes or advice unrelated to their specific experiences and interests."
+              ],
+              "expectedSourceStepIds": [
+                "answer_2fc6aabb"
+              ],
+              "retrievedIds": [
+                "answer_2fc6aabb"
+              ],
+              "answer": "For better results with your slow cooker recipes, try some of these tips and popular ideas:\n\n**General Tips:**\n* Use a low heat setting to prevent food from scorching or burning.\n* When using canned beans or tomatoes, choose low-sodium options and rinse them with water.\n* Add a splash of vinegar or lemon juice to enhance flavors and aid digestion.\n* Don't be afraid to get creative with spices and seasonings to add depth of flavor.\n\n**Recipe Recommendations:**\n* **Classic Favorites:** Chili Con Carne, Pulled Pork, or Pot Roast.\n* **Vegetarian/Vegan:** Lentil Curry, Roasted Vegetable Stew, or Black Bean Chili.\n* **Comfort Food:** Mac and Cheese, Chicken and Dumplings, or Butternut Squash Risotto.\n* **Breakfast:** A convenient breakfast casserole made with scrambled eggs, sausage, and bread.\n* **Homemade Yogurt:** You can also use your slow cooker to make homemade yogurt by heating milk to 180°F-185°F and incubating it for 8-12 hours.",
+              "citedIds": [
+                "answer_2fc6aabb"
+              ],
+              "latencyMs": 722.4964160000127,
+              "contextTokensApprox": 5148,
+              "answererPromptTokens": 5261,
+              "answererCompletionTokens": 267,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-40-54026fce",
+              "category": "single-session-preference",
+              "questionId": "54026fce",
+              "prompt": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
+              "expectedAnswers": [
+                "The user would prefer responses that acknowledge their desire for social interaction and collaboration while working remotely, utilizing their previous experiences with company initiatives and team collaborations. They might prefer suggestions of virtual team-building activities, regular check-ins, or joining interest-based groups within the company. The user may not prefer generic suggestions that do not take into account their specific work situation or previous attempts at staying connected with colleagues."
+              ],
+              "expectedSourceStepIds": [
+                "answer_f7b22c66"
+              ],
+              "retrievedIds": [
+                "answer_f7b22c66"
+              ],
+              "answer": "Here are a few suggestions to help you stay connected with your colleagues:\n\n1.  **Virtual Coffee Breaks**: Schedule informal video calls for casual chats, similar to watercooler conversations.\n2.  **Online Team Activities**: Organize virtual games or team-building exercises, such as trivia or online escape rooms.\n3.  **Collaborative Projects**: Work on cross-departmental projects or join working groups to increase interactions.\n4.  **Social Channels**: Create or join informal chat groups on platforms like Slack or Microsoft Teams for non-work-related conversations.\n5.  **Recognition and Celebrations**: Celebrate milestones, birthdays, or work anniversaries with virtual parties or shout-outs.\n6.  **Interest-Based Groups**: Start or join groups based on shared interests, such as book clubs or fitness challenges.",
+              "citedIds": [
+                "answer_f7b22c66"
+              ],
+              "latencyMs": 726.0502079998332,
+              "contextTokensApprox": 3748,
+              "answererPromptTokens": 3524,
+              "answererCompletionTokens": 203,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-41-e47becba",
+              "category": "single-session-user",
+              "questionId": "e47becba",
+              "prompt": "What degree did I graduate with?",
+              "expectedAnswers": [
+                "Business Administration"
+              ],
+              "expectedSourceStepIds": [
+                "answer_280352e9"
+              ],
+              "retrievedIds": [
+                "answer_280352e9"
+              ],
+              "answer": "Business Administration",
+              "citedIds": [
+                "answer_280352e9"
+              ],
+              "latencyMs": 693.1899159999375,
+              "contextTokensApprox": 4572,
+              "answererPromptTokens": 4317,
+              "answererCompletionTokens": 34,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-42-118b2229",
+              "category": "single-session-user",
+              "questionId": "118b2229",
+              "prompt": "How long is my daily commute to work?",
+              "expectedAnswers": [
+                "45 minutes each way"
+              ],
+              "expectedSourceStepIds": [
+                "answer_40a90d51"
+              ],
+              "retrievedIds": [
+                "answer_40a90d51"
+              ],
+              "answer": "1 hour and 30 minutes",
+              "citedIds": [
+                "answer_40a90d51"
+              ],
+              "latencyMs": 695.5356660000689,
+              "contextTokensApprox": 3374,
+              "answererPromptTokens": 3402,
+              "answererCompletionTokens": 38,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-43-51a45a95",
+              "category": "single-session-user",
+              "questionId": "51a45a95",
+              "prompt": "Where did I redeem a $5 coupon on coffee creamer?",
+              "expectedAnswers": [
+                "Target"
+              ],
+              "expectedSourceStepIds": [
+                "answer_d61669c7"
+              ],
+              "retrievedIds": [
+                "answer_d61669c7"
+              ],
+              "answer": "Target",
+              "citedIds": [
+                "answer_d61669c7"
+              ],
+              "latencyMs": 654.9942500000725,
+              "contextTokensApprox": 2880,
+              "answererPromptTokens": 2880,
+              "answererCompletionTokens": 22,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-44-58bf7951",
+              "category": "single-session-user",
+              "questionId": "58bf7951",
+              "prompt": "What play did I attend at the local community theater?",
+              "expectedAnswers": [
+                "The Glass Menagerie"
+              ],
+              "expectedSourceStepIds": [
+                "answer_355c48bb"
+              ],
+              "retrievedIds": [
+                "answer_355c48bb"
+              ],
+              "answer": "The Glass Menagerie",
+              "citedIds": [
+                "answer_355c48bb"
+              ],
+              "latencyMs": 689.0884159997768,
+              "contextTokensApprox": 2675,
+              "answererPromptTokens": 2641,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-45-1e043500",
+              "category": "single-session-user",
+              "questionId": "1e043500",
+              "prompt": "What is the name of the playlist I created on Spotify?",
+              "expectedAnswers": [
+                "Summer Vibes"
+              ],
+              "expectedSourceStepIds": [
+                "answer_3e012175"
+              ],
+              "retrievedIds": [
+                "answer_3e012175"
+              ],
+              "answer": "Summer Vibes",
+              "citedIds": [
+                "answer_3e012175"
+              ],
+              "latencyMs": 665.2884999998605,
+              "contextTokensApprox": 3430,
+              "answererPromptTokens": 3386,
+              "answererCompletionTokens": 35,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-46-c5e8278d",
+              "category": "single-session-user",
+              "questionId": "c5e8278d",
+              "prompt": "What was my last name before I changed it?",
+              "expectedAnswers": [
+                "Johnson"
+              ],
+              "expectedSourceStepIds": [
+                "answer_f6168136"
+              ],
+              "retrievedIds": [
+                "answer_f6168136"
+              ],
+              "answer": "Johnson",
+              "citedIds": [
+                "answer_f6168136"
+              ],
+              "latencyMs": 658.3492079998905,
+              "contextTokensApprox": 3954,
+              "answererPromptTokens": 3874,
+              "answererCompletionTokens": 33,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-47-6ade9755",
+              "category": "single-session-user",
+              "questionId": "6ade9755",
+              "prompt": "Where do I take yoga classes?",
+              "expectedAnswers": [
+                "Serenity Yoga"
+              ],
+              "expectedSourceStepIds": [
+                "answer_9398da02"
+              ],
+              "retrievedIds": [
+                "answer_9398da02"
+              ],
+              "answer": "Serenity Yoga",
+              "citedIds": [
+                "answer_9398da02"
+              ],
+              "latencyMs": 694.3727499997294,
+              "contextTokensApprox": 2451,
+              "answererPromptTokens": 2533,
+              "answererCompletionTokens": 25,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-48-6f9b354f",
+              "category": "single-session-user",
+              "questionId": "6f9b354f",
+              "prompt": "What color did I repaint my bedroom walls?",
+              "expectedAnswers": [
+                "a lighter shade of gray"
+              ],
+              "expectedSourceStepIds": [
+                "answer_feb5200f"
+              ],
+              "retrievedIds": [
+                "answer_feb5200f"
+              ],
+              "answer": "a lighter shade of gray",
+              "citedIds": [
+                "answer_feb5200f"
+              ],
+              "latencyMs": 666.7330840000432,
+              "contextTokensApprox": 3689,
+              "answererPromptTokens": 3708,
+              "answererCompletionTokens": 36,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-49-58ef2f1c",
+              "category": "single-session-user",
+              "questionId": "58ef2f1c",
+              "prompt": "When did I volunteer at the local animal shelter's fundraising dinner?",
+              "expectedAnswers": [
+                "February 14th"
+              ],
+              "expectedSourceStepIds": [
+                "answer_59547700"
+              ],
+              "retrievedIds": [
+                "answer_59547700"
+              ],
+              "answer": "14 February 2023",
+              "citedIds": [
+                "answer_59547700"
+              ],
+              "latencyMs": 692.8419589999066,
+              "contextTokensApprox": 3194,
+              "answererPromptTokens": 3240,
+              "answererCompletionTokens": 37,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-50-f8c5f88b",
+              "category": "single-session-user",
+              "questionId": "f8c5f88b",
+              "prompt": "Where did I buy my new tennis racket from?",
+              "expectedAnswers": [
+                "the sports store downtown"
+              ],
+              "expectedSourceStepIds": [
+                "answer_c3567066"
+              ],
+              "retrievedIds": [
+                "answer_c3567066"
+              ],
+              "answer": "a sports store downtown",
+              "citedIds": [
+                "answer_c3567066"
+              ],
+              "latencyMs": 682.7856660001999,
+              "contextTokensApprox": 3489,
+              "answererPromptTokens": 3497,
+              "answererCompletionTokens": 36,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-51-gpt4_2655b836",
+              "category": "temporal-reasoning",
+              "questionId": "gpt4_2655b836",
+              "prompt": "What was the first issue I had with my new car after its first service?",
+              "expectedAnswers": [
+                "GPS system not functioning correctly"
+              ],
+              "expectedSourceStepIds": [
+                "answer_4be1b6b4_2",
+                "answer_4be1b6b4_3",
+                "answer_4be1b6b4_1"
+              ],
+              "retrievedIds": [
+                "answer_4be1b6b4_1",
+                "answer_4be1b6b4_3",
+                "answer_4be1b6b4_2"
+              ],
+              "answer": "an issue with the car's GPS system",
+              "citedIds": [
+                "answer_4be1b6b4_3"
+              ],
+              "latencyMs": 608.7291659996481,
+              "contextTokensApprox": 10812,
+              "answererPromptTokens": 9639,
+              "answererCompletionTokens": 44,
+              "score": {
+                "answerCorrect": 0,
+                "retrievalRecall": 1,
+                "citationRecall": 0.3333333333333333,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-52-gpt4_2487a7cb",
+              "category": "temporal-reasoning",
+              "questionId": "gpt4_2487a7cb",
+              "prompt": "Which event did I attend first, the 'Effective Time Management' workshop or the 'Data Analysis using Python' webinar?",
+              "expectedAnswers": [
+                "'Data Analysis using Python' webinar"
+              ],
+              "expectedSourceStepIds": [
+                "answer_1c6b85ea_1",
+                "answer_1c6b85ea_2"
+              ],
+              "retrievedIds": [
+                "answer_1c6b85ea_2",
+                "answer_1c6b85ea_1"
+              ],
+              "answer": "Data Analysis using Python webinar",
+              "citedIds": [
+                "answer_1c6b85ea_2",
+                "answer_1c6b85ea_1"
+              ],
+              "latencyMs": 789.8290829998587,
+              "contextTokensApprox": 8760,
+              "answererPromptTokens": 7720,
+              "answererCompletionTokens": 53,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-53-gpt4_76048e76",
+              "category": "temporal-reasoning",
+              "questionId": "gpt4_76048e76",
+              "prompt": "Which vehicle did I take care of first in February, the bike or the car?",
+              "expectedAnswers": [
+                "bike"
+              ],
+              "expectedSourceStepIds": [
+                "answer_b535969f_2",
+                "answer_b535969f_1"
+              ],
+              "retrievedIds": [
+                "answer_b535969f_2",
+                "answer_b535969f_1"
+              ],
+              "answer": "bike",
+              "citedIds": [
+                "answer_b535969f_2",
+                "answer_b535969f_1"
+              ],
+              "latencyMs": 647.6568750003935,
+              "contextTokensApprox": 6583,
+              "answererPromptTokens": 6275,
+              "answererCompletionTokens": 47,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-54-gpt4_2312f94c",
+              "category": "temporal-reasoning",
+              "questionId": "gpt4_2312f94c",
+              "prompt": "Which device did I got first, the Samsung Galaxy S22 or the Dell XPS 13?",
+              "expectedAnswers": [
+                "Samsung Galaxy S22"
+              ],
+              "expectedSourceStepIds": [
+                "answer_5328c3c2_1",
+                "answer_5328c3c2_2"
+              ],
+              "retrievedIds": [
+                "answer_5328c3c2_2",
+                "answer_5328c3c2_1"
+              ],
+              "answer": "Samsung Galaxy S22",
+              "citedIds": [
+                "answer_5328c2_2",
+                "answer_5328c2_1"
+              ],
+              "latencyMs": 664.6512500001336,
+              "contextTokensApprox": 6764,
+              "answererPromptTokens": 6567,
+              "answererCompletionTokens": 50,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 0,
+                "citationPrecision": 0
+              }
+            },
+            {
+              "scenarioId": "longmemeval-55-0bb5a684",
+              "category": "temporal-reasoning",
+              "questionId": "0bb5a684",
+              "prompt": "How many days before the team meeting I was preparing for did I attend the workshop on 'Effective Communication in the Workplace'?",
+              "expectedAnswers": [
+                "7 days. 8 days (including the last day) is also acceptable."
+              ],
+              "expectedSourceStepIds": [
+                "answer_e936197f_1",
+                "answer_e936197f_2"
+              ],
+              "retrievedIds": [
+                "answer_e936197f_2",
+                "answer_e936197f_1"
+              ],
+              "answer": "7 days",
+              "citedIds": [
+                "answer_e936197f_2",
+                "answer_e936197f_1"
+              ],
+              "latencyMs": 738.5917089995928,
+              "contextTokensApprox": 9072,
+              "answererPromptTokens": 8082,
+              "answererCompletionTokens": 48,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-56-08f4fc43",
+              "category": "temporal-reasoning",
+              "questionId": "08f4fc43",
+              "prompt": "How many days had passed between the Sunday mass at St. Mary's Church and the Ash Wednesday service at the cathedral?",
+              "expectedAnswers": [
+                "30 days. 31 days (including the last day) is also acceptable."
+              ],
+              "expectedSourceStepIds": [
+                "answer_6ea1541e_2",
+                "answer_6ea1541e_1"
+              ],
+              "retrievedIds": [
+                "answer_6ea1541e_1",
+                "answer_6ea1541e_2"
+              ],
+              "answer": "30",
+              "citedIds": [
+                "answer_6ea1541e_1",
+                "answer_6ea1541e_2"
+              ],
+              "latencyMs": 776.3157500003217,
+              "contextTokensApprox": 8434,
+              "answererPromptTokens": 7096,
+              "answererCompletionTokens": 47,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-57-2c63a862",
+              "category": "temporal-reasoning",
+              "questionId": "2c63a862",
+              "prompt": "How many days did it take for me to find a house I loved after starting to work with Rachel?",
+              "expectedAnswers": [
+                "14 days. 15 days (including the last day) is also acceptable."
+              ],
+              "expectedSourceStepIds": [
+                "answer_d39b7977_1",
+                "answer_d39b7977_2"
+              ],
+              "retrievedIds": [
+                "answer_d39b7977_1",
+                "answer_d39b7977_2"
+              ],
+              "answer": "14",
+              "citedIds": [
+                "answer_d39b7977_1",
+                "answer_d39b7977_2"
+              ],
+              "latencyMs": 815.2456249999886,
+              "contextTokensApprox": 6883,
+              "answererPromptTokens": 6312,
+              "answererCompletionTokens": 47,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-58-gpt4_385a5000",
+              "category": "temporal-reasoning",
+              "questionId": "gpt4_385a5000",
+              "prompt": "Which seeds were started first, the tomatoes or the marigolds?",
+              "expectedAnswers": [
+                "Tomatoes"
+              ],
+              "expectedSourceStepIds": [
+                "answer_7a4a93f1_2",
+                "answer_7a4a93f1_1"
+              ],
+              "retrievedIds": [
+                "answer_7a4a93f1_2",
+                "answer_7a4a93f1_1"
+              ],
+              "answer": "tomatoes",
+              "citedIds": [
+                "answer_7a4a93f1_1",
+                "answer_7a4a93f1_2"
+              ],
+              "latencyMs": 695.9454999996524,
+              "contextTokensApprox": 5322,
+              "answererPromptTokens": 5356,
+              "answererCompletionTokens": 52,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-59-2a1811e2",
+              "category": "temporal-reasoning",
+              "questionId": "2a1811e2",
+              "prompt": "How many days had passed between the Hindu festival of Holi and the Sunday mass at St. Mary's Church?",
+              "expectedAnswers": [
+                "21 days. 22 days (including the last day) is also acceptable."
+              ],
+              "expectedSourceStepIds": [
+                "answer_1cc3cd0c_2",
+                "answer_1cc3cd0c_1"
+              ],
+              "retrievedIds": [
+                "answer_1cc3cd0c_1",
+                "answer_1cc3cd0c_2"
+              ],
+              "answer": "21 days",
+              "citedIds": [
+                "answer_1cc3cd0c_1",
+                "answer_1cc3cd0c_2"
+              ],
+              "latencyMs": 736.8564580001475,
+              "contextTokensApprox": 6876,
+              "answererPromptTokens": 6856,
+              "answererCompletionTokens": 50,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            },
+            {
+              "scenarioId": "longmemeval-60-bbf86515",
+              "category": "temporal-reasoning",
+              "questionId": "bbf86515",
+              "prompt": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
+              "expectedAnswers": [
+                "4 days."
+              ],
+              "expectedSourceStepIds": [
+                "answer_b3763b6b_1",
+                "answer_b3763b6b_2"
+              ],
+              "retrievedIds": [
+                "answer_b3763b6b_1",
+                "answer_b3763b6b_2"
+              ],
+              "answer": "4 days",
+              "citedIds": [
+                "answer_b3763b6b_1",
+                "answer_b3763b6b_2"
+              ],
+              "latencyMs": 649.4594169998891,
+              "contextTokensApprox": 7361,
+              "answererPromptTokens": 6758,
+              "answererCompletionTokens": 50,
+              "score": {
+                "answerCorrect": 1,
+                "retrievalRecall": 1,
+                "citationRecall": 1,
+                "citationPrecision": 1
+              }
+            }
+          ],
+          "summary": {
+            "questionCount": 60,
+            "answerAccuracy": 0.65,
+            "retrievalRecall": 0.9555555555555556,
+            "citationRecall": 0.7513888888888889,
+            "citationPrecision": 0.8833333333333333,
+            "averageLatencyMs": 1423.1118083499891,
+            "p95LatencyMs": 863.6472089997369,
+            "averageContextTokensApprox": 5826.366666666667,
+            "averageAnswererPromptTokens": 5589.666666666667,
+            "averageAnswererCompletionTokens": 57.13333333333333,
+            "totalAnswererPromptTokens": 335380,
+            "totalAnswererCompletionTokens": 3428
+          }
+        }
+      ],
+      "summary": {
+        "questionCount": 60,
+        "answerAccuracy": 0.65,
+        "retrievalRecall": 0.9555555555555556,
+        "citationRecall": 0.7513888888888889,
+        "citationPrecision": 0.8833333333333333,
+        "averageLatencyMs": 1423.1118083499891,
+        "p95LatencyMs": 863.6472089997369,
+        "averageContextTokensApprox": 5826.366666666667,
+        "averageAnswererPromptTokens": 5589.666666666667,
+        "averageAnswererCompletionTokens": 57.13333333333333,
+        "totalAnswererPromptTokens": 335380,
+        "totalAnswererCompletionTokens": 3428,
+        "latencyScore": 1,
+        "overallScore": 0.7707638888888889,
+        "confidence95": {}
+      },
+      "byCategory": [
+        {
+          "category": "knowledge-update",
+          "questionCount": 10,
+          "answerAccuracy": 1,
+          "retrievalRecall": 1,
+          "citationRecall": 0.5,
+          "citationPrecision": 1,
+          "averageLatencyMs": 687.9652164999978,
+          "p95LatencyMs": 743.2884170000307,
+          "averageContextTokensApprox": 7500.7,
+          "averageAnswererPromptTokens": 7182.8,
+          "averageAnswererCompletionTokens": 36.9,
+          "totalAnswererPromptTokens": 71828,
+          "totalAnswererCompletionTokens": 369
+        },
+        {
+          "category": "multi-session",
+          "questionCount": 10,
+          "answerAccuracy": 0.5,
+          "retrievalRecall": 0.9333333333333332,
+          "citationRecall": 0.775,
+          "citationPrecision": 1,
+          "averageLatencyMs": 4879.377654500035,
+          "p95LatencyMs": 42469.40325000014,
+          "averageContextTokensApprox": 10565.4,
+          "averageAnswererPromptTokens": 9955.7,
+          "averageAnswererCompletionTokens": 47.1,
+          "totalAnswererPromptTokens": 99557,
+          "totalAnswererCompletionTokens": 471
+        },
+        {
+          "category": "single-session-assistant",
+          "questionCount": 10,
+          "answerAccuracy": 0.7,
+          "retrievalRecall": 0.9,
+          "citationRecall": 0.8,
+          "citationPrecision": 0.8,
+          "averageLatencyMs": 865.5370919000234,
+          "p95LatencyMs": 1032.4080000000322,
+          "averageContextTokensApprox": 1359.9,
+          "averageAnswererPromptTokens": 1676.2,
+          "averageAnswererCompletionTokens": 38.4,
+          "totalAnswererPromptTokens": 16762,
+          "totalAnswererCompletionTokens": 384
+        },
+        {
+          "category": "single-session-preference",
+          "questionCount": 10,
+          "answerAccuracy": 0,
+          "retrievalRecall": 0.9,
+          "citationRecall": 0.6,
+          "citationPrecision": 0.6,
+          "averageLatencyMs": 714.1448623999622,
+          "p95LatencyMs": 777.9586669998935,
+          "averageContextTokensApprox": 4474.7,
+          "averageAnswererPromptTokens": 4309.4,
+          "averageAnswererCompletionTokens": 138.3,
+          "totalAnswererPromptTokens": 43094,
+          "totalAnswererCompletionTokens": 1383
+        },
+        {
+          "category": "single-session-user",
+          "questionCount": 10,
+          "answerAccuracy": 0.8,
+          "retrievalRecall": 1,
+          "citationRecall": 1,
+          "citationPrecision": 1,
+          "averageLatencyMs": 679.3179414999486,
+          "p95LatencyMs": 695.5356660000689,
+          "averageContextTokensApprox": 3370.8,
+          "averageAnswererPromptTokens": 3347.8,
+          "averageAnswererCompletionTokens": 33.3,
+          "totalAnswererPromptTokens": 33478,
+          "totalAnswererCompletionTokens": 333
+        },
+        {
+          "category": "temporal-reasoning",
+          "questionCount": 10,
+          "answerAccuracy": 0.9,
+          "retrievalRecall": 1,
+          "citationRecall": 0.8333333333333333,
+          "citationPrecision": 0.9,
+          "averageLatencyMs": 712.3280832999626,
+          "p95LatencyMs": 815.2456249999886,
+          "averageContextTokensApprox": 7686.7,
+          "averageAnswererPromptTokens": 7066.1,
+          "averageAnswererCompletionTokens": 48.8,
+          "totalAnswererPromptTokens": 70661,
+          "totalAnswererCompletionTokens": 488
+        }
+      ],
+      "version": null,
+      "mode": null
+    }
+  ]
+}
