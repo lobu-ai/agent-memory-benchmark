@@ -39,8 +39,12 @@ product a user actually gets.
   can demote a spurious substring match. Disclosed here because the judge choice
   is part of the result; a stronger/ensemble judge is the obvious next step.
 - **Citation recall / precision** — overlap of cited ids with gold sources.
-- **Latency** — retrieval-only wall time. Informative, not apples-to-apples
-  between a local server and a hosted API; always read it next to context size.
+- **Latency** — retrieval-only wall time. Every benchmarked system now runs
+  self-hosted as a local HTTP server (Lobu, Supermemory, Hindsight), so all pay a
+  comparable localhost round-trip; differences reflect each system's search path
+  and returned context size, not cloud-vs-local. Ingest-time work (heavy for
+  extraction-based systems) is not in this number. Always read latency next to
+  context size.
 - **Answerer context tokens** — how much context each system hands the reader.
   Lower-for-equal-accuracy is a real efficiency win.
 

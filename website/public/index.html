@@ -57,11 +57,15 @@
           <a href="../METHODOLOGY.md">Read the methodology &rarr;</a>
         </p>
         <p class="caveat">
-          &#9888; <strong>Latency is not apples-to-apples.</strong> Self-hosted
-          systems (Lobu, Hindsight) run in-process; cloud systems (Mem0,
-          Supermemory, Zep) pay a network round-trip. Read latency next to
-          context size, not as a head-to-head ranking. Answer and retrieval are
-          the primary comparison.
+          &#9888; <strong>Latency is retrieval-only wall time, not a clean
+          head-to-head.</strong> Every system on these boards (Lobu, Supermemory,
+          Hindsight) runs self-hosted as a local HTTP server, so all pay a
+          comparable localhost round-trip &mdash; differences reflect each
+          system's search path and the context size it returns, not
+          cloud-vs-local. Ingest-time work (heavy for extraction-based systems
+          like Hindsight) is not counted in this number. Read latency next to
+          context size; answer accuracy and retrieval recall are the primary
+          comparison.
         </p>
         <p class="reproduce-label">Reproduce a run:</p>
         <pre class="reproduce"><code id="reproduce-cmd"></code></pre>
