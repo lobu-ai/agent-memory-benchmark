@@ -1,0 +1,82 @@
+{
+  "judgeModel": "glm-4.6",
+  "judgedAt": "2026-06-16T16:18:49.476Z",
+  "systems": [
+    {
+      "systemId": "hindsight",
+      "systemLabel": "Hindsight",
+      "trials": [
+        {
+          "questions": [
+            {
+              "scenarioId": "longmemeval-1-gpt4_2655b836",
+              "questionId": "gpt4_2655b836",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-2-gpt4_2487a7cb",
+              "questionId": "gpt4_2487a7cb",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-3-gpt4_76048e76",
+              "questionId": "gpt4_76048e76",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-4-gpt4_2312f94c",
+              "questionId": "gpt4_2312f94c",
+              "category": "temporal-reasoning",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-5-0bb5a684",
+              "questionId": "0bb5a684",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-6-08f4fc43",
+              "questionId": "08f4fc43",
+              "category": "temporal-reasoning",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-7-2c63a862",
+              "questionId": "2c63a862",
+              "category": "temporal-reasoning",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-8-gpt4_385a5000",
+              "questionId": "gpt4_385a5000",
+              "category": "temporal-reasoning",
+              "verdict": 0
+            },
+            {
+              "scenarioId": "longmemeval-9-2a1811e2",
+              "questionId": "2a1811e2",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            },
+            {
+              "scenarioId": "longmemeval-10-bbf86515",
+              "questionId": "bbf86515",
+              "category": "temporal-reasoning",
+              "verdict": 1
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "answerAccuracy": 0.6,
+        "perCategory": {
+          "temporal-reasoning": 0.6
+        }
+      }
+    }
+  ]
+}

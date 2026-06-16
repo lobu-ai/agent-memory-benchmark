@@ -1,0 +1,29 @@
+{
+  "suitePath": "suites/longmemeval-mixed-60.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "openai-compatible",
+    "model": "glm-5.1",
+    "baseUrl": "https://api.z.ai/api/coding/paas/v4/",
+    "apiKeyEnv": "Z_AI_API_KEY",
+    "temperature": 0,
+    "maxTokens": 1024
+  },
+  "systems": [
+    {
+      "id": "mem0",
+      "label": "Mem0",
+      "type": "command",
+      "argv": [
+        ".mem0-venv/bin/python",
+        "adapters/mem0_local_adapter.py"
+      ],
+      "env": {
+        "MEM0_CHROMA_PATH": "/tmp/mem0-mixed60-chroma"
+      },
+      "topK": 8
+    }
+  ]
+}
