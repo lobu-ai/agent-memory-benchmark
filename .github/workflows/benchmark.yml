@@ -6,9 +6,8 @@ name: benchmark
 #
 # Required repository secrets:
 #   Z_AI_API_KEY          answerer (glm-5.1) + Hindsight's internal LLM
-#   MEM0_API_KEY          Mem0 cloud
-#   SUPERMEMORY_API_KEY   Supermemory cloud
-#   ZEP_API_KEY           Zep cloud
+#   MEM0_API_KEY          Mem0 (optional; local OSS lib otherwise)
+#   SUPERMEMORY_API_KEY   Supermemory (self-hosted binary)
 #
 # Trigger manually (Actions tab -> benchmark -> Run workflow) or on schedule.
 
@@ -116,10 +115,9 @@ jobs:
       # --- Cloud system versions (SDK version is the comparable identifier) ----
       - name: Capture cloud system versions
         run: |
-          pip install mem0ai supermemory zep-cloud >/dev/null 2>&1 || true
+          pip install mem0ai supermemory >/dev/null 2>&1 || true
           echo "MEM0_VERSION=$(pip show mem0ai        | awk '/^Version:/{print $2}' || echo cloud)" >> "$GITHUB_ENV"
           echo "SUPERMEMORY_VERSION=$(pip show supermemory | awk '/^Version:/{print $2}' || echo cloud)" >> "$GITHUB_ENV"
-          echo "ZEP_VERSION=$(pip show zep-cloud      | awk '/^Version:/{print $2}' || echo cloud)" >> "$GITHUB_ENV"
 
       # --- Run the benchmark ---------------------------------------------------
       - name: Run benchmark
@@ -127,7 +125,6 @@ jobs:
           Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
           MEM0_API_KEY: ${{ secrets.MEM0_API_KEY }}
           SUPERMEMORY_API_KEY: ${{ secrets.SUPERMEMORY_API_KEY }}
-          ZEP_API_KEY: ${{ secrets.ZEP_API_KEY }}
         run: bun run scripts/run.ts --config "configs/$CONFIG"
 
       - name: Regenerate leaderboard data

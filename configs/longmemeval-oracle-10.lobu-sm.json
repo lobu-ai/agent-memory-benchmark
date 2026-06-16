@@ -1,5 +1,5 @@
 {
-  "suitePath": "suites/longmemeval-oracle.50.json",
+  "suitePath": "suites/longmemeval-oracle.10.json",
   "outputDir": "results",
   "trials": 1,
   "topK": 8,
@@ -30,36 +30,6 @@
       "mode": "self-hosted"
     },
     {
-      "id": "hindsight",
-      "label": "Hindsight",
-      "type": "command",
-      "argv": [
-        "python3",
-        "adapters/hindsight_adapter.py"
-      ],
-      "env": {
-        "HINDSIGHT_BASE_URL": "http://localhost:8888",
-        "BENCH_SYSTEM_VERSION": "${HINDSIGHT_VERSION:-unknown}"
-      },
-      "topK": 8,
-      "mode": "self-hosted"
-    },
-    {
-      "id": "mem0",
-      "label": "Mem0",
-      "type": "command",
-      "argv": [
-        "python3",
-        "adapters/mem0_adapter.py"
-      ],
-      "env": {
-        "MEM0_API_KEY": "$MEM0_API_KEY",
-        "BENCH_SYSTEM_VERSION": "${MEM0_VERSION:-unknown}"
-      },
-      "topK": 8,
-      "mode": "cloud"
-    },
-    {
       "id": "supermemory",
       "label": "Supermemory",
       "type": "command",
@@ -69,7 +39,8 @@
       ],
       "env": {
         "SUPERMEMORY_API_KEY": "$SUPERMEMORY_API_KEY",
-        "BENCH_SYSTEM_VERSION": "${SUPERMEMORY_VERSION:-unknown}"
+        "BENCH_SYSTEM_VERSION": "${SUPERMEMORY_VERSION:-unknown}",
+        "SUPERMEMORY_BASE_URL": "http://localhost:6767"
       },
       "topK": 8,
       "mode": "cloud"

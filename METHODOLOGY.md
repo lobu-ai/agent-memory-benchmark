@@ -69,9 +69,10 @@ product a user actually gets.
   answerer + ingestion pipeline, not a shared one. Publishing 0% would be
   unfair to Mem0, so it is excluded pending an eval that matches its intended
   setup. The local adapter (`adapters/mem0_local_adapter.py`) is kept for that.
-- **Zep — cloud quota blocked** (over its account episode quota); cloud-only, so
-  not runnable locally. **Letta — hard-blocked on this machine**: self-host is a
-  Docker image and no container runtime (Docker/OrbStack/Colima) is installed.
+- **Letta — hard-blocked on this machine**: self-host is a Docker image and no
+  container runtime (Docker/OrbStack/Colima) is installed. (Zep is excluded
+  entirely: it is cloud-only and can't be run locally, so it is out of scope for
+  a self-hosted benchmark.)
 - **Hindsight — runs fully local, but throughput-bound by consolidation, not
   quota.** Earlier notes called this "LLM-quota blocked"; that was wrong. The
   self-hosted `hindsight-api` (0.8.2) runs entirely offline against local Ollama:

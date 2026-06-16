@@ -32,9 +32,8 @@ The shared answerer is held constant across systems so the score reflects the
 |---|---|---|
 | Lobu | `adapters/lobu_adapter.py` | public REST tool API of a running `lobu` server |
 | Hindsight | `adapters/hindsight_adapter.py` | local Hindsight API server |
-| Mem0 | `adapters/mem0_adapter.py` | Mem0 cloud API |
-| Supermemory | `adapters/supermemory_adapter.py` | Supermemory cloud API |
-| Zep | `adapters/zep_adapter.py` | Zep cloud/self-hosted API |
+| Mem0 | `adapters/mem0_local_adapter.py` | local OSS `mem0` lib + local Chroma |
+| Supermemory | `adapters/supermemory_adapter.py` | self-hosted `supermemory-server` binary (local) |
 
 ## Datasets
 
@@ -60,8 +59,8 @@ Reports (JSON + Markdown leaderboard) land in `results/`.
 
 `.github/workflows/benchmark.yml` runs the whole thing in CI — it stands up the
 self-hosted systems (Hindsight via `pip`, Lobu via `lobu run` with embedded
-Postgres), captures **each system's version under test**, runs the benchmark
-against the cloud systems, regenerates the leaderboard data, and uploads/commits
+Postgres, Supermemory via its local binary), captures **each system's version
+under test**, runs the benchmark, regenerates the leaderboard data, and uploads/commits
 the result artifacts. This keeps results reproducible and version-tracked over
 time (`systems[].version` in every report).
 
@@ -73,15 +72,11 @@ Required repository secrets (Settings → Secrets and variables → Actions):
 | Secret | Used for |
 |---|---|
 | `Z_AI_API_KEY` | the shared answerer (glm-5.1) + Hindsight's internal LLM |
-| `MEM0_API_KEY` | Mem0 cloud |
-| `SUPERMEMORY_API_KEY` | Supermemory cloud |
-| `ZEP_API_KEY` | Zep cloud |
+| `SUPERMEMORY_API_KEY` | Supermemory self-hosted binary (any value for local) |
 
 ```bash
 gh secret set Z_AI_API_KEY -R lobu-ai/agent-memory-benchmark
-gh secret set MEM0_API_KEY -R lobu-ai/agent-memory-benchmark
 gh secret set SUPERMEMORY_API_KEY -R lobu-ai/agent-memory-benchmark
-gh secret set ZEP_API_KEY -R lobu-ai/agent-memory-benchmark
 ```
 
 ## Add a system (PR)

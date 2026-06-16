@@ -75,21 +75,6 @@
       "mode": "cloud"
     },
     {
-      "id": "zep",
-      "label": "Zep",
-      "type": "command",
-      "argv": [
-        "python3",
-        "adapters/zep_adapter.py"
-      ],
-      "env": {
-        "ZEP_API_KEY": "$ZEP_API_KEY",
-        "BENCH_SYSTEM_VERSION": "${ZEP_VERSION:-unknown}"
-      },
-      "topK": 8,
-      "mode": "cloud"
-    },
-    {
       "id": "letta",
       "label": "Letta",
       "type": "command",
