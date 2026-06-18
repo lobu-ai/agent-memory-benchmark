@@ -343,6 +343,14 @@ td.heat {
   white-space: nowrap;
 }
 
+/* Coverage note under the methodology blurb (which systems run which suites). */
+.coverage-note {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  max-width: 80ch;
+}
+
 /* Fairness caveat under the methodology blurb. */
 .caveat {
   margin-top: 0.5rem;

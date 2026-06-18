@@ -8,7 +8,7 @@
       name="description"
       content="A fair, reproducible benchmark for agent long-term memory systems."
     />
-    <link rel="stylesheet" href="./style.css?v=4" />
+    <link rel="stylesheet" href="./style.css?v=5" />
   </head>
   <body>
     <header class="site-header">
@@ -52,6 +52,12 @@
           answerer reads the retrieved context; raw metrics first.
           <a href="../METHODOLOGY.md">Read the methodology &rarr;</a>
         </p>
+        <p class="coverage-note">
+          Coverage note: not every system runs every suite. Hindsight is shown
+          on the oracle suite only &mdash; its LLM extract-and-consolidate ingest
+          runs minutes per scenario, too slow to scale to the others.
+          longmemeval-v2 shows the systems with cached retrieval.
+        </p>
         <p class="reproduce-label">Reproduce a run:</p>
         <pre class="reproduce"><code id="reproduce-cmd"></code></pre>
       </section>
@@ -61,6 +67,6 @@
       <p id="footer-meta" class="muted"></p>
     </footer>
 
-    <script src="./app.js?v=4"></script>
+    <script src="./app.js?v=5"></script>
   </body>
 </html>
