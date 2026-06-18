@@ -8,7 +8,7 @@
       name="description"
       content="A fair, reproducible benchmark for agent long-term memory systems."
     />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./style.css?v=4" />
   </head>
   <body>
     <header class="site-header">
@@ -28,7 +28,7 @@
     </header>
 
     <main class="wrap">
-      <!-- Control bar: benchmark + answerer model selectors + system toggles -->
+      <!-- Control bar: benchmark + answerer model on row 1, judge on its own row -->
       <section id="controls" class="controls" aria-label="Filters">
         <div class="control-group">
           <span class="control-label">Benchmark</span>
@@ -38,13 +38,9 @@
           <span class="control-label">Answerer model</span>
           <div id="model-pills" class="pills" role="group"></div>
         </div>
-        <div class="control-group">
+        <div class="control-group control-group--newrow">
           <span class="control-label">Judge</span>
           <div id="judge-pills" class="pills" role="group"></div>
-        </div>
-        <div class="control-group control-group--systems">
-          <span class="control-label">Systems</span>
-          <div id="system-toggles" class="toggles" role="group"></div>
         </div>
       </section>
 
@@ -56,19 +52,6 @@
           answerer reads the retrieved context; raw metrics first.
           <a href="../METHODOLOGY.md">Read the methodology &rarr;</a>
         </p>
-        <p class="caveat">
-          &#9888; <strong>Latency is a fair measurement, but read it next to
-          context size.</strong> Every system gets the same query and is timed the
-          same way (retrieval-only wall time), self-hosted as a local HTTP server
-          &mdash; the measurement itself is apples-to-apples. The thing to avoid is
-          reading &ldquo;lowest number wins&rdquo;: a system that returns far less
-          context (e.g. a handful of extracted facts vs. whole sessions) will clock
-          faster simply because it returned less, not because it is better. Lower
-          latency <em>for the same context size</em> is the real efficiency signal.
-          Ingest-time work (heavy for extraction-based systems) isn&rsquo;t in this
-          number either. Answer accuracy and retrieval recall remain the primary
-          comparison.
-        </p>
         <p class="reproduce-label">Reproduce a run:</p>
         <pre class="reproduce"><code id="reproduce-cmd"></code></pre>
       </section>
@@ -78,6 +61,6 @@
       <p id="footer-meta" class="muted"></p>
     </footer>
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=4"></script>
   </body>
 </html>

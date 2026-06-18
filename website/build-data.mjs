@@ -111,6 +111,23 @@ function answererModel(config) {
   return null;
 }
 
+/**
+ * Coarse model family, used to flag same-family (self-)judging. A judge from
+ * the same family as the answerer tends to grade its own outputs leniently, so
+ * those cells are a leniency reference, not a headline number.
+ */
+function modelFamily(model) {
+  const m = String(model || "").toLowerCase();
+  if (!m) return null;
+  if (m.includes("grok")) return "grok";
+  if (m.includes("glm")) return "glm";
+  if (m.includes("claude")) return "claude";
+  if (m.includes("gemini")) return "gemini";
+  if (m.includes("gpt") || m.includes("o1") || m.includes("o3"))
+    return "openai";
+  return m.split(/[-\s]/)[0] || null;
+}
+
 /** Human label for a suite id. Falls back to a title-cased id. */
 function suiteLabel(suiteId) {
   const known = {
@@ -162,13 +179,22 @@ function parseReport(json, filename) {
     const trialAccuracies = trials.map((t) =>
       num(t && t.summary ? t.summary.answerAccuracy : null)
     );
+    // Ingest (write-time) cost — its own benchmark dimension. Average the
+    // per-trial ingest wall-clock; null for older reports without it.
+    const ingestMsVals = trials
+      .map((t) => num(t && t.ingestMs))
+      .filter((x) => x != null);
+    const ingestSeconds = ingestMsVals.length
+      ? ingestMsVals.reduce((a, b) => a + b, 0) / ingestMsVals.length / 1000
+      : null;
     return {
       systemId: canonicalSystemId(sys.systemId || "(unknown)"),
       systemLabel: sys.systemLabel || sys.systemId || "(unknown)",
+      ingestSeconds,
       version:
         typeof sys.version === "string" && sys.version ? sys.version : null,
       mode: typeof sys.mode === "string" && sys.mode ? sys.mode : null,
-      summary: pickSummary(sys.summary),
+      summary: { ...pickSummary(sys.summary), ingestSeconds },
       // Per-trial accuracies + their spread (mean/min/max/stdev). The summary's
       // answerAccuracy is the across-trial mean; this exposes the variance.
       trialAccuracies: trialAccuracies.filter((x) => x != null),
@@ -205,6 +231,22 @@ function main() {
       reports.push(parseReport(json, f));
     } catch (err) {
       console.warn(`[build-data] skipping ${f}: ${err.message}`);
+    }
+  }
+
+  // Real ingest (write-time) cost is system-intrinsic but only the FIRST
+  // (cold-cache) run measures it; later cache-replay runs record ~0 (ingest
+  // skipped). The latest report per system is often a replay, so its ingest is
+  // misleadingly low. Recover the true cost as the MAX ingestSeconds seen for
+  // each (suite, system) across every report, and apply it during materialize.
+  const maxIngest = new Map(); // "suiteId systemId" -> max ingestSeconds
+  for (const r of reports) {
+    for (const sys of r.systems) {
+      if (sys.ingestSeconds == null) continue;
+      const k = `${r.suiteId} ${sys.systemId}`;
+      const prev = maxIngest.get(k);
+      if (prev == null || sys.ingestSeconds > prev)
+        maxIngest.set(k, sys.ingestSeconds);
     }
   }
 
@@ -318,7 +360,18 @@ function main() {
   // Materialize combos into runs.
   const runs = [];
   for (const combo of combos.values()) {
-    const systems = [...combo.systemsLatest.values()].map((e) => e.system);
+    const systems = [...combo.systemsLatest.values()]
+      .map((e) => e.system)
+      .map((sys) => {
+        // Override cache-replay ingest with the true (max) measured ingest.
+        const trueIngest = maxIngest.get(`${combo.suiteId} ${sys.systemId}`);
+        if (trueIngest == null || trueIngest === sys.ingestSeconds) return sys;
+        return {
+          ...sys,
+          ingestSeconds: trueIngest,
+          summary: { ...sys.summary, ingestSeconds: trueIngest },
+        };
+      });
     // questionCount: take from any system that reports one (they should agree).
     let questionCount = null;
     for (const s of systems) {
@@ -332,6 +385,9 @@ function main() {
       suiteLabel: combo.suiteLabel,
       answererModel: combo.answererModel,
       judge: combo.judge,
+      selfJudged:
+        modelFamily(combo.answererModel) != null &&
+        modelFamily(combo.answererModel) === modelFamily(combo.judge),
       generatedAt: combo.generatedAt,
       generatedAtMs: combo.generatedAtMs,
       trials: combo.trials,
@@ -388,6 +444,7 @@ function main() {
         suiteLabel: head.suiteLabel,
         answererModel: AGG_MODEL,
         judge: head.judge,
+        selfJudged: false,
         generatedAt: head.generatedAt,
         generatedAtMs: head.generatedAtMs,
         trials: head.trials,

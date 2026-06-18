@@ -375,6 +375,19 @@ td.heat {
   max-width: 90ch;
 }
 
+/* Same-family (self-grading) warning banner shown under the run caption. */
+.self-judge-warn {
+  margin: 8px 0 4px;
+  max-width: 90ch;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
 /* Per-trial range shown under a multi-trial Answer % mean. */
 .spread {
   font-size: 0.72rem;
@@ -382,3 +395,9 @@ td.heat {
   font-weight: 400;
   white-space: nowrap;
 }
+
+/* ClickBench-style relative multiplier shown under each cost cell. */
+.rel-mult { display: block; font-size: 0.72em; color: #8a8f98; margin-top: 1px; }
+
+/* Judge selector forced onto its own row under benchmark+answerer. */
+.control-group--newrow { flex-basis: 100%; }

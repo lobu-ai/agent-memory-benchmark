@@ -31,15 +31,24 @@
       fmt: pct,
     },
     {
+      key: "ingestSeconds",
+      label: "Ingest time",
+      higherIsBetter: false,
+      rel: true,
+      fmt: secs,
+    },
+    {
       key: "averageLatencyMs",
       label: "Avg latency",
       higherIsBetter: false,
+      rel: true,
       fmt: ms,
     },
     {
       key: "averageContextTokensApprox",
       label: "Avg context tok.",
       higherIsBetter: false,
+      rel: true,
       fmt: tokens,
     },
   ];
@@ -68,6 +77,24 @@
   function tokens(v) {
     if (v == null) return null;
     return Math.round(v).toLocaleString("en-US");
+  }
+  function secs(v) {
+    if (v == null) return null;
+    if (v >= 60) return (v / 60).toFixed(1) + " min";
+    if (v >= 1) return v.toFixed(1) + " s";
+    return (v * 1000).toFixed(0) + " ms";
+  }
+  // ClickBench-style relative multiplier vs the best (lowest) value in a column.
+  function relMultiplier(systems, key) {
+    const vals = systems
+      .map((s) => s.summary && s.summary[key])
+      .filter((x) => typeof x === "number" && isFinite(x) && x > 0);
+    if (!vals.length) return () => null;
+    const best = Math.min(...vals);
+    return (v) =>
+      typeof v === "number" && isFinite(v) && best > 0
+        ? (v / best).toFixed(2) + "×"
+        : null;
   }
 
   // ---- Data lookup ------------------------------------------------------
@@ -152,7 +179,6 @@
     const benchEl = document.getElementById("benchmark-pills");
     const modelEl = document.getElementById("model-pills");
     const judgeEl = document.getElementById("judge-pills");
-    const togEl = document.getElementById("system-toggles");
 
     // Benchmark pills.
     benchEl.innerHTML = "";
@@ -193,26 +219,6 @@
         render();
       });
       judgeEl.appendChild(btn);
-    }
-
-    // System toggles (scoped to current run).
-    togEl.innerHTML = "";
-    const run = findRun(state.suiteId, state.answererModel, state.judge);
-    const systems = run ? run.systems : [];
-    for (const s of systems) {
-      const label = document.createElement("label");
-      label.className = "toggle";
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.checked = state.enabledSystems.has(s.systemId);
-      cb.addEventListener("change", () => {
-        if (cb.checked) state.enabledSystems.add(s.systemId);
-        else state.enabledSystems.delete(s.systemId);
-        renderBoard();
-      });
-      label.appendChild(cb);
-      label.appendChild(document.createTextNode(s.systemLabel));
-      togEl.appendChild(label);
     }
   }
 
@@ -267,10 +273,24 @@
       parts.map(escapeHtml).join(" · ");
     board.appendChild(caption);
 
-    // Visible (checked) systems.
-    let systems = run.systems.filter((s) =>
-      state.enabledSystems.has(s.systemId)
-    );
+    // Same-family (self-grading) warning: the judge is the same model family as
+    // the answerer, so these scores may be lenient. Cross-family judges are the
+    // trustworthy headline; this cell is a leniency reference.
+    if (run.selfJudged) {
+      const warn = document.createElement("p");
+      warn.className = "self-judge-warn";
+      warn.innerHTML =
+        `⚠ <strong>Same-family judge:</strong> ${escapeHtml(
+          String(run.answererModel)
+        )} answered and ${escapeHtml(
+          String(run.judge)
+        )} judged — same model family, so these scores may be self-graded high. ` +
+        `Prefer a cross-family judge for the headline number.`;
+      board.appendChild(warn);
+    }
+
+    // All systems are rows (no checkbox filter).
+    let systems = run.systems.slice();
 
     if (systems.length === 0) {
       const note = document.createElement("div");
@@ -286,6 +306,9 @@
     // Precompute heatmap fns over the visible set.
     const heatFns = {};
     for (const col of COLUMNS) heatFns[col.key] = columnHeat(systems, col);
+    const relFns = {};
+    for (const col of COLUMNS)
+      if (col.rel) relFns[col.key] = relMultiplier(systems, col.key);
 
     // Build table.
     const scroll = document.createElement("div");
@@ -310,14 +333,13 @@
 
       const nameTd = document.createElement("td");
       nameTd.className = "col-system";
-      nameTd.appendChild(document.createTextNode(s.systemLabel));
-      if (s.mode) {
-        const tag = document.createElement("span");
-        tag.className =
-          "sys-mode " + (s.mode === "self-hosted" ? "mode-self" : "mode-cloud");
-        tag.textContent = s.mode;
-        nameTd.appendChild(tag);
-      }
+      // Everything on this board is self-hosted, so drop the redundant
+      // "(self-hosted)" suffix and the mode chip.
+      const cleanLabel = String(s.systemLabel || "").replace(
+        /\s*\(self-hosted\)\s*/i,
+        ""
+      );
+      nameTd.appendChild(document.createTextNode(cleanLabel));
       if (s.version) {
         const ver = document.createElement("span");
         ver.className = "sys-version";
@@ -336,6 +358,17 @@
           td.textContent = "—";
         } else {
           td.textContent = disp;
+          // ClickBench-style relative multiplier vs the best in the column
+          // (1.00× = fastest/cheapest), shown under the absolute value.
+          if (col.rel && relFns[col.key]) {
+            const rel = relFns[col.key](v);
+            if (rel) {
+              const mult = document.createElement("span");
+              mult.className = "rel-mult";
+              mult.textContent = " " + rel;
+              td.appendChild(mult);
+            }
+          }
           // Multi-trial Answer %: show the per-trial range under the mean so a
           // single point can't be over-read (single-trial swings ~±14 points).
           if (
