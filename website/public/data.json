@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-06-17T23:33:03.172Z",
+  "builtAt": "2026-06-18T11:49:37.103Z",
   "benchmarks": [
     {
       "suiteId": "locomo-50",
@@ -153,34 +153,33 @@
         {
           "systemId": "lobu-plain",
           "systemLabel": "Lobu",
-          "ingestSeconds": 736.684,
+          "ingestSeconds": 24.405,
           "version": null,
           "mode": "self-hosted",
           "summary": {
             "questionCount": 50,
-            "answerAccuracy": 0.1924144450746833,
-            "retrievalRecall": 0.05066666666666667,
-            "citationRecall": 0.010666666666666666,
-            "citationPrecision": 0.08,
-            "averageLatencyMs": 8532.639887668192,
-            "p95LatencyMs": 39096.67854383588,
-            "averageContextTokensApprox": 1157.1,
-            "averageAnswererPromptTokens": 1741.4,
-            "averageAnswererCompletionTokens": 83.24,
-            "overallScore": 0.031020657246552362,
-            "ingestSeconds": 736.684
+            "answerAccuracy": 0.39,
+            "retrievalRecall": 0.5313333333333332,
+            "citationRecall": 0.3106666666666667,
+            "citationPrecision": 0.36033333333333334,
+            "averageLatencyMs": 176.31381563842297,
+            "p95LatencyMs": 266.2212960422039,
+            "averageContextTokensApprox": 9882.54,
+            "averageAnswererPromptTokens": 10770.1,
+            "averageAnswererCompletionTokens": 29.26,
+            "overallScore": 0.33686441088475644,
+            "ingestSeconds": 24.405
           },
           "trialAccuracies": [
-            0.046511627906976744,
-            0.17073170731707318,
-            0.36
+            0.36,
+            0.42
           ],
           "accuracySpread": {
-            "mean": 0.1924144450746833,
-            "min": 0.046511627906976744,
-            "max": 0.36,
-            "stdev": 0.12889620034969332,
-            "n": 3
+            "mean": 0.39,
+            "min": 0.36,
+            "max": 0.42,
+            "stdev": 0.03,
+            "n": 2
           }
         }
       ]
@@ -289,37 +288,6 @@
             "stdev": 0,
             "n": 1
           }
-        },
-        {
-          "systemId": "lobu-plain",
-          "systemLabel": "Lobu",
-          "ingestSeconds": 736.684,
-          "version": null,
-          "mode": "self-hosted",
-          "summary": {
-            "questionCount": 50,
-            "answerAccuracy": 0.046511627906976744,
-            "retrievalRecall": 0.05066666666666667,
-            "citationRecall": 0.010666666666666666,
-            "citationPrecision": 0.08,
-            "averageLatencyMs": 8532.639887668192,
-            "p95LatencyMs": 39096.67854383588,
-            "averageContextTokensApprox": 1157.1,
-            "averageAnswererPromptTokens": 1741.4,
-            "averageAnswererCompletionTokens": 83.24,
-            "overallScore": 0.031020657246552362,
-            "ingestSeconds": 736.684
-          },
-          "trialAccuracies": [
-            0.046511627906976744
-          ],
-          "accuracySpread": {
-            "mean": 0.046511627906976744,
-            "min": 0.046511627906976744,
-            "max": 0.046511627906976744,
-            "stdev": 0,
-            "n": 1
-          }
         }
       ]
     },
@@ -329,8 +297,8 @@
       "answererModel": "glm-4.6",
       "judge": "glm-4.6",
       "selfJudged": true,
-      "generatedAt": "2026-06-17T12:35:37.661Z",
-      "generatedAtMs": 1781699737661,
+      "generatedAt": "2026-06-18T11:47:22.571Z",
+      "generatedAtMs": 1781783242571,
       "trials": 1,
       "topK": 8,
       "questionCount": 50,
@@ -338,30 +306,30 @@
         {
           "systemId": "lobu-plain",
           "systemLabel": "Lobu",
-          "ingestSeconds": 237.15,
+          "ingestSeconds": 24.405,
           "version": null,
           "mode": "self-hosted",
           "summary": {
             "questionCount": 50,
-            "answerAccuracy": 0.17073170731707318,
-            "retrievalRecall": 0.09733333333333333,
-            "citationRecall": 0.09733333333333333,
-            "citationPrecision": 0.17,
-            "averageLatencyMs": 2881.758607700467,
-            "p95LatencyMs": 2928.8405664265156,
-            "averageContextTokensApprox": 2656.56,
-            "averageAnswererPromptTokens": 3325.08,
-            "averageAnswererCompletionTokens": 29.12,
-            "overallScore": 0.16743333333333332,
-            "ingestSeconds": 237.15
+            "answerAccuracy": 0.42,
+            "retrievalRecall": 0.5313333333333332,
+            "citationRecall": 0.4173333333333333,
+            "citationPrecision": 0.476047619047619,
+            "averageLatencyMs": 176.31381563842297,
+            "p95LatencyMs": 266.2212960422039,
+            "averageContextTokensApprox": 9882.54,
+            "averageAnswererPromptTokens": 11058.62,
+            "averageAnswererCompletionTokens": 39.6,
+            "overallScore": 0.4292357142857142,
+            "ingestSeconds": 24.405
           },
           "trialAccuracies": [
-            0.17073170731707318
+            0.42
           ],
           "accuracySpread": {
-            "mean": 0.17073170731707318,
-            "min": 0.17073170731707318,
-            "max": 0.17073170731707318,
+            "mean": 0.42,
+            "min": 0.42,
+            "max": 0.42,
             "stdev": 0,
             "n": 1
           }
