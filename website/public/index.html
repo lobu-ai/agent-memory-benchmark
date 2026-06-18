@@ -56,7 +56,9 @@
           Coverage note: not every system runs every suite. Hindsight is shown
           on the oracle suite only &mdash; its LLM extract-and-consolidate ingest
           runs minutes per scenario, too slow to scale to the others.
-          longmemeval-v2 shows the systems with cached retrieval.
+          longmemeval-v2 ships no gold source-step annotations, so retrieval
+          recall is not measurable there (shown as &mdash; for every system);
+          only answer accuracy is comparable on that suite.
         </p>
         <p class="reproduce-label">Reproduce a run:</p>
         <pre class="reproduce"><code id="reproduce-cmd"></code></pre>

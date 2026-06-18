@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-06-18T11:49:37.103Z",
+  "builtAt": "2026-06-18T12:10:56.955Z",
   "benchmarks": [
     {
       "suiteId": "locomo-50",
@@ -1944,7 +1944,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.04383886255924171,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.8436018957345972,
             "averageLatencyMs": 86.52463834125867,
@@ -1976,7 +1976,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.07874854042173227,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.8056872037914692,
             "averageLatencyMs": 5148.264305357119,
@@ -2008,7 +2008,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.003684834123222749,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.9928909952606635,
             "averageLatencyMs": 171.26728211622245,
@@ -2054,7 +2054,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.028436018957345974,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.8436018957345972,
             "averageLatencyMs": 86.52463834125867,
@@ -2085,7 +2085,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.057971014492753624,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.8056872037914692,
             "averageLatencyMs": 5148.264305357119,
@@ -2116,7 +2116,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.005,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.9928909952606635,
             "averageLatencyMs": 171.26728211622245,
@@ -2161,7 +2161,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.0995260663507109,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.7938388625592417,
             "averageLatencyMs": 5148.264305357119,
@@ -2192,7 +2192,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.05924170616113744,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.8720379146919431,
             "averageLatencyMs": 86.52463834125867,
@@ -2223,7 +2223,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.002369668246445498,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.9881516587677726,
             "averageLatencyMs": 171.26728211622245,
@@ -2268,7 +2268,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.1137440758293839,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.7938388625592417,
             "averageLatencyMs": 5148.264305357119,
@@ -2299,7 +2299,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.06635071090047394,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.8720379146919431,
             "averageLatencyMs": 86.52463834125867,
@@ -2330,7 +2330,7 @@
           "summary": {
             "questionCount": 422,
             "answerAccuracy": 0.007109004739336493,
-            "retrievalRecall": 0,
+            "retrievalRecall": null,
             "citationRecall": 0,
             "citationPrecision": 0.9881516587677726,
             "averageLatencyMs": 171.26728211622245,
