@@ -1,0 +1,27 @@
+{
+  "suitePath": "suites/longmemeval-oracle.10.json",
+  "outputDir": "results",
+  "trials": 1,
+  "topK": 8,
+  "answerer": {
+    "type": "extractive"
+  },
+  "systems": [
+    {
+      "id": "tree-ring",
+      "label": "Tree Ring Memory",
+      "type": "command",
+      "argv": [
+        "python3",
+        "adapters/tree_ring_adapter.py"
+      ],
+      "env": {
+        "TREE_RING_BIN": "${TREE_RING_BIN:-tree-ring}",
+        "TREE_RING_ROOT_BASE": "/tmp/tree-ring-benchmark"
+      },
+      "topK": 8,
+      "mode": "self-hosted"
+    }
+  ],
+  "parallelSystems": false
+}

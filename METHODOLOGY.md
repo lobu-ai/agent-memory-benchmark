@@ -115,6 +115,16 @@ product a user actually gets.
     latency before falling over; under concurrent load the repeated failures
     crashed the server. The plain `searchMode` is therefore the only
     apples-to-apples self-hosted comparison, which is what these boards use.
+- **Tree Ring Memory — runs through the public `tree-ring` CLI.** The adapter
+  writes each benchmark step with `tree-ring remember --json` into an isolated
+  root for that scenario and retrieves with `tree-ring recall --json
+  --include-sensitive`. Benchmark step ids are carried as tags and mapped back
+  from recalled events; the adapter does not inspect Tree Ring's SQLite store.
+  Retrieval first uses the benchmark question as written, then falls back to
+  stopword-stripped query windows from the same question if the lexical CLI
+  returns too few items. If Tree Ring refuses a synthetic secret-like memory,
+  the adapter records that as a product policy refusal rather than bypassing
+  the policy.
 
 ## Honest caveats
 
