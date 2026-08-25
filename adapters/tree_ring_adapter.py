@@ -14,6 +14,7 @@ scoring contract without reading Tree Ring's SQLite database.
 Env:
   TREE_RING_BIN        default tree-ring
   TREE_RING_ROOT_BASE  default /tmp/tree-ring-benchmark
+  TREE_RING_MAX_RECALL_QUERIES  default 20
 """
 from __future__ import annotations
 
@@ -34,6 +35,7 @@ TREE_RING_BIN = os.environ.get("TREE_RING_BIN", "tree-ring")
 ROOT_BASE = Path(os.environ.get("TREE_RING_ROOT_BASE", "/tmp/tree-ring-benchmark"))
 PROJECT_PREFIX = os.environ.get("TREE_RING_PROJECT_PREFIX", "agent-memory-benchmark")
 COMMAND_TIMEOUT_SECONDS = int(os.environ.get("TREE_RING_COMMAND_TIMEOUT_SECONDS", "120"))
+MAX_RECALL_QUERIES = max(1, int(os.environ.get("TREE_RING_MAX_RECALL_QUERIES", "20")))
 
 _INITIALIZED: set[str] = set()
 
@@ -142,10 +144,12 @@ def recall_queries(prompt: str) -> List[str]:
         for token in "".join(ch.lower() if ch.isalnum() else " " for ch in prompt).split()
         if len(token) >= 3 and token.lower() not in STOPWORDS
     ]
-    simplified = " ".join(dict.fromkeys(terms))
+    unique_terms = list(dict.fromkeys(terms))
+    simplified = " ".join(unique_terms)
     if simplified and simplified != prompt.lower():
         queries.append(simplified)
-    unique_terms = list(dict.fromkeys(terms))
+        if len(queries) >= MAX_RECALL_QUERIES:
+            return queries[:MAX_RECALL_QUERIES]
     for width in (3, 2):
         if len(unique_terms) < width:
             continue
@@ -153,6 +157,8 @@ def recall_queries(prompt: str) -> List[str]:
             window = " ".join(unique_terms[index : index + width])
             if window not in queries:
                 queries.append(window)
+                if len(queries) >= MAX_RECALL_QUERIES:
+                    return queries[:MAX_RECALL_QUERIES]
     return queries
 
 
@@ -231,22 +237,27 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
     all_rows: List[Any] = []
     seen_tree_ring_ids: set[str] = set()
     for query in recall_queries(prompt):
-        rows = parse_json_output(
-            run_tree_ring(
-                [
-                    "recall",
-                    "--root",
-                    str(root),
-                    "--json",
-                    "--project",
-                    project,
-                    "--limit",
-                    str(max(top_k * 4, 20)),
-                    "--include-sensitive",
-                    query,
-                ]
+        try:
+            rows = parse_json_output(
+                run_tree_ring(
+                    [
+                        "recall",
+                        "--root",
+                        str(root),
+                        "--json",
+                        "--project",
+                        project,
+                        "--limit",
+                        str(max(top_k * 4, 20)),
+                        "--include-sensitive",
+                        query,
+                    ]
+                )
             )
-        )
+        except RuntimeError as exc:
+            sys.stderr.write(f"recall query failed for {query!r} (continuing): {exc}\n")
+            sys.stderr.flush()
+            continue
         for row in rows if isinstance(rows, list) else []:
             memory = row.get("memory") if isinstance(row, dict) else {}
             memory_id = memory.get("id") if isinstance(memory, dict) else None
