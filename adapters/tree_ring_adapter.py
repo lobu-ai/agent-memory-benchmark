@@ -85,18 +85,23 @@ def project_name(run_id: str) -> str:
     return f"{PROJECT_PREFIX}-{run_key(run_id)}"
 
 
-def root_for(payload: Dict[str, Any]) -> Path:
+def project_dir_for(payload: Dict[str, Any]) -> Path:
     run_id = str(payload.get("runId") or "benchmark-run")
     return ROOT_BASE / run_key(run_id)
 
 
-def run_tree_ring(args: List[str]) -> str:
+def root_for(payload: Dict[str, Any]) -> Path:
+    return project_dir_for(payload) / ".tree-ring"
+
+
+def run_tree_ring(args: List[str], cwd: Optional[Path] = None) -> str:
     result = subprocess.run(
         [TREE_RING_BIN, *args],
         check=False,
         text=True,
         capture_output=True,
         timeout=COMMAND_TIMEOUT_SECONDS,
+        cwd=str(cwd) if cwd is not None else None,
     )
     if result.returncode != 0:
         detail = (result.stderr or result.stdout or "").strip()
@@ -124,8 +129,11 @@ def ensure_root(payload: Dict[str, Any]) -> Path:
     root_str = str(root)
     if root_str in _INITIALIZED:
         return root
-    root.mkdir(parents=True, exist_ok=True)
-    parse_json_output(run_tree_ring(["init", "--root", root_str, "--json"]))
+    project_dir = root.parent
+    project_dir.mkdir(parents=True, exist_ok=True)
+    parse_json_output(
+        run_tree_ring(["init", "--root", root_str, "--json"], cwd=project_dir)
+    )
     _INITIALIZED.add(root_str)
     return root
 
@@ -165,7 +173,7 @@ def recall_queries(prompt: str) -> List[str]:
 def action_reset(payload: Dict[str, Any]) -> Any:
     root = root_for(payload)
     _INITIALIZED.discard(str(root))
-    shutil.rmtree(root, ignore_errors=True)
+    shutil.rmtree(root.parent, ignore_errors=True)
     return None
 
 
@@ -214,7 +222,7 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
         args.append(content)
 
         try:
-            parse_json_output(run_tree_ring(args))
+            parse_json_output(run_tree_ring(args, cwd=root.parent))
             created += 1
         except RuntimeError as exc:
             # Tree Ring intentionally refuses secret-like memories. Treat that
@@ -251,7 +259,8 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
                         str(max(top_k * 4, 20)),
                         "--include-sensitive",
                         query,
-                    ]
+                    ],
+                    cwd=root.parent,
                 )
             )
         except RuntimeError as exc:
