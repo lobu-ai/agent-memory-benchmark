@@ -210,6 +210,63 @@ inverse-property, transitive-property or restriction inference requirements.
 For product comparisons, run native graph tasks against Graphiti/Neo4j rather
 than label a text-memory score an ontology-system ranking.
 
+## Experimental native graph agent smoke
+
+`experiments/graph_agent/` is a separate agent-loop experiment, not part of
+the retrieval leaderboard. It contains two public development worlds: a
+four-edge risk path with an alternate support, and a matched world with that
+alternate edge reversed. Each has three sequential withdrawal checkpoints,
+same-name distractors, a grounded cycle, and 50 disconnected distractor edges.
+This is two base episodes, one matched pair, six correlated queries per system.
+
+The Lobu adapter uses public `entities.create`, `link`, `unlink`, `list`, and
+`listLinks` APIs on an explicit disposable loopback install. `entities.delete`
+resets only fixture-owned synthetic rows before ingestion. Typed metadata and
+directed links are mapped structurally; adapters contain no task solver. The
+PostgreSQL control exposes read-only SQL over normalized assertions and nodes,
+including recursive CTEs. SQL is a correctness and navigation-cost control,
+not a competing memory product. Graphiti is not implemented in this smoke.
+
+Muse runs through the existing authenticated OpenCode stateless endpoint with
+only the harness's JSON tool protocol. It receives neither future updates nor
+the oracle. A complete incremental withdrawal feed and snapshot bindings are
+provided by benchmark application glue; these are not native product credit.
+Limits across all three checkpoints: 10 model calls, 25 tool invocations,
+200 KB of tool responses, 360 seconds; global model-call cap 80. Responses may
+contain a prose prefix followed by one JSON object. Errors consume budget.
+Native API granularity differs from SQL; reports retain tool bytes and latency.
+
+Use isolated services you own: apply `fixtures/graph-agent` with pinned CLI
+24.4.0 to a disposable local Lobu install; initialize a separate PostgreSQL
+database `graph_bench` with owner `bench_owner` and SELECT-only login
+`bench_reader`; start `opencode serve` on loopback using its existing provider
+authorization. Supply a private service-state JSON with `lobu_port`, `pg_port`,
+`opencode_port`, and the generated OpenCode server `password`. Optional
+`prior_model_calls` charges earlier diagnostic attempts against the global cap.
+Never publish this state or point the runner at a production workspace.
+
+```bash
+python3 -m unittest discover -s experiments/graph_agent -p 'test_*.py'
+python3 experiments/graph_agent/probe.py --state <private-service-state.json> --output <storage-receipts.json>
+python3 experiments/graph_agent/run.py --state <private-service-state.json> --output <new-output-directory>
+python3 experiments/graph_agent/grade.py <output-directory>
+```
+
+The offline evaluator checks answers against an independent recursive reference,
+accepts either sufficient path, rejects stale/unread proof citations, and checks
+exact-set frontier certificates against the bounded complete source. Empty sets
+need the same coverage proof. Read grounding verifies assertion content in tool
+results; it does not prove arbitrary SQL expression lineage. This seed has one
+source and one page per reachable subject. It does not test multipage recovery,
+authorization, temporal ORG semantics, approvals, dispatch, or OWL entailment.
+Run those tracks and a graph-product comparison before making broader claims.
+Raw traces, fixed denominators (including setup failures), fixture/code hashes,
+and diagnostic attempts must accompany results. OpenCode's endpoint exposes no
+billed token/dollar usage, so none is estimated.
+Storage probes compare all persisted assertions after each withdrawal through
+fresh native API reads, and verify PostgreSQL write/file-read rejection by
+SQLSTATE. Run probes and agent trials sequentially; both own disposable data.
+
 ## Continuous benchmarking (GitHub Actions)
 
 `.github/workflows/benchmark.yml` runs the whole thing in CI — it stands up the

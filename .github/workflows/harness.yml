@@ -16,6 +16,10 @@ jobs:
       - run: python3 -m unittest scripts/test_ontology_benchmark.py
       - run: python3 -m unittest adapters/test_adapters.py
       - run: python3 -m unittest scripts/test_prepare_kqapro.py
+      - run: python3 -m unittest discover -s experiments/graph_agent -p 'test_*.py'
       - run: bun install --cwd fixtures/ontology --frozen-lockfile
       - run: bunx tsc --noEmit --skipLibCheck --moduleResolution bundler --module esnext --target es2022 fixtures/ontology/lobu.config.ts
       - run: cd fixtures/ontology && node_modules/.bin/lobu validate
+      - run: bun install --cwd fixtures/graph-agent --frozen-lockfile
+      - run: bunx tsc --noEmit --skipLibCheck --moduleResolution bundler --module esnext --target es2022 fixtures/graph-agent/lobu.config.ts
+      - run: cd fixtures/graph-agent && node_modules/.bin/lobu validate
