@@ -369,6 +369,12 @@ Contracts: [ingestion](https://supermemory.ai/docs/ingestion/add-memories),
 The generator emits eight worlds in four structural pairs: parallel branches,
 a shared choke edge, multiple risky targets, and exits from a reachable cycle.
 Each world has three sequential checkpoint queries, for 24 correlated queries.
+After adapter freeze, `experiments/graph_agent/generate_holdout.py --output <file>`
+generates a separate 24-query graph holdout: joined braids, two issuers with
+zero-hop risk, nested cycles, and irrelevant followed by relevant withdrawals.
+Its degree profiles differ from all development templates; both reference
+solvers verify every checkpoint. It remains graph-only, not the broader planned
+temporal, permission or action benchmark. Generation is not product execution.
 The separate `.reference.json` sidecar checks each answer by path enumeration
 and recursive SQL. Keep that evaluator artifact away from the executor. Each
 pair differs in one edge's direction. Seeds reproduce identifiers and order;

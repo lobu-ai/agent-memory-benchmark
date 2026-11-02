@@ -17,6 +17,7 @@ from reference import (worlds, path_oracle, relational_oracle, make_frontier_cer
                        verify_exact_set, sufficient_positive_proof)
 from run import parse_reply, episode, BudgetExhausted
 from generate import generate, verify
+from generate_holdout import generate_holdout
 from report import load_retrieval
 from supermemory import with_source_records, source_content
 from muse_bridge import make_server, model_message
@@ -179,6 +180,26 @@ class GraphAgentTests(unittest.TestCase):
             right = {f["id"]: f for f in second["facts"]}
             self.assertEqual(left.keys(), right.keys())
             self.assertEqual(sum(left[k] != right[k] for k in left), 1)
+
+    def test_holdout_uses_new_structures_and_independent_reference_agreement(self):
+        suite = generate_holdout()
+        self.assertEqual(suite, generate_holdout())
+        self.assertEqual(len(verify(suite)), 24)
+        def shape(world):
+            # An isomorphism-invariant degree profile; differing profiles prove
+            # these are more than renamed versions of a development template.
+            nodes = {f["subject"] for f in world["facts"]} | {
+                f["object"] for f in world["facts"] if f["predicate"] != "bench:risk"}
+            return sorted((sum(f["subject"] == node and f["predicate"] == "bench:issuer" for f in world["facts"]),
+                           sum(f["subject"] == node and f["predicate"] == "org:subOrganizationOf" for f in world["facts"]),
+                           sum(f["object"] == node and f["predicate"] == "org:subOrganizationOf" for f in world["facts"]))
+                          for node in nodes)
+        old = [shape(w) for w in generate()["episodes"]]
+        for index in range(0, 8, 2):
+            left, right = suite["episodes"][index:index+2]
+            self.assertNotIn(shape(left), old)
+            left_facts, right_facts = [{f["id"]: f for f in w["facts"]} for w in [left, right]]
+            self.assertEqual(sum(left_facts[key] != right_facts[key] for key in left_facts), 1)
 
     def test_custom_suite_grading_preserves_selected_denominator_and_rejects_hash_mismatch(self):
         with tempfile.TemporaryDirectory() as tmp:
