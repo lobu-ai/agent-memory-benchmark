@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 import sys
 import threading
+import tempfile
+import hashlib
+import subprocess
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -12,10 +15,75 @@ from adapters import loopback, post, SqlError
 from grade import grade_answer, observed_facts
 from reference import (worlds, path_oracle, relational_oracle, make_frontier_certificate,
                        verify_exact_set, sufficient_positive_proof)
-from run import parse_reply, episode
+from run import parse_reply, episode, BudgetExhausted
+from generate import generate, verify
+from report import load_retrieval
 
 
 class GraphAgentTests(unittest.TestCase):
+    def test_expansion_is_reproducible_and_all_24_queries_have_two_agreeing_references(self):
+        suite = generate()
+        self.assertEqual(suite, generate())
+        self.assertNotEqual(suite, generate(2026110207))
+        rows = verify(suite)
+        self.assertEqual((len(suite["episodes"]), len({w["pair_id"] for w in suite["episodes"]}), len(rows)), (8, 4, 24))
+        self.assertTrue(all(row["references_agree"] for row in rows))
+        for i in range(0, 8, 2):
+            first, second = suite["episodes"][i:i+2]
+            self.assertNotEqual([r["expected"] for r in rows if r["episode"] == first["id"]],
+                                [r["expected"] for r in rows if r["episode"] == second["id"]])
+            left = {f["id"]: f for f in first["facts"]}
+            right = {f["id"]: f for f in second["facts"]}
+            self.assertEqual(left.keys(), right.keys())
+            self.assertEqual(sum(left[k] != right[k] for k in left), 1)
+
+    def test_custom_suite_grading_preserves_selected_denominator_and_rejects_hash_mismatch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            suite = folder/"suite.json"
+            data = generate()
+            suite.write_text(json.dumps(data))
+            selected = data["episodes"][0]
+            results = {"fixture_sha256": hashlib.sha256(suite.read_bytes()).hexdigest(),
+                       "selected_episode_ids": [selected["id"]],
+                       "rows": [{"system": "lobu", "episode": selected["id"], "status": "setup_failed"}]}
+            (folder/"results.json").write_text(json.dumps(results))
+            (folder/"trace.jsonl").write_text("")
+            command = [sys.executable, str(Path(__file__).with_name("grade.py")), str(folder), "--suite", str(suite)]
+            done = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(done.returncode, 0, done.stderr)
+            graded = json.loads((folder/"graded.json").read_text())
+            self.assertEqual(graded["summary"]["lobu"]["denominator"], 3)
+            self.assertEqual(graded["summary"]["lobu"]["answered"], 0)
+            suite.write_text(json.dumps({**data, "seed": "modified"}))
+            self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
+
+    def test_report_loader_checks_source_hashes_and_retains_strict_semantic_distinction(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            scenario = {"id": "synthetic", "steps": [{"kind": "memory", "id": "r1", "content": json.dumps({"name": "Synthetic root"})}]}
+            (folder/"suite.json").write_text(json.dumps({"scenarios": [scenario]}))
+            suite_hash = hashlib.sha256((folder/"suite.json").read_bytes()).hexdigest()
+            systems, tasks = [], []
+            for name in ["lobu", "supermemory", "full-context-control"]:
+                row = {"scenarioId": "synthetic", "questionId": "q", "category": "comparison", "prompt": "Synthetic question?",
+                       "expectedAnswers": ["R"], "answer": "Root R", "score": {"answerCorrect": 0, "retrievalRecall": 1},
+                       "retrievedIds": ["r1"], "expectedSourceStepIds": ["r1"], "citedIds": ["r1"], "latencyMs": 1}
+                source = folder/(name+".json")
+                source.write_text(json.dumps({"provenance": {"suiteSha256": suite_hash}, "systems": [{"trials": [{"questions": [row]}]}]}))
+                source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+                systems.append({"system": name, "sourceReport": source.name, "sourceSha256": source_hash, "semanticCorrect": 1})
+                tasks.append({"system": name, "question_id": "q", "source_sha256": source_hash, "source_file": source.name,
+                              "answer": "Root R", "expected": ["R"], "semantic_correct": True, "reason": "Synthetic alias"})
+            (folder/"comparison.json").write_text(json.dumps({"suiteSha256": suite_hash, "systems": systems}))
+            (folder/"semantic-review.json").write_text(json.dumps({"tasks": tasks, "model": "synthetic", "judge": "same-reader"}))
+            result = load_retrieval(folder)
+            self.assertEqual(result["systems"][0]["strictCorrect"], 0)
+            self.assertTrue(result["questions"][0]["systems"]["lobu"]["semantic"])
+            (folder/"lobu.json").write_text('{}')
+            with self.assertRaises(ValueError):
+                load_retrieval(folder)
+
     def test_both_worlds_and_all_checkpoints_have_independent_reference_agreement(self):
         for world, expected in worlds():
             for cp, want in zip(world["checkpoints"], expected):
@@ -108,6 +176,20 @@ class GraphAgentTests(unittest.TestCase):
         self.assertNotIn('"q1"', reader.first_prompt)
         self.assertNotIn('"q2"', reader.first_prompt)
         self.assertNotIn('s0004', reader.first_prompt)
+
+    def test_global_budget_exhaustion_remains_a_budget_result(self):
+        world, _ = worlds()[0]
+        class Store:
+            manifest = {}
+            def withdraw(self, ids):
+                pass
+        class Reader:
+            def append(self, value):
+                pass
+            def generate(self, messages, remaining):
+                raise BudgetExhausted("global cap")
+        rows = episode(world, Store(), Reader(), "budget-boundary")
+        self.assertEqual([r["status"] for r in rows], ["budget_exhausted"]*3)
 
     def test_protocol_rejects_native_tools_and_mixed_final_calls(self):
         self.assertEqual(parse_reply('{"calls":[{"tool":"query","arguments":{"sql":"SELECT 1"}}]}')["calls"][0]["tool"], "query")

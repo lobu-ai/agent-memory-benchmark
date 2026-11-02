@@ -53,6 +53,10 @@ def parse_reply(text):
     return value
 
 
+class BudgetExhausted(RuntimeError):
+    pass
+
+
 class Executor:
     def __init__(self, state, output):
         self.state, self.output = state, output
@@ -60,7 +64,7 @@ class Executor:
 
     def generate(self, messages, remaining):
         if self.calls >= 80:
-            raise RuntimeError("Global model-call budget exhausted")
+            raise BudgetExhausted("Global model-call budget exhausted")
         self.calls += 1
         prompt = "\n\n".join(x["role"] + ":\n" + x["content"] for x in messages)
         started = time.monotonic()
@@ -117,6 +121,9 @@ def episode(world, adapter, executor, system):
             except (json.JSONDecodeError, ValueError) as exc:
                 messages.append({"role": "user", "content": "Protocol error: " + str(exc)[:200]})
                 continue
+            except BudgetExhausted as exc:
+                row.update(status="budget_exhausted", error=str(exc))
+                break
             except Exception as exc:
                 row.update(status="executor_failed", error=str(exc)[:300])
                 break
@@ -162,16 +169,31 @@ def main():
     p.add_argument("--state", type=Path, required=True, help="Private local service state; never publish")
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--systems", nargs="+", choices=["lobu", "postgres"], default=["lobu", "postgres"])
+    p.add_argument("--suite", type=Path, default=ROOT / "fixtures/graph-agent/worlds.json")
+    p.add_argument("--episodes", nargs="+", help="Explicit episode IDs for a bounded batch")
     args = p.parse_args()
-    args.output.mkdir(parents=True, exist_ok=False)
     state = json.loads(args.state.read_text())
-    source = ROOT / "fixtures/graph-agent/worlds.json"
-    worlds = json.loads(source.read_text())["episodes"]
+    source = args.suite
+    suite = json.loads(source.read_text())
+    all_worlds = suite["episodes"]
+    worlds = all_worlds
+    if args.episodes:
+        if not set(args.episodes) <= {w["id"] for w in worlds}:
+            p.error("Unknown episode selection")
+        worlds = [w for w in worlds if w["id"] in args.episodes]
+    args.output.mkdir(parents=True, exist_ok=False)
+    pair_members = {}
+    for world in all_worlds:
+        pair_members.setdefault(world.get("pair_id", "original-pair"), set()).add(world["id"])
+    selected_ids = {w["id"] for w in worlds}
     executor = Executor(state, args.output / "trace.jsonl")
     result = {"experimental": True, "fixture_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
               "code_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in Path(__file__).parent.glob("*.py") if p.name in {"run.py", "adapters.py"}},
               "prior_diagnostic_model_calls_charged": state.get("prior_model_calls", 0),
-              "model": MODEL, "independent_episodes": 2, "matched_pairs": 1,
+              "model": MODEL, "base_episodes": len(worlds),
+              "selected_episode_ids": [w["id"] for w in worlds],
+              "checkpoint_queries_per_system": sum(len(w["checkpoints"]) for w in worlds),
+              "matched_pairs": sum(members <= selected_ids for members in pair_members.values()),
               "usage_note": "OpenCode stateless endpoint returns no billed token or dollar usage.",
               "capability": "agent query-time directed traversal; no native OWL claim",
               "application_glue": ["structural mappings", "complete incremental withdrawal feed", "snapshot bindings"], "rows": []}

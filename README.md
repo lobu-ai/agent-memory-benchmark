@@ -267,6 +267,44 @@ Storage probes compare all persisted assertions after each withdrawal through
 fresh native API reads, and verify PostgreSQL write/file-read rejection by
 SQLSTATE. Run probes and agent trials sequentially; both own disposable data.
 
+Generate additional graph development questions with:
+
+```bash
+python3 experiments/graph_agent/generate.py --output results/graph-dev-24.json
+python3 experiments/graph_agent/run.py --state <private-service-state.json> --suite results/graph-dev-24.json --episodes graph-dev-01 graph-dev-02 --output <new-batch-directory>
+python3 experiments/graph_agent/grade.py <batch-directory> --suite results/graph-dev-24.json
+```
+
+The generator emits eight worlds in four structural pairs: parallel branches,
+a shared choke edge, multiple risky targets, and exits from a reachable cycle.
+Each world has three sequential checkpoint queries, for 24 correlated queries.
+The separate `.reference.json` sidecar checks each answer by path enumeration
+and recursive SQL. Keep that evaluator artifact away from the executor. Each
+pair differs in one edge's direction. Seeds reproduce identifiers and order;
+changing a seed alone does not create a structural holdout. These cases expand
+graph maintenance only; they do not implement the reviewed temporal,
+authorization, pagination or governed-action tracks.
+
+Select explicit episode IDs for bounded batches. The 80-call global cap remains
+in force for a run, and `prior_model_calls` charges earlier attempts; never reset
+the counter to retry a failed batch. Evaluation checks the executed fixture hash
+and uses the selected episodes' denominator, including setup failures. A partial
+batch must not be reported as complete coverage of all 24 queries.
+
+Build a standalone question-level report from saved retrieval, native smoke and
+generated-development artifacts (no model calls):
+
+```bash
+python3 experiments/graph_agent/report.py --retrieval-dir <retrieval-artifacts> --native-summary <native-summary.json> --generated-suite results/graph-dev-24.json --output <report-directory>/index.html
+```
+
+The retrieval artifacts are `suite.json`, `comparison.json`,
+`semantic-review.json` and the source reports named by the comparison manifest.
+Their hashes must agree. The native summary is the combined smoke manifest with
+`systems`, `rows`, fixture hash and source commit. The report keeps strict versus
+same-reader semantic review separate, shows paired wins/losses and missing
+reference records for each question, and labels generated questions as not run.
+
 ## Continuous benchmarking (GitHub Actions)
 
 `.github/workflows/benchmark.yml` runs the whole thing in CI — it stands up the

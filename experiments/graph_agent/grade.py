@@ -1,5 +1,6 @@
 """Offline deterministic evaluation; never imported by the executor/adapters."""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from reference import relational_oracle, sufficient_positive_proof, verify_exact_set
@@ -62,11 +63,21 @@ def grade_answer(world, checkpoint, final, reads):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("run", type=Path)
+    p.add_argument("--suite", type=Path)
     args = p.parse_args()
     root = Path(__file__).resolve().parents[2]
-    worlds = {w["id"]: w for w in json.loads((root/"fixtures/graph-agent/worlds.json").read_text())["episodes"]}
+    source = args.suite or root/"fixtures/graph-agent/worlds.json"
+    worlds = {w["id"]: w for w in json.loads(source.read_text())["episodes"]}
     traces = [json.loads(line) for line in (args.run/"trace.jsonl").read_text().splitlines()]
     result = json.loads((args.run/"results.json").read_text())
+    if hashlib.sha256(source.read_bytes()).hexdigest() != result["fixture_sha256"]:
+        raise ValueError("Evaluation suite does not match the executed fixture hash")
+    if "selected_episode_ids" in result:
+        selected = result["selected_episode_ids"]
+        if not selected or not set(selected) <= worlds.keys():
+            raise ValueError("Invalid executed episode selection")
+        worlds = {key:worlds[key] for key in selected}
+    denominator = sum(len(w["checkpoints"]) for w in worlds.values())
     for row in result["rows"]:
         if row["status"] != "answered":
             row["grades"] = {"answer_correct": False, "proof_grounded": False, "exact_set_certified": False}
@@ -82,9 +93,12 @@ def main():
     result["summary"] = {}
     for system in sorted({r["system"] for r in result["rows"]}):
         rows = [r for r in result["rows"] if r["system"] == system]
-        result["summary"][system] = {"denominator": 6, "answered": sum(r["status"] == "answered" for r in rows),
+        result["summary"][system] = {"denominator": denominator, "answered": sum(r["status"] == "answered" for r in rows),
             **{k: sum(r["grades"][k] for r in rows) for k in ["answer_correct", "proof_grounded", "exact_set_certified"]}}
-    result["controls"] = {"all_empty_answer_exact": 3, "always_risky_root_answer_exact": 3, "denominator_per_system": 6,
+    truths = [(world, relational_oracle(world, set(cp["withdraw"]))) for world in worlds.values() for cp in world["checkpoints"]]
+    result["controls"] = {"all_empty_answer_exact": sum(not answer for _, answer in truths),
+                          "always_first_named_root_answer_exact": sum(answer == [world["names"][0]["id"]] for world, answer in truths),
+                          "denominator_per_system": denominator,
                           "note": "Neither control supplies grounded proof or complete frontier certificates."}
     (args.run/"graded.json").write_text(json.dumps(result, indent=2)+"\n")
     print(json.dumps(result["summary"]))
