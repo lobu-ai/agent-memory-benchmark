@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from 'bun:test';
 import { chmodSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { runBenchmark } from '../runner';
@@ -19,8 +20,12 @@ function fixture(fail = false): BenchmarkRunConfig {
   }] }));
   const adapter = join(dir, 'adapter.mjs');
   writeFileSync(adapter, `import readline from 'node:readline';
+import {readFileSync,writeFileSync} from 'node:fs';
 for await (const line of readline.createInterface({input:process.stdin})) {
  const {id,action,payload}=JSON.parse(line);
+ if(action==='ingest' && process.env.MUTATE_SUITE) {
+  const path=process.env.MUTATE_SUITE;const source=JSON.parse(readFileSync(path,'utf8'));source.description='changed while benchmark was running';writeFileSync(path,JSON.stringify(source));
+ }
  const leaked=JSON.stringify(payload).includes('expectedAnswers') || JSON.stringify(payload).includes('expectedSourceStepIds');
  const failed=leaked || (process.env.FAIL==='1' && action==='retrieve');
  console.log(JSON.stringify({id,ok:!failed,error:leaked?'gold labels exposed':'synthetic outage',result:action==='retrieve'?{items:[{id:'fact',text:'The answer is blue.'}],latencyMs:1}:null}));
@@ -34,6 +39,14 @@ for await (const line of readline.createInterface({input:process.stdin})) {
 test('gold labels never cross the real subprocess boundary', async () => {
   const report = await runBenchmark(fixture());
   expect(report.systems[0]?.summary.retrievalRecall).toBe(1);
+});
+
+test('suite provenance hashes the input snapshot rather than a file modified during execution', async () => {
+  const config = fixture();
+  const hash = createHash('sha256').update(readFileSync(config.suitePath)).digest('hex');
+  config.systems[0]!.env = { MUTATE_SUITE: config.suitePath };
+  const report = await runBenchmark(config);
+  expect(report.provenance?.suiteSha256).toBe(hash);
 });
 
 test('CLI writes a partial report and fails visibly when one system is unavailable', async () => {

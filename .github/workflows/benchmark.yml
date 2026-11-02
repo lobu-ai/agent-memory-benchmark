@@ -105,7 +105,7 @@ jobs:
           INIT=""
           for i in $(seq 1 30); do
             INIT=$(curl -s -X POST http://localhost:8799/api/local-init -H 'X-Lobu-Client: lobu-cli')
-            echo "$INIT" | python3 -c 'import sys,json;assert json.load(sys.stdin).get("device_token")' 2>/dev/null && break
+            echo "$INIT" | python3 -c 'import sys,json;b=json.load(sys.stdin);assert b.get("device_token") and (b.get("organization") or {}).get("slug")' 2>/dev/null && break
             INIT=""; sleep 5
           done
           [ -n "$INIT" ] || { echo "local-init never succeeded"; cat lobu.log; exit 1; }

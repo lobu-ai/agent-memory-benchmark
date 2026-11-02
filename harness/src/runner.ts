@@ -15,7 +15,7 @@ import {
   scoreQuestion,
   summarizeTrial,
 } from "./scoring";
-import { loadBenchmarkSuite } from "./suite";
+import { validateBenchmarkSuite } from "./suite";
 import type {
   BenchmarkAdapter,
   BenchmarkReport,
@@ -69,7 +69,9 @@ export function printReport(report: BenchmarkReport): void {
 export async function runBenchmark(
   config: BenchmarkRunConfig
 ): Promise<BenchmarkReport> {
-  const suite = loadBenchmarkSuite(config.suitePath);
+  const suiteBytes = readFileSync(config.suitePath);
+  const suite = validateBenchmarkSuite(JSON.parse(suiteBytes.toString("utf8")));
+  const suiteSha256 = createHash("sha256").update(suiteBytes).digest("hex");
   let harnessRevision: string | null = null;
   let harnessDirty: boolean | null = null;
   try {
@@ -290,7 +292,7 @@ export async function runBenchmark(
     generatedAt: new Date().toISOString(),
     failures,
     provenance: {
-      suiteSha256: createHash('sha256').update(readFileSync(config.suitePath)).digest('hex'),
+      suiteSha256,
       harnessRevision, harnessDirty, runtime: process.version,
     },
     config: {
