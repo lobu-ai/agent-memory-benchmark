@@ -108,6 +108,9 @@ class GraphAgentTests(unittest.TestCase):
 
     def test_extractor_bridge_rejects_unknown_calls_and_ambiguous_json(self):
         tools = [{"function": {"name": "save"}}]
+        batch = {"tool_calls": [{"name": "save", "arguments": {"fact": str(i)}} for i in range(10)]}
+        message, finish = model_message(json.dumps(batch), tools)
+        self.assertEqual((len(message["tool_calls"]), finish), (10, "tool_calls"))
         for text in ['{"tool_calls":[{"name":"shell","arguments":{}}]}',
                      '{"tool_calls":[]}','{"content":"done"} {"tool_calls":[]}']:
             with self.assertRaises(ValueError):

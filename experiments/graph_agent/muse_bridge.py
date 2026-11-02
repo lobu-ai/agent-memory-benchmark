@@ -34,7 +34,7 @@ def model_message(text, tools):
     if not isinstance(value, dict) or set(value) != {"tool_calls"}:
         raise ValueError("Invalid tool envelope")
     calls = value["tool_calls"]
-    if not isinstance(calls, list) or not 1 <= len(calls) <= 8:
+    if not isinstance(calls, list) or not 1 <= len(calls) <= 64:
         raise ValueError("Invalid tool count")
     allowed = {tool["function"]["name"] for tool in tools}
     converted = []
@@ -111,6 +111,8 @@ def make_server(state, ledger, host="127.0.0.1", port=0):
                 with urllib.request.urlopen(req, timeout=100) as response:
                     result = json.load(response)
                 text = result["data"]["text"]
+                record.update(request=request, model_text=text, model=MODEL,
+                              prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest())
                 message, finish = model_message(text, tools)
                 record.update(prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest(),
                               request=request, model_text=text, message=message, finish_reason=finish,
@@ -120,6 +122,8 @@ def make_server(state, ledger, host="127.0.0.1", port=0):
                 status = 200
             except Exception as exc:
                 record["error_class"] = type(exc).__name__
+                if isinstance(exc, ValueError):
+                    record["error_reason"] = str(exc)[:200]
                 body = {"error": {"type": type(exc).__name__, "message": "Extraction transport failed"}}
             finally:
                 record.update(status=status, duration_ms=round((time.monotonic()-started)*1000), usage=None)
