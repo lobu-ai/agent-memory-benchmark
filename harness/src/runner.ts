@@ -1,4 +1,6 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { CommandBenchmarkAdapter } from "./adapters/command";
 import {
@@ -68,6 +70,12 @@ export async function runBenchmark(
   config: BenchmarkRunConfig
 ): Promise<BenchmarkReport> {
   const suite = loadBenchmarkSuite(config.suitePath);
+  let harnessRevision: string | null = null;
+  let harnessDirty: boolean | null = null;
+  try {
+    harnessRevision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    harnessDirty = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().length > 0;
+  } catch { /* Standalone source archives may not have git metadata. */ }
   const answerer = createAnswerer(config.answerer);
   const topK = config.topK ?? 8;
   const adapters = config.systems.map(createAdapter);
@@ -172,6 +180,7 @@ export async function runBenchmark(
 
               const score = scoreQuestion({
                 expectedAnswers: question.expectedAnswers,
+                answerMatch: config.answerMatch,
                 expectedSourceStepIds: question.expectedSourceStepIds,
                 answer: answerer ? answerResult.answer : null,
                 citedIds: answerer ? answerResult.citedIds : [],
@@ -245,6 +254,12 @@ export async function runBenchmark(
     systemLabel: string;
     trials: TrialResult[];
   }>;
+  const failures: NonNullable<BenchmarkReport['failures']> = [];
+  function recordFailure(adapter: BenchmarkAdapter, error: unknown): void {
+    const reason = error instanceof Error ? error.message : String(error);
+    failures.push({ systemId: adapter.id, systemLabel: adapter.label, error: reason });
+    logProgress(`system=${adapter.id} FAILED: ${reason}`);
+  }
   if (parallelSystems) {
     const settled = await Promise.allSettled(
       adapters.map((adapter, idx) => runSystem(adapter, idx))
@@ -255,15 +270,8 @@ export async function runBenchmark(
       if (outcome.status === "fulfilled") {
         systemResults.push(outcome.value);
       } else {
-        const reason =
-          outcome.reason instanceof Error
-            ? outcome.reason.message
-            : String(outcome.reason);
-        logProgress(`system=${adapter.id} FAILED: ${reason}`);
+        recordFailure(adapter, outcome.reason);
       }
-    }
-    if (systemResults.length === 0) {
-      throw new Error("All systems failed — no results to aggregate");
     }
   } else {
     systemResults = [];
@@ -271,12 +279,8 @@ export async function runBenchmark(
       try {
         systemResults.push(await runSystem(adapter, idx));
       } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
-        logProgress(`system=${adapter.id} FAILED: ${reason}`);
+        recordFailure(adapter, error);
       }
-    }
-    if (systemResults.length === 0) {
-      throw new Error("All systems failed — no results to aggregate");
     }
   }
 
@@ -284,6 +288,11 @@ export async function runBenchmark(
     suiteId: suite.id,
     suiteVersion: suite.version,
     generatedAt: new Date().toISOString(),
+    failures,
+    provenance: {
+      suiteSha256: createHash('sha256').update(readFileSync(config.suitePath)).digest('hex'),
+      harnessRevision, harnessDirty, runtime: process.version,
+    },
     config: {
       trials: trialCount,
       topK,
@@ -291,6 +300,7 @@ export async function runBenchmark(
       contextTokenEstimate: "chars_div_4",
       scenarioIsolation: "per-scenario",
       latencyMeasurement: "retrieval-only",
+      answerMatch: config.answerMatch ?? "substring-proxy",
     },
     systems: aggregateSystemResults(systemResults).map((s) => ({
       ...s,

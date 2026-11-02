@@ -25,7 +25,7 @@ function escapeMarkdownCell(value: string): string {
 }
 
 function summarizeIssue(question: QuestionResult): string {
-  if (question.score.retrievalRecall < 1) return 'retrieval miss';
+  if ((question.score.retrievalRecall !== null && question.score.retrievalRecall < 1)) return 'retrieval miss';
   if (question.score.answerCorrect === 0) return 'answer miss';
   if (
     (question.score.citationRecall !== null && question.score.citationRecall < 1) ||
@@ -39,14 +39,14 @@ function summarizeIssue(question: QuestionResult): string {
 function renderMisses(system: AggregateSystemResult): string {
   const misses = flattenQuestions(system).filter(
     (question) =>
-      question.score.retrievalRecall < 1 ||
+      (question.score.retrievalRecall !== null && question.score.retrievalRecall < 1) ||
       question.score.answerCorrect === 0 ||
       (question.score.citationRecall !== null && question.score.citationRecall < 1) ||
       (question.score.citationPrecision !== null && question.score.citationPrecision < 1)
   );
 
   if (misses.length === 0) {
-    return ['### Misses', '', '_None — all questions were answered and cited correctly._'].join(
+    return ['### Misses', '', '_No misses among scored metrics; n/a metrics were not evaluated._'].join(
       '\n'
     );
   }
@@ -162,7 +162,7 @@ function renderRetrievalDiagnostics(system: AggregateSystemResult): string {
 function renderHighlights(system: AggregateSystemResult): string {
   const strongest = [...system.byCategory]
     .sort(
-      (a, b) => b.retrievalRecall - a.retrievalRecall || a.averageLatencyMs - b.averageLatencyMs
+      (a, b) => (b.retrievalRecall ?? -1) - (a.retrievalRecall ?? -1) || a.averageLatencyMs - b.averageLatencyMs
     )
     .slice(0, 2)
     .map(
@@ -172,7 +172,7 @@ function renderHighlights(system: AggregateSystemResult): string {
 
   const weakest = [...system.byCategory]
     .sort(
-      (a, b) => a.retrievalRecall - b.retrievalRecall || b.averageLatencyMs - a.averageLatencyMs
+      (a, b) => (a.retrievalRecall ?? -1) - (b.retrievalRecall ?? -1) || b.averageLatencyMs - a.averageLatencyMs
     )
     .slice(0, 2)
     .map(
@@ -313,6 +313,7 @@ export function renderMarkdownReport(report: BenchmarkReport): string {
     `- Trials: **${report.config.trials}**`,
     `- Top-K: **${report.config.topK}**`,
     `- Answerer: **${report.config.answerer ?? 'none'}**`,
+    `- Answer scoring: **${report.config.answerMatch ?? 'substring-proxy'}**`,
     `- Evaluation mode: **${isRetrievalOnly ? 'retrieval-only' : 'full QA'}**`,
     `- Scenario isolation: **${report.config.scenarioIsolation}**`,
     `- Latency measurement: **${report.config.latencyMeasurement}**`,
@@ -339,6 +340,7 @@ export function renderMarkdownReport(report: BenchmarkReport): string {
       ? `- Fastest average retrieval latency: **${fastest.systemLabel}** at **${ms(fastest.summary.averageLatencyMs)}**`
       : '- Avg latency: **n/a**',
     '',
+    ...(report.failures?.length ? ['## Incomplete comparison', '', ...report.failures.map(failure => `- **${escapeMarkdownCell(failure.systemLabel)}** failed: ${escapeMarkdownCell(failure.error)}`), '', 'Failed systems are excluded from rankings; this is not a complete comparison.', ''] : []),
     '## Leaderboard (raw metrics first)',
     '',
     ...leaderboardHeader,

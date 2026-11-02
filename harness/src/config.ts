@@ -66,6 +66,9 @@ export function loadBenchmarkConfig(path: string): BenchmarkRunConfig {
       );
     });
 
+  assert(systems.length > 0, "At least one enabled system is required");
+  assert(config.answerMatch === undefined || config.answerMatch === "substring-proxy" || config.answerMatch === "normalized-exact", "Unsupported answerMatch");
+
   return {
     ...config,
     suitePath: resolve(process.cwd(), config.suitePath),

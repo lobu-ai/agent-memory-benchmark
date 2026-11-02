@@ -20,6 +20,10 @@ async function main() {
   printReport(report);
   console.log(`Saved JSON report to ${reportPath}`);
   console.log(`Saved Markdown report to ${markdownPath}`);
+  if (report.failures?.length) {
+    console.error(`${report.failures.length} system(s) failed; this comparison is incomplete.`);
+    process.exitCode = 1;
+  }
 }
 
 main().catch((error) => {

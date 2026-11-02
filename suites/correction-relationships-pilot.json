@@ -1,0 +1,414 @@
+{
+  "id": "correction-relationships-pilot",
+  "version": "1.0.0",
+  "description": "Six synthetic diagnostic cases. Relationship assertions are retrieved as evidence; this QA suite does not validate native graph constraints or execute actions. Not an official external benchmark or a product ranking.",
+  "entityTypes": [
+    {
+      "slug": "bench_subject",
+      "name": "Synthetic benchmark subject"
+    }
+  ],
+  "relationshipTypes": [
+    {
+      "slug": "owned_by",
+      "name": "Owned by",
+      "rules": [
+        {
+          "sourceEntityTypeSlug": "bench_subject",
+          "targetEntityTypeSlug": "bench_subject"
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "bank-correction",
+      "category": "correction",
+      "entities": [
+        {
+          "ref": "subject",
+          "entityType": "bench_subject",
+          "name": "Synthetic subject bank-correction"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "memory",
+          "id": "bank-old",
+          "content": "Invoice SYN-INV-001 uses bank reference SYN-BANK-A.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "bank-new",
+          "content": "Correction for invoice SYN-INV-001: the verified current bank reference is SYN-BANK-B. It replaces SYN-BANK-A.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/02 (Fri) 12:00"
+          },
+          "supersedes": "bank-old"
+        },
+        {
+          "kind": "memory",
+          "id": "bank-noise",
+          "content": "Invoice SYN-INV-002 uses bank reference SYN-BANK-C.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        }
+      ],
+      "questions": [
+        {
+          "id": "bank-correction-q",
+          "prompt": "What is the current verified bank reference for invoice SYN-INV-001?",
+          "expectedAnswers": [
+            "SYN-BANK-B"
+          ],
+          "expectedSourceStepIds": [
+            "bank-new"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "withdrawn-risk",
+      "category": "withdrawal",
+      "entities": [
+        {
+          "ref": "subject",
+          "entityType": "bench_subject",
+          "name": "Synthetic subject withdrawn-risk"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "memory",
+          "id": "risk-policy",
+          "content": "For order SYN-ORDER-001: the release recommendation is eligible when its supplier risk claim is withdrawn and its insurance is valid. This is a recommendation only, never permission to ship.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "risk-old",
+          "content": "Supplier risk claim for order SYN-ORDER-001 is reported.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "risk-new",
+          "content": "The supplier risk claim for order SYN-ORDER-001 is withdrawn after verification.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/02 (Fri) 12:00"
+          },
+          "supersedes": "risk-old"
+        },
+        {
+          "kind": "memory",
+          "id": "insurance",
+          "content": "Insurance for order SYN-ORDER-001 is valid.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        }
+      ],
+      "questions": [
+        {
+          "id": "withdrawn-risk-q",
+          "prompt": "According to the release policy, what is the current release recommendation for order SYN-ORDER-001?",
+          "expectedAnswers": [
+            "eligible"
+          ],
+          "expectedSourceStepIds": [
+            "risk-policy",
+            "risk-new",
+            "insurance"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "category": "identity-separation",
+      "entities": [
+        {
+          "ref": "subject",
+          "entityType": "bench_subject",
+          "name": "Synthetic subject identity"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "memory",
+          "id": "company-a",
+          "content": "Company key SYN-CO-A has display name Acme and verified bank reference SYN-BANK-BLUE.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "company-b",
+          "content": "Company key SYN-CO-B also has display name Acme and verified bank reference SYN-BANK-RED. It is a different legal entity; a shared display name does not establish identity.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        }
+      ],
+      "questions": [
+        {
+          "id": "identity-q",
+          "prompt": "What is the verified bank reference for company key SYN-CO-A?",
+          "expectedAnswers": [
+            "SYN-BANK-BLUE"
+          ],
+          "expectedSourceStepIds": [
+            "company-a"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "relationship-chain",
+      "category": "relationship-evidence",
+      "entities": [
+        {
+          "ref": "subject",
+          "entityType": "bench_subject",
+          "name": "Synthetic Harbor Plant"
+        },
+        {
+          "ref": "parent",
+          "entityType": "bench_subject",
+          "name": "Synthetic Northstar Holdings"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "relationship",
+          "id": "site-parent",
+          "fromRef": "subject",
+          "toRef": "parent",
+          "relationshipType": "owned_by",
+          "content": "Synthetic Harbor Plant is owned by Synthetic Northstar Holdings."
+        },
+        {
+          "kind": "memory",
+          "id": "parent-approval",
+          "content": "Synthetic Northstar Holdings has valid supplier approval for Synthetic Harbor Plant.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "other-parent",
+          "content": "Synthetic Southstar Holdings is unrelated to Synthetic Harbor Plant.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        }
+      ],
+      "questions": [
+        {
+          "id": "relationship-chain-q",
+          "prompt": "Which approved parent owns Synthetic Harbor Plant?",
+          "expectedAnswers": [
+            "Synthetic Northstar Holdings"
+          ],
+          "expectedSourceStepIds": [
+            "site-parent",
+            "parent-approval"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conflicting-claims",
+      "category": "unresolved-conflict",
+      "entities": [
+        {
+          "ref": "subject",
+          "entityType": "bench_subject",
+          "name": "Synthetic subject conflicting-claims"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "memory",
+          "id": "conflict-policy",
+          "content": "For contract SYN-C-003, conflicting equally authoritative current limit claims without a resolution require the recommendation review required. Do not silently choose a limit.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "limit-a",
+          "content": "Current limit claim from authority A for contract SYN-C-003 is 100 units.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "limit-b",
+          "content": "Current limit claim from equally authoritative B for contract SYN-C-003 is 200 units.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        }
+      ],
+      "questions": [
+        {
+          "id": "conflicting-claims-q",
+          "prompt": "What recommendation applies to contract SYN-C-003 with its current conflicting limit claims?",
+          "expectedAnswers": [
+            "review required"
+          ],
+          "expectedSourceStepIds": [
+            "conflict-policy",
+            "limit-a",
+            "limit-b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stale-decision",
+      "category": "stale-derived-result",
+      "entities": [
+        {
+          "ref": "subject",
+          "entityType": "bench_subject",
+          "name": "Synthetic subject stale-decision"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "memory",
+          "id": "stale-policy",
+          "content": "A recommendation for order SYN-ORDER-004 must be recompute if its cited bank fact has been superseded. Recompute is required even if the old recommendation said eligible.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "stale-bank-old",
+          "content": "Bank fact for order SYN-ORDER-004 is SYN-BANK-OLD.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "stale-recommendation",
+          "content": "The stored recommendation for order SYN-ORDER-004 is eligible and cites fact stale-bank-old.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/01 (Thu) 12:00"
+          }
+        },
+        {
+          "kind": "memory",
+          "id": "stale-bank-new",
+          "content": "The bank fact for order SYN-ORDER-004 is corrected to SYN-BANK-NEW, superseding stale-bank-old.",
+          "entityRefs": [
+            "subject"
+          ],
+          "semanticType": "fact",
+          "metadata": {
+            "session_date": "2026/01/02 (Fri) 12:00"
+          },
+          "supersedes": "stale-bank-old"
+        }
+      ],
+      "questions": [
+        {
+          "id": "stale-decision-q",
+          "prompt": "Under the freshness policy, what must happen to the stored recommendation for order SYN-ORDER-004?",
+          "expectedAnswers": [
+            "recompute"
+          ],
+          "expectedSourceStepIds": [
+            "stale-policy",
+            "stale-recommendation",
+            "stale-bank-new"
+          ]
+        }
+      ]
+    }
+  ]
+}
