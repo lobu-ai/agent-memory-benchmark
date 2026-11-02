@@ -12,16 +12,106 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from adapters import loopback, post, SqlError
-from grade import grade_answer, observed_facts
+from grade import grade_answer, observed_facts, coverage_receipts
 from reference import (worlds, path_oracle, relational_oracle, make_frontier_certificate,
                        verify_exact_set, sufficient_positive_proof)
 from run import parse_reply, episode, BudgetExhausted
 from generate import generate, verify
 from report import load_retrieval
-from supermemory import with_source_records
+from supermemory import with_source_records, source_content
+from muse_bridge import make_server, model_message
+import urllib.request
 
 
 class GraphAgentTests(unittest.TestCase):
+    def test_coverage_requires_public_enumeration_and_all_source_reads(self):
+        listing = {"tool": "list_documents", "result": {"documents": [{"id": "one"}, {"id": "two"}],
+                   "pagination": {"currentPage": 1, "totalPages": 1, "totalItems": 2}}}
+        reads = [{"tool": "get_document", "result": {"id": key, "source_records": {"assertions": []}}}
+                 for key in ["one", "two"]]
+        self.assertTrue(coverage_receipts("supermemory", [listing]+reads, "invoice", {}))
+        self.assertFalse(coverage_receipts("supermemory", reads, "invoice", {}))
+        self.assertFalse(coverage_receipts("supermemory", [listing]+reads[:1], "invoice", {}))
+        incomplete = copy.deepcopy(listing)
+        incomplete["result"]["pagination"]["totalPages"] = 2
+        self.assertFalse(coverage_receipts("supermemory", [incomplete]+reads, "invoice", {}))
+
+    def test_coverage_requires_node_metadata_and_terminal_link_pages(self):
+        nodes = {"tool": "list_nodes", "result": {"nodes": [
+            {"entity_id": 1, "node_ref": "invoice"}, {"entity_id": 2, "node_ref": "issuer"}]}}
+        links = [{"tool": "list_links", "arguments": {"entity_id": entity},
+                  "result": {"links": [], "metadata": {"has_more": False}}} for entity in [1, 2]]
+        cert = {"frontier": {"issuer": {}}}
+        self.assertTrue(coverage_receipts("lobu", [nodes]+links, "invoice", cert))
+        self.assertFalse(coverage_receipts("lobu", [nodes]+links[:1], "invoice", cert))
+        self.assertFalse(coverage_receipts("lobu", links, "invoice", cert))
+        partial = copy.deepcopy(links)
+        partial[-1]["arguments"]["offset"] = 100
+        self.assertFalse(coverage_receipts("lobu", [nodes]+partial, "invoice", cert))
+
+    def test_extractor_bridge_supports_native_tool_round_trip_plain_final_and_activity(self):
+        class Model(BaseHTTPRequestHandler):
+            calls = 0
+            def log_message(self, *_):
+                pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers["Content-Length"]))
+                Model.calls += 1
+                answer = ('{"tool_calls":[{"name":"save","arguments":{"fact":"synthetic"}}]}'
+                          if Model.calls == 1 else "Completed the requested extraction.")
+                data = json.dumps({"data": {"text": answer}}).encode()
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(data)
+        upstream = ThreadingHTTPServer(("127.0.0.1", 0), Model)
+        threads = [threading.Thread(target=upstream.serve_forever, daemon=True)]
+        threads[0].start()
+        with tempfile.TemporaryDirectory() as tmp:
+            ledger = Path(tmp)/"ledger.jsonl"
+            bridge = make_server({"opencode_port": upstream.server_port, "password": "synthetic-password",
+                "observer_token": "synthetic-observer", "extractor_token": "synthetic-extractor", "extraction_call_limit": 2}, ledger)
+            threads.append(threading.Thread(target=bridge.serve_forever, daemon=True))
+            threads[-1].start()
+            base = f"http://127.0.0.1:{bridge.server_port}"
+            tools = [{"type": "function", "function": {"name": "save", "parameters": {"type": "object"}}}]
+            try:
+                headers = {"Authorization": "Bearer synthetic-extractor"}
+                first = post(base+"/v1/chat/completions", {"messages": [], "tools": tools}, headers)
+                self.assertEqual(first["choices"][0]["finish_reason"], "tool_calls")
+                call = first["choices"][0]["message"]["tool_calls"][0]
+                self.assertEqual(json.loads(call["function"]["arguments"]), {"fact": "synthetic"})
+                req = urllib.request.Request(base+"/v1/chat/completions",
+                    data=json.dumps({"messages": [{"role": "tool", "content": "saved", "tool_call_id": call["id"]}],
+                                     "tools": tools, "stream": True}).encode(), headers=headers)
+                with urllib.request.urlopen(req) as response:
+                    stream = response.read().decode()
+                self.assertIn('"finish_reason": "stop"', stream)
+                self.assertIn("Completed the requested extraction.", stream)
+                with urllib.request.urlopen(urllib.request.Request(base+"/activity",
+                        headers={"Authorization": "Bearer synthetic-observer"})) as response:
+                    activity = json.load(response)
+                self.assertEqual((activity["seq"], activity["in_flight"], activity["last_agent_final_seq"]), (2, 0, 2))
+                with self.assertRaises(urllib.error.HTTPError) as failure:
+                    post(base+"/v1/chat/completions", {"messages": [], "tools": tools}, headers)
+                failure.exception.close()
+                self.assertEqual(Model.calls, 2)
+                self.assertNotIn("synthetic-password", ledger.read_text())
+                self.assertNotIn("synthetic-extractor", ledger.read_text())
+            finally:
+                bridge.shutdown()
+                bridge.server_close()
+                upstream.shutdown()
+                upstream.server_close()
+                for thread in threads:
+                    thread.join()
+
+    def test_extractor_bridge_rejects_unknown_calls_and_ambiguous_json(self):
+        tools = [{"function": {"name": "save"}}]
+        for text in ['{"tool_calls":[{"name":"shell","arguments":{}}]}',
+                     '{"tool_calls":[]}','{"content":"done"} {"tool_calls":[]}']:
+            with self.assertRaises(ValueError):
+                model_message(text, tools)
+
     def test_missing_v5_endpoint_is_a_redacted_setup_failure_with_zero_reader_calls(self):
         class Handler(BaseHTTPRequestHandler):
             def log_message(self, *_):
@@ -70,6 +160,8 @@ class GraphAgentTests(unittest.TestCase):
         response = with_source_records({"documents": [{"id": "source-test", "content": json.dumps({"assertions": [fact]})}],
                                       "memory": "assertion-unread implies node-b risk"})
         self.assertEqual(observed_facts(response), [fact])
+        rendered = source_content({"assertions": [fact], "names": []})
+        self.assertEqual(observed_facts(with_source_records({"content": rendered})), [fact])
         self.assertEqual(observed_facts(with_source_records({"content": "not JSON", "memory": "assertion-unread"})), [])
 
     def test_expansion_is_reproducible_and_all_24_queries_have_two_agreeing_references(self):

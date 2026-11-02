@@ -316,7 +316,8 @@ adds this object (replace placeholders; never publish this file):
 
 The Supermemory agent can search hybrid/chunks/memories with related results,
 page extracted memories, and read or enumerate source documents. Ingestion
-groups ten assertions per document in original input order; this is a structural
+groups ten assertions per document in original input order; every assertion is
+rendered as a readable statement followed by its exact source JSON. This is a structural
 mapping, not answer-specific subgraph selection. Withdrawals patch only the
 affected documents. A fixed namespace extraction context explains the same
 source vocabulary, IDs and direction that the Lobu schema represents; it
@@ -336,12 +337,30 @@ separate. Self-hosted results do not establish hosted-service quality.
 Live v0.0.9 conformance found that source document GET omits
 `system.dreamingStatus`, and document listing rejects `include.content`.
 Set `list_content: false` for that verified build and read source content using
-`get_document`. The missing memory-completion signal remains a scoring gate:
-the adapter fails readiness explicitly instead of assuming extraction is done.
-Extracted memories and hybrid search work in the live diagnostic; that does not
-certify completion or supply a new accuracy score. Before the scored smoke, use
-a verified build/service that exposes the completion signal, or validate a
-different public completion contract and record it explicitly.
+`get_document`. Default readiness still requires the native completion signal.
+For an isolated, serial, owned local engine only, the optional private
+`observer: {url: "http://127.0.0.1:<port>/activity", token: "<private>", settle_seconds: 2}`
+uses the generic `muse_bridge.py` transport ledger: a fresh successful extractor
+final, no in-flight calls, exact published content, and stable public memory
+listing. Receipts label this **instrumented quiescence (application glue)**,
+not a native completion or transaction guarantee. It never waits for a gold
+fact, expected answer, or nonempty memory count. The bridge dispatches no
+Supermemory functions; the native engine executes its own extraction tools.
+
+A live PATCH correction made no fresh extractor call within 300 seconds.
+The explicit `replacement_mode: "delete_reingest"` compatibility setting
+composes public document deletion and instant ingestion under the same source
+ID. It verifies deletion count/errors and new extraction readiness. This is
+application-managed replacement, not a native correction result or silent
+fallback. Default `replacement_mode: "patch"` remains unchanged. Keep both
+failed diagnostic attempts and compatibility receipts in any report.
+
+Exact-set grading also checks actual API coverage receipts: complete source
+enumeration plus source reads for Supermemory; node metadata plus terminal
+outgoing-link pages for Lobu. Positive proof citations alone do not establish
+absence. SQL expression lineage remains unverified in the relational control.
+Per-phase model-call caps are explicit; bridge restarts resume the extraction
+ledger and reader batches carry prior attempts forward. Billed usage is unknown.
 
 Contracts: [ingestion](https://supermemory.ai/docs/ingestion/add-memories),
 [document lifecycle](https://supermemory.ai/docs/ingestion/document-operations),

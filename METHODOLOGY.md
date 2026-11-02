@@ -181,6 +181,13 @@ search absence as proof, and never constructs a task-specific closure. Native
 extracted prose remains distinct from exact source evidence. The reader is the
 same Muse executor as Lobu; Supermemory's extraction model and any compatibility
 bridge must be recorded separately, including requests and unavailable usage.
+An explicitly configured local transport observer can establish instrumented
+quiescence when a build omits native memory status. This is application glue,
+never a native completion guarantee. Likewise, explicit delete/reingest source
+replacement is application-managed; it does not demonstrate native correction.
+Both compatibility choices, diagnostic failures, setup and update latency, and
+all extraction calls belong in the result. Exact-set certification additionally
+requires recorded public enumeration and source reads, not only correct IDs.
 This evaluates a specified self-hosted configuration, not Supermemory's hosted
 proprietary extraction pipeline. Setup/readiness failures, source-update
 failures, model failures and budget exhaustion are distinct from wrong answers.

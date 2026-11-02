@@ -64,7 +64,7 @@ class Executor:
         self.calls = state.get("prior_model_calls", 0)
 
     def generate(self, messages, remaining):
-        if self.calls >= 80:
+        if self.calls >= self.state.get("model_call_limit", 80):
             raise BudgetExhausted("Global model-call budget exhausted")
         self.calls += 1
         prompt = "\n\n".join(x["role"] + ":\n" + x["content"] for x in messages)
@@ -101,8 +101,12 @@ def episode(world, adapter, executor, system):
     results = []
     for checkpoint_index, checkpoint in enumerate(world["checkpoints"]):
         removed = set(checkpoint["withdraw"]) - seen_withdrawals
+        update_started = time.monotonic()
         try:
             adapter.withdraw(sorted(removed))
+            executor.append({"kind": "source_update", "system": system, "episode": world["id"],
+                             "checkpoint": checkpoint["id"], "withdrawal_count": len(removed),
+                             "elapsed_ms": round((time.monotonic()-update_started)*1000)})
         except Exception as exc:
             for index, blocked in enumerate(world["checkpoints"][checkpoint_index:]):
                 row = {"system": system, "episode": world["id"], "checkpoint": blocked["id"],
@@ -200,8 +204,10 @@ def main():
     result = {"experimental": True, "fixture_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
               "code_sha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in [Path(__file__), Path(__file__).with_name("adapters.py"),
-                                        Path(__file__).with_name("supermemory.py"), ROOT/"adapters/_supermemory_v5.py"]},
+                                        Path(__file__).with_name("supermemory.py"), Path(__file__).with_name("muse_bridge.py"),
+                                        ROOT/"adapters/_supermemory_v5.py"]},
               "prior_diagnostic_model_calls_charged": state.get("prior_model_calls", 0),
+              "model_call_limit": state.get("model_call_limit", 80),
               "model": MODEL, "base_episodes": len(worlds),
               "selected_episode_ids": [w["id"] for w in worlds],
               "checkpoint_queries_per_system": sum(len(w["checkpoints"]) for w in worlds),
@@ -213,6 +219,7 @@ def main():
     for system in args.systems:
         for world in worlds:
             adapter = None
+            setup_started = time.monotonic()
             try:
                 if system == "lobu":
                     adapter = Lobu("http://127.0.0.1:" + str(state["lobu_port"]))
@@ -221,6 +228,8 @@ def main():
                 else:
                     adapter = Supermemory(state["supermemory"])
                 adapter.load(world)
+                executor.append({"kind": "setup", "system": system, "episode": world["id"],
+                                 "elapsed_ms": round((time.monotonic()-setup_started)*1000)})
                 result["rows"].extend(episode(world, adapter, executor, system))
             except Exception as exc:
                 result["rows"].append({"system": system, "episode": world["id"], "status": "setup_failed",

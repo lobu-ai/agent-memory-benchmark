@@ -15,6 +15,25 @@ SUPPORTING_CONTEXT = (
     "identity: different node IDs can share names. Preserve source IDs and direction when extracting "
     "facts. These definitions describe the input vocabulary, not answers or derived reachability."
 )
+SOURCE_MARKER = "\n\nSOURCE_RECORDS_JSON\n"
+
+
+def source_content(source):
+    """Render every asserted fact, with no inference or answer-specific filter."""
+    names = {row["id"]: row["label"] for row in source["names"]}
+    def label(ref):
+        return names.get(ref, ref) + " [" + ref + "]"
+    lines = []
+    for fact in source["assertions"]:
+        subject, target = label(fact["subject"]), label(fact["object"])
+        if fact["predicate"] == "bench:issuer":
+            sentence = subject + " is an invoice issued by " + target
+        elif fact["predicate"] == "org:subOrganizationOf":
+            sentence = subject + " is directly a suborganization of " + target
+        else:
+            sentence = subject + " has reported " + fact["object"] + " risk"
+        lines.append("Assertion " + fact["id"] + ": " + sentence + ".")
+    return "Current source assertions:\n" + "\n".join(lines) + SOURCE_MARKER + json.dumps(source, sort_keys=True)
 
 
 def with_source_records(value):
@@ -30,7 +49,7 @@ def with_source_records(value):
     result = {k: with_source_records(v) for k, v in value.items()}
     if isinstance(value.get("content"), str):
         try:
-            source = json.loads(value["content"])
+            source = json.loads(value["content"].split(SOURCE_MARKER, 1)[-1])
             if isinstance(source, dict) and isinstance(source.get("assertions"), list):
                 result["source_records"] = source
                 del result["content"]  # Structural decoding, not duplicated evidence bytes.
@@ -55,7 +74,8 @@ class Supermemory:
     def __init__(self, config):
         self.api = Client(config["base_url"], config["api_key"], namespace(uuid.uuid4().hex),
                           ready_timeout=config.get("ready_timeout", 180),
-                          list_content=config.get("list_content", True))
+                          list_content=config.get("list_content", True), observer=config.get("observer"),
+                          replacement_mode=config.get("replacement_mode", "patch"))
         self.manifest = {key: dict(value) for key, value in type(self).manifest.items()}
         if not self.api.list_content:
             self.manifest["list_documents"]["description"] = (
@@ -64,7 +84,10 @@ class Supermemory:
         self.config = {key: config[key] for key in ["version", "extraction_model"]}
         self.config.update(api="v5", taskType="memory", dreaming="instant", rerank="none",
                            list_content=self.api.list_content, supporting_context=SUPPORTING_CONTEXT,
+                           source_serialization="all assertions as plain statements plus exact source JSON",
                            grouping="ten assertions per source document, original input order")
+        self.config["readiness"] = "instrumented quiescence (application glue)" if self.api.observer else "native dreamingStatus"
+        self.config["replacement_mode"] = self.api.replacement_mode
         self.documents, self.receipts = {}, []
 
     def load(self, world):
@@ -80,7 +103,7 @@ class Supermemory:
             self.publish(doc_id)
 
     def publish(self, doc_id, replace=False):
-        content = json.dumps(self.documents[doc_id], sort_keys=True)
+        content = source_content(self.documents[doc_id])
         self.receipts.append(self.api.write(doc_id, content, {"episode": self.world_id}, replace=replace,
                                            supporting_context=SUPPORTING_CONTEXT))
 
@@ -112,7 +135,7 @@ class Supermemory:
 
     def receipt(self):
         return {**self.config, "namespace": self.api.scope, "ready_documents": self.receipts,
-                "http_requests": self.api.requests, "extraction_usage": None}
+                "http_requests": self.api.requests, "observer_requests": self.api.observer_requests, "extraction_usage": None}
 
     def cleanup(self):
         return self.api.cleanup()

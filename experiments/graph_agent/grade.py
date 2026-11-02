@@ -60,6 +60,64 @@ def grade_answer(world, checkpoint, final, reads):
             "unread_or_stale_citations": sorted(cited-observed)}
 
 
+def coverage_receipts(system, traces, invoice, certificate):
+    """Require actual exhaustive API reads, not just a correct guessed set.
+
+    Complete withdrawal feeds preserve prior terminal receipts in this pilot:
+    there are no insertions or new documents between checkpoints.
+    """
+    if system == "supermemory":
+        pages, total_pages, total_items, listed, read = set(), None, None, set(), set()
+        def documents(value):
+            if isinstance(value, dict):
+                if "source_records" in value and isinstance(value.get("id"), str):
+                    read.add(value["id"])
+                for child in value.values():
+                    documents(child)
+            elif isinstance(value, list):
+                for child in value:
+                    documents(child)
+        for trace in traces:
+            result = trace["result"]
+            documents(result)
+            if trace["tool"] == "list_documents" and "pagination" in result:
+                pagination = result["pagination"]
+                pages.add(pagination["currentPage"])
+                total_pages, total_items = pagination["totalPages"], pagination["totalItems"]
+                listed.update(row["id"] for row in result["documents"])
+        return (total_pages is not None and pages >= set(range(1, total_pages+1))
+                and len(listed) == total_items and listed <= read)
+    if system == "lobu":
+        refs, seen_nodes, link_pages = {}, set(), {}
+        for trace in traces:
+            result = trace["result"]
+            if trace["tool"] == "list_nodes":
+                for node in result.get("nodes", []):
+                    refs[node["entity_id"]] = node["node_ref"]
+                    seen_nodes.add(node["node_ref"])
+            elif trace["tool"] == "list_links" and "metadata" in result:
+                if result.get("relationship_failures"):
+                    continue
+                link_pages.setdefault(trace["arguments"].get("entity_id"), []).append(
+                    (trace["arguments"].get("offset", 0), len(result.get("links", [])),
+                     result["metadata"].get("has_more")))
+        complete = set()
+        for entity, pages in link_pages.items():
+            covered = 0
+            for offset, count, more in sorted(pages):
+                if offset > covered:
+                    break
+                covered = max(covered, offset+count)
+                if more is False:
+                    complete.add(refs.get(entity))
+                    break
+        frontier = set(certificate["frontier"])
+        return frontier <= seen_nodes and (frontier | {invoice}) <= complete
+    # SQL expression lineage is not checked by this pilot. Keep this explicit
+    # rather than attributing native API enumeration guarantees to the control.
+    return system == "postgres"
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("run", type=Path)
@@ -80,21 +138,30 @@ def main():
     denominator = sum(len(w["checkpoints"]) for w in worlds.values())
     for row in result["rows"]:
         if row["status"] != "answered":
-            row["grades"] = {"answer_correct": False, "proof_grounded": False, "exact_set_certified": False}
+            row["grades"] = {"answer_correct": False, "proof_grounded": False, "exact_set_certified": False,
+                             "source_coverage_verified": False}
             continue
         world = worlds[row["episode"]]
         cp = next(c for c in world["checkpoints"] if c["id"] == row["checkpoint"])
         reads = []
+        tool_traces = []
         for trace in traces:
             if (trace.get("kind") == "tool" and trace["system"] == row["system"] and trace["episode"] == row["episode"]
                     and trace["checkpoint"] <= row["checkpoint"]):
                 reads.extend(observed_facts(trace["result"]))
+                tool_traces.append(trace)
         row["grades"] = grade_answer(world, cp, row["final"], reads)
+        covered = (row["grades"]["exact_set_certified"] and coverage_receipts(
+            row["system"], tool_traces, world["invoice"], row["final"]["certificate"]))
+        row["grades"]["source_coverage_verified"] = covered
+        row["grades"]["exact_set_certified"] &= covered
+        if not row["final"].get("answer"):
+            row["grades"]["proof_grounded"] &= covered
     result["summary"] = {}
     for system in sorted({r["system"] for r in result["rows"]}):
         rows = [r for r in result["rows"] if r["system"] == system]
         result["summary"][system] = {"denominator": denominator, "answered": sum(r["status"] == "answered" for r in rows),
-            **{k: sum(r["grades"][k] for r in rows) for k in ["answer_correct", "proof_grounded", "exact_set_certified"]}}
+            **{k: sum(r["grades"][k] for r in rows) for k in ["answer_correct", "proof_grounded", "exact_set_certified", "source_coverage_verified"]}}
     truths = [(world, relational_oracle(world, set(cp["withdraw"]))) for world in worlds.values() for cp in world["checkpoints"]]
     result["controls"] = {"all_empty_answer_exact": sum(not answer for _, answer in truths),
                           "always_first_named_root_answer_exact": sum(answer == [world["names"][0]["id"]] for world, answer in truths),

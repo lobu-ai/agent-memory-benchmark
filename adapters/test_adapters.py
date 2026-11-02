@@ -51,6 +51,9 @@ class SupermemoryContractTests(unittest.TestCase):
         self.pending = {}
         self.stuck = False
         self.old_build = False
+        self.instrumented = False
+        self.delete_fails = False
+        self.activity = {"seq": 0, "in_flight": 0, "last_agent_final_seq": 0, "last_error_seq": 0, "errors": 0}
         case = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -63,8 +66,20 @@ class SupermemoryContractTests(unittest.TestCase):
                     self.send(401, {"error": "credential must never be reflected"})
                     return
                 doc_id = self.path.rsplit("/", 1)[-1]
-                if self.command == "POST" and self.path.endswith("/document"):
+                if self.command == "DELETE" and self.path.endswith("/document"):
+                    if case.delete_fails:
+                        self.send(200, {"count": 0, "errors": [{"id": body["ids"][0]}]})
+                    else:
+                        for key in body["ids"]:
+                            del case.documents[key]
+                        self.send(200, {"count": len(body["ids"]), "errors": []})
+                elif self.command == "GET" and self.path == "/activity":
+                    self.send(200, case.activity)
+                elif self.command == "POST" and self.path.endswith("/document"):
                     case.documents[body["id"]] = {**body, "system": {"status": "done", "dreamingStatus": "dreaming"}}
+                    if case.instrumented:
+                        case.activity["seq"] += 1
+                        case.activity["last_agent_final_seq"] = case.activity["seq"]
                     self.send(200, {"id": body["id"], "status": "queued"})
                 elif self.command == "PATCH":
                     # Deliberately expose an old done version for one read.
@@ -82,6 +97,8 @@ class SupermemoryContractTests(unittest.TestCase):
                     else:
                         self.send(200, {"documents": [{"id": key} for key in case.documents],
                                         "pagination": {"totalPages": 1}})
+                elif "/list/memories?" in self.path:
+                    self.send(200, {"memories": [], "pagination": {"totalPages": 1}})
                 elif self.path.endswith("/search"):
                     # API ranking intentionally differs from similarity order.
                     self.send(200, {"results": [{"id": "m2", "memory": "corrected", "similarity": .1,
@@ -98,7 +115,7 @@ class SupermemoryContractTests(unittest.TestCase):
                 self.end_headers()
                 self.wfile.write(data)
 
-            do_POST = do_GET = do_PATCH = handle_request
+            do_POST = do_GET = do_PATCH = do_DELETE = handle_request
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -141,6 +158,34 @@ class SupermemoryContractTests(unittest.TestCase):
         api.list_content = True
         with self.assertRaises(SupermemoryError):
             api.list()
+
+    def test_instrumented_readiness_requires_a_new_final_and_stable_public_reads(self):
+        self.old_build, self.instrumented = True, True
+        api = Client(self.base, "synthetic-test-key", "bench_test", ready_timeout=2,
+                     observer={"url": self.base+"/activity", "token": "synthetic-test-key", "settle_seconds": 0})
+        receipt = api.write("a", "content", {})
+        self.assertEqual(receipt["readiness_contract"], "instrumented quiescence (application glue)")
+        self.assertEqual(receipt["observer"]["last_agent_final_seq"], 1)
+        # An earlier final must never certify a later source write.
+        self.instrumented = False
+        api.ready_timeout = .03
+        with self.assertRaises(ReadinessError):
+            api.write("b", "other content", {})
+
+    def test_explicit_delete_reingest_checks_deletion_and_fresh_extraction(self):
+        self.old_build, self.instrumented = True, True
+        api = Client(self.base, "synthetic-test-key", "bench_test", ready_timeout=2,
+                     replacement_mode="delete_reingest",
+                     observer={"url": self.base+"/activity", "token": "synthetic-test-key", "settle_seconds": 0})
+        api.write("a", "old", {})
+        receipt = api.write("a", "new", {}, replace=True)
+        self.assertEqual(self.documents["a"]["content"], "new")
+        self.assertEqual(receipt["observer"]["last_agent_final_seq"], 2)
+        self.assertEqual(receipt["replacement_mode"], "delete_reingest")
+        self.delete_fails = True
+        with self.assertRaisesRegex(ReadinessError, "deletion was incomplete"):
+            api.write("a", "must not overwrite", {}, replace=True)
+        self.assertEqual(self.documents["a"]["content"], "new")
 
     def test_typed_http_error_is_redacted_and_insecure_remote_origin_rejected(self):
         api = Client(self.base, "wrong-synthetic-key", "bench_test")
