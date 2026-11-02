@@ -1,0 +1,1020 @@
+{
+  "status": "Public development examples only; no product/model run",
+  "boundary": "Controller fixture: future withdrawals are a schedule, not executor input. At each checkpoint send only its visible prefix. Evaluator gold stays in a separate process/file.",
+  "episodes": [
+    {
+      "id": "parallel-proof-survives",
+      "task": "Return all current open-risk organizations reachable from the invoice issuer via zero or more org:subOrganizationOf links. Include sufficient assertion IDs.",
+      "invoice": "n8937",
+      "facts": [
+        {
+          "id": "s0000",
+          "subject": "n8937",
+          "predicate": "bench:issuer",
+          "object": "n1443"
+        },
+        {
+          "id": "s0001",
+          "subject": "n1443",
+          "predicate": "org:subOrganizationOf",
+          "object": "n7742"
+        },
+        {
+          "id": "s0002",
+          "subject": "n7742",
+          "predicate": "org:subOrganizationOf",
+          "object": "n3622"
+        },
+        {
+          "id": "s0003",
+          "subject": "n3622",
+          "predicate": "org:subOrganizationOf",
+          "object": "n9896"
+        },
+        {
+          "id": "s0004",
+          "subject": "n9896",
+          "predicate": "org:subOrganizationOf",
+          "object": "n5910"
+        },
+        {
+          "id": "s0005",
+          "subject": "n1443",
+          "predicate": "org:subOrganizationOf",
+          "object": "n3978"
+        },
+        {
+          "id": "s0006",
+          "subject": "n3978",
+          "predicate": "org:subOrganizationOf",
+          "object": "n7453"
+        },
+        {
+          "id": "s0007",
+          "subject": "n7453",
+          "predicate": "org:subOrganizationOf",
+          "object": "n6276"
+        },
+        {
+          "id": "s0008",
+          "subject": "n6276",
+          "predicate": "org:subOrganizationOf",
+          "object": "n5910"
+        },
+        {
+          "id": "s0009",
+          "subject": "n1443",
+          "predicate": "org:subOrganizationOf",
+          "object": "n7888"
+        },
+        {
+          "id": "s0010",
+          "subject": "n7888",
+          "predicate": "org:subOrganizationOf",
+          "object": "n8282"
+        },
+        {
+          "id": "s0011",
+          "subject": "n8282",
+          "predicate": "org:subOrganizationOf",
+          "object": "n1443"
+        },
+        {
+          "id": "s0012",
+          "subject": "n5910",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0013",
+          "subject": "n3540",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0014",
+          "subject": "d0",
+          "predicate": "org:subOrganizationOf",
+          "object": "d1"
+        },
+        {
+          "id": "s0015",
+          "subject": "d0",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0016",
+          "subject": "d1",
+          "predicate": "org:subOrganizationOf",
+          "object": "d2"
+        },
+        {
+          "id": "s0017",
+          "subject": "d2",
+          "predicate": "org:subOrganizationOf",
+          "object": "d3"
+        },
+        {
+          "id": "s0018",
+          "subject": "d3",
+          "predicate": "org:subOrganizationOf",
+          "object": "d4"
+        },
+        {
+          "id": "s0019",
+          "subject": "d4",
+          "predicate": "org:subOrganizationOf",
+          "object": "d5"
+        },
+        {
+          "id": "s0020",
+          "subject": "d5",
+          "predicate": "org:subOrganizationOf",
+          "object": "d6"
+        },
+        {
+          "id": "s0021",
+          "subject": "d6",
+          "predicate": "org:subOrganizationOf",
+          "object": "d7"
+        },
+        {
+          "id": "s0022",
+          "subject": "d7",
+          "predicate": "org:subOrganizationOf",
+          "object": "d8"
+        },
+        {
+          "id": "s0023",
+          "subject": "d7",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0024",
+          "subject": "d8",
+          "predicate": "org:subOrganizationOf",
+          "object": "d9"
+        },
+        {
+          "id": "s0025",
+          "subject": "d9",
+          "predicate": "org:subOrganizationOf",
+          "object": "d10"
+        },
+        {
+          "id": "s0026",
+          "subject": "d10",
+          "predicate": "org:subOrganizationOf",
+          "object": "d11"
+        },
+        {
+          "id": "s0027",
+          "subject": "d11",
+          "predicate": "org:subOrganizationOf",
+          "object": "d12"
+        },
+        {
+          "id": "s0028",
+          "subject": "d12",
+          "predicate": "org:subOrganizationOf",
+          "object": "d13"
+        },
+        {
+          "id": "s0029",
+          "subject": "d13",
+          "predicate": "org:subOrganizationOf",
+          "object": "d14"
+        },
+        {
+          "id": "s0030",
+          "subject": "d14",
+          "predicate": "org:subOrganizationOf",
+          "object": "d15"
+        },
+        {
+          "id": "s0031",
+          "subject": "d14",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0032",
+          "subject": "d15",
+          "predicate": "org:subOrganizationOf",
+          "object": "d16"
+        },
+        {
+          "id": "s0033",
+          "subject": "d16",
+          "predicate": "org:subOrganizationOf",
+          "object": "d17"
+        },
+        {
+          "id": "s0034",
+          "subject": "d17",
+          "predicate": "org:subOrganizationOf",
+          "object": "d18"
+        },
+        {
+          "id": "s0035",
+          "subject": "d18",
+          "predicate": "org:subOrganizationOf",
+          "object": "d19"
+        },
+        {
+          "id": "s0036",
+          "subject": "d19",
+          "predicate": "org:subOrganizationOf",
+          "object": "d20"
+        },
+        {
+          "id": "s0037",
+          "subject": "d20",
+          "predicate": "org:subOrganizationOf",
+          "object": "d21"
+        },
+        {
+          "id": "s0038",
+          "subject": "d21",
+          "predicate": "org:subOrganizationOf",
+          "object": "d22"
+        },
+        {
+          "id": "s0039",
+          "subject": "d21",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0040",
+          "subject": "d22",
+          "predicate": "org:subOrganizationOf",
+          "object": "d23"
+        },
+        {
+          "id": "s0041",
+          "subject": "d23",
+          "predicate": "org:subOrganizationOf",
+          "object": "d24"
+        },
+        {
+          "id": "s0042",
+          "subject": "d24",
+          "predicate": "org:subOrganizationOf",
+          "object": "d25"
+        },
+        {
+          "id": "s0043",
+          "subject": "d25",
+          "predicate": "org:subOrganizationOf",
+          "object": "d26"
+        },
+        {
+          "id": "s0044",
+          "subject": "d26",
+          "predicate": "org:subOrganizationOf",
+          "object": "d27"
+        },
+        {
+          "id": "s0045",
+          "subject": "d27",
+          "predicate": "org:subOrganizationOf",
+          "object": "d28"
+        },
+        {
+          "id": "s0046",
+          "subject": "d28",
+          "predicate": "org:subOrganizationOf",
+          "object": "d29"
+        },
+        {
+          "id": "s0047",
+          "subject": "d28",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0048",
+          "subject": "d29",
+          "predicate": "org:subOrganizationOf",
+          "object": "d30"
+        },
+        {
+          "id": "s0049",
+          "subject": "d30",
+          "predicate": "org:subOrganizationOf",
+          "object": "d31"
+        },
+        {
+          "id": "s0050",
+          "subject": "d31",
+          "predicate": "org:subOrganizationOf",
+          "object": "d32"
+        },
+        {
+          "id": "s0051",
+          "subject": "d32",
+          "predicate": "org:subOrganizationOf",
+          "object": "d33"
+        },
+        {
+          "id": "s0052",
+          "subject": "d33",
+          "predicate": "org:subOrganizationOf",
+          "object": "d34"
+        },
+        {
+          "id": "s0053",
+          "subject": "d34",
+          "predicate": "org:subOrganizationOf",
+          "object": "d35"
+        },
+        {
+          "id": "s0054",
+          "subject": "d35",
+          "predicate": "org:subOrganizationOf",
+          "object": "d36"
+        },
+        {
+          "id": "s0055",
+          "subject": "d35",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0056",
+          "subject": "d36",
+          "predicate": "org:subOrganizationOf",
+          "object": "d37"
+        },
+        {
+          "id": "s0057",
+          "subject": "d37",
+          "predicate": "org:subOrganizationOf",
+          "object": "d38"
+        },
+        {
+          "id": "s0058",
+          "subject": "d38",
+          "predicate": "org:subOrganizationOf",
+          "object": "d39"
+        },
+        {
+          "id": "s0059",
+          "subject": "d39",
+          "predicate": "org:subOrganizationOf",
+          "object": "d40"
+        },
+        {
+          "id": "s0060",
+          "subject": "d40",
+          "predicate": "org:subOrganizationOf",
+          "object": "d41"
+        },
+        {
+          "id": "s0061",
+          "subject": "d41",
+          "predicate": "org:subOrganizationOf",
+          "object": "d42"
+        },
+        {
+          "id": "s0062",
+          "subject": "d42",
+          "predicate": "org:subOrganizationOf",
+          "object": "d43"
+        },
+        {
+          "id": "s0063",
+          "subject": "d42",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0064",
+          "subject": "d43",
+          "predicate": "org:subOrganizationOf",
+          "object": "d44"
+        },
+        {
+          "id": "s0065",
+          "subject": "d44",
+          "predicate": "org:subOrganizationOf",
+          "object": "d45"
+        },
+        {
+          "id": "s0066",
+          "subject": "d45",
+          "predicate": "org:subOrganizationOf",
+          "object": "d46"
+        },
+        {
+          "id": "s0067",
+          "subject": "d46",
+          "predicate": "org:subOrganizationOf",
+          "object": "d47"
+        },
+        {
+          "id": "s0068",
+          "subject": "d47",
+          "predicate": "org:subOrganizationOf",
+          "object": "d48"
+        },
+        {
+          "id": "s0069",
+          "subject": "d48",
+          "predicate": "org:subOrganizationOf",
+          "object": "d49"
+        },
+        {
+          "id": "s0070",
+          "subject": "d49",
+          "predicate": "org:subOrganizationOf",
+          "object": "d0"
+        },
+        {
+          "id": "s0071",
+          "subject": "d49",
+          "predicate": "bench:risk",
+          "object": "open"
+        }
+      ],
+      "names": [
+        {
+          "id": "n5910",
+          "label": "Synthetic Meridian"
+        },
+        {
+          "id": "n3540",
+          "label": "Synthetic Meridian"
+        }
+      ],
+      "schema": {
+        "org:subOrganizationOf": "directed containment, not automatically transitive as an asserted RDF predicate",
+        "bench:risk": "custom benchmark risk fact; no legal or financial inference"
+      },
+      "coverage": {
+        "status": "complete",
+        "predicates": [
+          "bench:issuer",
+          "org:subOrganizationOf",
+          "bench:risk"
+        ],
+        "scope": "all entities in this bounded world",
+        "version": "v1"
+      },
+      "checkpoints": [
+        {
+          "id": "q0",
+          "withdraw": [],
+          "snapshot_id": "snapshot-0",
+          "required_watermark": 0,
+          "principal": "fixture-reader",
+          "authorization_scope": "bounded-world",
+          "source_id": "fixture-source",
+          "source_health": "healthy",
+          "valid_at": 0,
+          "observation_cutoff": 0
+        },
+        {
+          "id": "q1",
+          "withdraw": [
+            "s0004"
+          ],
+          "snapshot_id": "snapshot-1",
+          "required_watermark": 1,
+          "principal": "fixture-reader",
+          "authorization_scope": "bounded-world",
+          "source_id": "fixture-source",
+          "source_health": "healthy",
+          "valid_at": 1,
+          "observation_cutoff": 1
+        },
+        {
+          "id": "q2",
+          "withdraw": [
+            "s0004",
+            "s0008"
+          ],
+          "snapshot_id": "snapshot-2",
+          "required_watermark": 2,
+          "principal": "fixture-reader",
+          "authorization_scope": "bounded-world",
+          "source_id": "fixture-source",
+          "source_health": "healthy",
+          "valid_at": 2,
+          "observation_cutoff": 2
+        }
+      ],
+      "inferenceProfile": "Directed reachability over asserted org:subOrganizationOf only; no inverse, subproperty or other entailment inputs are enabled in this seed."
+    },
+    {
+      "id": "parallel-proof-reverse",
+      "task": "Return all current open-risk organizations reachable from the invoice issuer via zero or more org:subOrganizationOf links. Include sufficient assertion IDs.",
+      "invoice": "n8937",
+      "facts": [
+        {
+          "id": "s0000",
+          "subject": "n8937",
+          "predicate": "bench:issuer",
+          "object": "n1443"
+        },
+        {
+          "id": "s0001",
+          "subject": "n1443",
+          "predicate": "org:subOrganizationOf",
+          "object": "n7742"
+        },
+        {
+          "id": "s0002",
+          "subject": "n7742",
+          "predicate": "org:subOrganizationOf",
+          "object": "n3622"
+        },
+        {
+          "id": "s0003",
+          "subject": "n3622",
+          "predicate": "org:subOrganizationOf",
+          "object": "n9896"
+        },
+        {
+          "id": "s0004",
+          "subject": "n9896",
+          "predicate": "org:subOrganizationOf",
+          "object": "n5910"
+        },
+        {
+          "id": "s0005",
+          "subject": "n1443",
+          "predicate": "org:subOrganizationOf",
+          "object": "n3978"
+        },
+        {
+          "id": "s0006",
+          "subject": "n3978",
+          "predicate": "org:subOrganizationOf",
+          "object": "n7453"
+        },
+        {
+          "id": "s0007",
+          "subject": "n7453",
+          "predicate": "org:subOrganizationOf",
+          "object": "n6276"
+        },
+        {
+          "id": "s0008",
+          "subject": "n5910",
+          "predicate": "org:subOrganizationOf",
+          "object": "n6276"
+        },
+        {
+          "id": "s0009",
+          "subject": "n1443",
+          "predicate": "org:subOrganizationOf",
+          "object": "n7888"
+        },
+        {
+          "id": "s0010",
+          "subject": "n7888",
+          "predicate": "org:subOrganizationOf",
+          "object": "n8282"
+        },
+        {
+          "id": "s0011",
+          "subject": "n8282",
+          "predicate": "org:subOrganizationOf",
+          "object": "n1443"
+        },
+        {
+          "id": "s0012",
+          "subject": "n5910",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0013",
+          "subject": "n3540",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0014",
+          "subject": "d0",
+          "predicate": "org:subOrganizationOf",
+          "object": "d1"
+        },
+        {
+          "id": "s0015",
+          "subject": "d0",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0016",
+          "subject": "d1",
+          "predicate": "org:subOrganizationOf",
+          "object": "d2"
+        },
+        {
+          "id": "s0017",
+          "subject": "d2",
+          "predicate": "org:subOrganizationOf",
+          "object": "d3"
+        },
+        {
+          "id": "s0018",
+          "subject": "d3",
+          "predicate": "org:subOrganizationOf",
+          "object": "d4"
+        },
+        {
+          "id": "s0019",
+          "subject": "d4",
+          "predicate": "org:subOrganizationOf",
+          "object": "d5"
+        },
+        {
+          "id": "s0020",
+          "subject": "d5",
+          "predicate": "org:subOrganizationOf",
+          "object": "d6"
+        },
+        {
+          "id": "s0021",
+          "subject": "d6",
+          "predicate": "org:subOrganizationOf",
+          "object": "d7"
+        },
+        {
+          "id": "s0022",
+          "subject": "d7",
+          "predicate": "org:subOrganizationOf",
+          "object": "d8"
+        },
+        {
+          "id": "s0023",
+          "subject": "d7",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0024",
+          "subject": "d8",
+          "predicate": "org:subOrganizationOf",
+          "object": "d9"
+        },
+        {
+          "id": "s0025",
+          "subject": "d9",
+          "predicate": "org:subOrganizationOf",
+          "object": "d10"
+        },
+        {
+          "id": "s0026",
+          "subject": "d10",
+          "predicate": "org:subOrganizationOf",
+          "object": "d11"
+        },
+        {
+          "id": "s0027",
+          "subject": "d11",
+          "predicate": "org:subOrganizationOf",
+          "object": "d12"
+        },
+        {
+          "id": "s0028",
+          "subject": "d12",
+          "predicate": "org:subOrganizationOf",
+          "object": "d13"
+        },
+        {
+          "id": "s0029",
+          "subject": "d13",
+          "predicate": "org:subOrganizationOf",
+          "object": "d14"
+        },
+        {
+          "id": "s0030",
+          "subject": "d14",
+          "predicate": "org:subOrganizationOf",
+          "object": "d15"
+        },
+        {
+          "id": "s0031",
+          "subject": "d14",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0032",
+          "subject": "d15",
+          "predicate": "org:subOrganizationOf",
+          "object": "d16"
+        },
+        {
+          "id": "s0033",
+          "subject": "d16",
+          "predicate": "org:subOrganizationOf",
+          "object": "d17"
+        },
+        {
+          "id": "s0034",
+          "subject": "d17",
+          "predicate": "org:subOrganizationOf",
+          "object": "d18"
+        },
+        {
+          "id": "s0035",
+          "subject": "d18",
+          "predicate": "org:subOrganizationOf",
+          "object": "d19"
+        },
+        {
+          "id": "s0036",
+          "subject": "d19",
+          "predicate": "org:subOrganizationOf",
+          "object": "d20"
+        },
+        {
+          "id": "s0037",
+          "subject": "d20",
+          "predicate": "org:subOrganizationOf",
+          "object": "d21"
+        },
+        {
+          "id": "s0038",
+          "subject": "d21",
+          "predicate": "org:subOrganizationOf",
+          "object": "d22"
+        },
+        {
+          "id": "s0039",
+          "subject": "d21",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0040",
+          "subject": "d22",
+          "predicate": "org:subOrganizationOf",
+          "object": "d23"
+        },
+        {
+          "id": "s0041",
+          "subject": "d23",
+          "predicate": "org:subOrganizationOf",
+          "object": "d24"
+        },
+        {
+          "id": "s0042",
+          "subject": "d24",
+          "predicate": "org:subOrganizationOf",
+          "object": "d25"
+        },
+        {
+          "id": "s0043",
+          "subject": "d25",
+          "predicate": "org:subOrganizationOf",
+          "object": "d26"
+        },
+        {
+          "id": "s0044",
+          "subject": "d26",
+          "predicate": "org:subOrganizationOf",
+          "object": "d27"
+        },
+        {
+          "id": "s0045",
+          "subject": "d27",
+          "predicate": "org:subOrganizationOf",
+          "object": "d28"
+        },
+        {
+          "id": "s0046",
+          "subject": "d28",
+          "predicate": "org:subOrganizationOf",
+          "object": "d29"
+        },
+        {
+          "id": "s0047",
+          "subject": "d28",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0048",
+          "subject": "d29",
+          "predicate": "org:subOrganizationOf",
+          "object": "d30"
+        },
+        {
+          "id": "s0049",
+          "subject": "d30",
+          "predicate": "org:subOrganizationOf",
+          "object": "d31"
+        },
+        {
+          "id": "s0050",
+          "subject": "d31",
+          "predicate": "org:subOrganizationOf",
+          "object": "d32"
+        },
+        {
+          "id": "s0051",
+          "subject": "d32",
+          "predicate": "org:subOrganizationOf",
+          "object": "d33"
+        },
+        {
+          "id": "s0052",
+          "subject": "d33",
+          "predicate": "org:subOrganizationOf",
+          "object": "d34"
+        },
+        {
+          "id": "s0053",
+          "subject": "d34",
+          "predicate": "org:subOrganizationOf",
+          "object": "d35"
+        },
+        {
+          "id": "s0054",
+          "subject": "d35",
+          "predicate": "org:subOrganizationOf",
+          "object": "d36"
+        },
+        {
+          "id": "s0055",
+          "subject": "d35",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0056",
+          "subject": "d36",
+          "predicate": "org:subOrganizationOf",
+          "object": "d37"
+        },
+        {
+          "id": "s0057",
+          "subject": "d37",
+          "predicate": "org:subOrganizationOf",
+          "object": "d38"
+        },
+        {
+          "id": "s0058",
+          "subject": "d38",
+          "predicate": "org:subOrganizationOf",
+          "object": "d39"
+        },
+        {
+          "id": "s0059",
+          "subject": "d39",
+          "predicate": "org:subOrganizationOf",
+          "object": "d40"
+        },
+        {
+          "id": "s0060",
+          "subject": "d40",
+          "predicate": "org:subOrganizationOf",
+          "object": "d41"
+        },
+        {
+          "id": "s0061",
+          "subject": "d41",
+          "predicate": "org:subOrganizationOf",
+          "object": "d42"
+        },
+        {
+          "id": "s0062",
+          "subject": "d42",
+          "predicate": "org:subOrganizationOf",
+          "object": "d43"
+        },
+        {
+          "id": "s0063",
+          "subject": "d42",
+          "predicate": "bench:risk",
+          "object": "open"
+        },
+        {
+          "id": "s0064",
+          "subject": "d43",
+          "predicate": "org:subOrganizationOf",
+          "object": "d44"
+        },
+        {
+          "id": "s0065",
+          "subject": "d44",
+          "predicate": "org:subOrganizationOf",
+          "object": "d45"
+        },
+        {
+          "id": "s0066",
+          "subject": "d45",
+          "predicate": "org:subOrganizationOf",
+          "object": "d46"
+        },
+        {
+          "id": "s0067",
+          "subject": "d46",
+          "predicate": "org:subOrganizationOf",
+          "object": "d47"
+        },
+        {
+          "id": "s0068",
+          "subject": "d47",
+          "predicate": "org:subOrganizationOf",
+          "object": "d48"
+        },
+        {
+          "id": "s0069",
+          "subject": "d48",
+          "predicate": "org:subOrganizationOf",
+          "object": "d49"
+        },
+        {
+          "id": "s0070",
+          "subject": "d49",
+          "predicate": "org:subOrganizationOf",
+          "object": "d0"
+        },
+        {
+          "id": "s0071",
+          "subject": "d49",
+          "predicate": "bench:risk",
+          "object": "open"
+        }
+      ],
+      "names": [
+        {
+          "id": "n5910",
+          "label": "Synthetic Meridian"
+        },
+        {
+          "id": "n3540",
+          "label": "Synthetic Meridian"
+        }
+      ],
+      "schema": {
+        "org:subOrganizationOf": "directed containment, not automatically transitive as an asserted RDF predicate",
+        "bench:risk": "custom benchmark risk fact; no legal or financial inference"
+      },
+      "coverage": {
+        "status": "complete",
+        "predicates": [
+          "bench:issuer",
+          "org:subOrganizationOf",
+          "bench:risk"
+        ],
+        "scope": "all entities in this bounded world",
+        "version": "v1"
+      },
+      "checkpoints": [
+        {
+          "id": "q0",
+          "withdraw": [],
+          "snapshot_id": "snapshot-0",
+          "required_watermark": 0,
+          "principal": "fixture-reader",
+          "authorization_scope": "bounded-world",
+          "source_id": "fixture-source",
+          "source_health": "healthy",
+          "valid_at": 0,
+          "observation_cutoff": 0
+        },
+        {
+          "id": "q1",
+          "withdraw": [
+            "s0004"
+          ],
+          "snapshot_id": "snapshot-1",
+          "required_watermark": 1,
+          "principal": "fixture-reader",
+          "authorization_scope": "bounded-world",
+          "source_id": "fixture-source",
+          "source_health": "healthy",
+          "valid_at": 1,
+          "observation_cutoff": 1
+        },
+        {
+          "id": "q2",
+          "withdraw": [
+            "s0004",
+            "s0008"
+          ],
+          "snapshot_id": "snapshot-2",
+          "required_watermark": 2,
+          "principal": "fixture-reader",
+          "authorization_scope": "bounded-world",
+          "source_id": "fixture-source",
+          "source_health": "healthy",
+          "valid_at": 2,
+          "observation_cutoff": 2
+        }
+      ],
+      "inferenceProfile": "Directed reachability over asserted org:subOrganizationOf only; no inverse, subproperty or other entailment inputs are enabled in this seed."
+    }
+  ]
+}

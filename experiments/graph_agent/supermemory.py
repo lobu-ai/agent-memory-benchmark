@@ -1,0 +1,141 @@
+"""Supermemory document/search tools. Structural source mapping only, no solver."""
+import json
+from pathlib import Path
+import sys
+import uuid
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "adapters"))
+from _supermemory_v5 import Client, ReadinessError, namespace
+
+SUPPORTING_CONTEXT = (
+    "Synthetic organizational knowledge. Each source assertions array contains stable assertion id, "
+    "subject, predicate and object. org:subOrganizationOf means subject is directly a suborganization "
+    "of object, in that direction. bench:issuer means an invoice is issued by object. bench:risk with "
+    "object open means the subject has reported open risk, not authority. Names are labels, never "
+    "identity: different node IDs can share names. Preserve source IDs and direction when extracting "
+    "facts. These definitions describe the input vocabulary, not answers or derived reachability."
+)
+SOURCE_MARKER = "\n\nSOURCE_RECORDS_JSON\n"
+
+
+def source_content(source):
+    """Render every asserted fact, with no inference or answer-specific filter."""
+    names = {row["id"]: row["label"] for row in source["names"]}
+    def label(ref):
+        return names.get(ref, ref) + " [" + ref + "]"
+    lines = []
+    for fact in source["assertions"]:
+        subject, target = label(fact["subject"]), label(fact["object"])
+        if fact["predicate"] == "bench:issuer":
+            sentence = subject + " is an invoice issued by " + target
+        elif fact["predicate"] == "org:subOrganizationOf":
+            sentence = subject + " is directly a suborganization of " + target
+        else:
+            sentence = subject + " has reported " + fact["object"] + " risk"
+        lines.append("Assertion " + fact["id"] + ": " + sentence + ".")
+    return "Current source assertions:\n" + "\n".join(lines) + SOURCE_MARKER + json.dumps(source, sort_keys=True)
+
+
+def with_source_records(value):
+    """Decode only source JSON actually returned by the public document API.
+
+    Extracted memory prose is not promoted to an exact source assertion. The
+    grader independently matches returned records with the sealed input stream.
+    """
+    if isinstance(value, list):
+        return [with_source_records(v) for v in value]
+    if not isinstance(value, dict):
+        return value
+    result = {k: with_source_records(v) for k, v in value.items()}
+    if isinstance(value.get("content"), str):
+        try:
+            source = json.loads(value["content"].split(SOURCE_MARKER, 1)[-1])
+            if isinstance(source, dict) and isinstance(source.get("assertions"), list):
+                result["source_records"] = source
+                del result["content"]  # Structural decoding, not duplicated evidence bytes.
+        except json.JSONDecodeError:
+            pass
+    return result
+
+
+class Supermemory:
+    manifest = {
+        "search": {"description": "Supermemory search with native related-memory graph and source documents included. Search absence is not a complete source enumeration.",
+                   "arguments": {"query": "nonempty string", "limit": "integer 1..100 (default 10)",
+                                 "mode": "hybrid (default), memories, or chunks"}},
+        "list_documents": {"description": "Page ALL source documents with their published content. Native pagination.totalPages bounds enumeration; source_records decodes only returned source JSON.",
+                           "arguments": {"page": "integer >= 1", "limit": "integer 1..100"}},
+        "get_document": {"description": "Read a source document by ID within this episode's namespace, including current published source records.",
+                         "arguments": {"id": "document ID string"}},
+        "list_memories": {"description": "Page current extracted memories; this is not source enumeration.",
+                          "arguments": {"page": "integer >= 1", "limit": "integer 1..100"}},
+    }
+
+    def __init__(self, config):
+        self.api = Client(config["base_url"], config["api_key"], namespace(uuid.uuid4().hex),
+                          ready_timeout=config.get("ready_timeout", 180),
+                          list_content=config.get("list_content", True), observer=config.get("observer"),
+                          replacement_mode=config.get("replacement_mode", "patch"))
+        self.manifest = {key: dict(value) for key, value in type(self).manifest.items()}
+        if not self.api.list_content:
+            self.manifest["list_documents"]["description"] = (
+                "Page ALL source document metadata. This build omits list content; use get_document "
+                "for source records. Native pagination.totalPages bounds complete enumeration.")
+        self.config = {key: config[key] for key in ["version", "extraction_model"]}
+        self.config.update(api="v5", taskType="memory", dreaming="instant", rerank="none",
+                           list_content=self.api.list_content, supporting_context=SUPPORTING_CONTEXT,
+                           source_serialization="all assertions as plain statements plus exact source JSON",
+                           grouping="ten assertions per source document, original input order")
+        self.config["readiness"] = "instrumented quiescence (application glue)" if self.api.observer else "native dreamingStatus"
+        self.config["replacement_mode"] = self.api.replacement_mode
+        self.documents, self.receipts = {}, []
+
+    def load(self, world):
+        self.world_id = world["id"]
+        # Fixed input-order groups, never answer-specific selection or closure.
+        names = {n["id"]: n["label"] for n in world["names"]}
+        for offset in range(0, len(world["facts"]), 10):
+            doc_id = "source_" + str(offset // 10)
+            facts = world["facts"][offset:offset+10]
+            refs = {f["subject"] for f in facts} | {f["object"] for f in facts if f["predicate"] != "bench:risk"}
+            source = {"assertions": facts, "names": [{"id": r, "label": names.get(r, r)} for r in sorted(refs)]}
+            self.documents[doc_id] = source
+            self.publish(doc_id)
+
+    def publish(self, doc_id, replace=False):
+        content = source_content(self.documents[doc_id])
+        self.receipts.append(self.api.write(doc_id, content, {"episode": self.world_id}, replace=replace,
+                                           supporting_context=SUPPORTING_CONTEXT))
+
+    def withdraw(self, ids):
+        removed = set(ids)
+        for doc_id, source in self.documents.items():
+            current = [f for f in source["assertions"] if f["id"] not in removed]
+            if len(current) != len(source["assertions"]):
+                source["assertions"] = current
+                self.publish(doc_id, replace=True)
+
+    def invoke(self, tool, args):
+        if tool not in self.manifest or not isinstance(args, dict):
+            raise ValueError("Unknown tool")
+        if tool == "search":
+            if set(args) - {"query", "limit", "mode"} or type(args.get("limit", 10)) is not int:
+                raise ValueError("Invalid search arguments")
+            value = self.api.search(args.get("query"), args.get("limit", 10), args.get("mode", "hybrid"))
+        elif tool == "get_document":
+            if set(args) != {"id"} or not isinstance(args["id"], str) or not 1 <= len(args["id"]) <= 200:
+                raise ValueError("Expected document ID")
+            value = self.api.get(args["id"])
+        else:
+            if set(args) - {"page", "limit"}:
+                raise ValueError("Invalid pagination arguments")
+            value = self.api.list("documents" if tool == "list_documents" else "memories",
+                                  args.get("page", 1), args.get("limit", 100))
+        return with_source_records(value)
+
+    def receipt(self):
+        return {**self.config, "namespace": self.api.scope, "ready_documents": self.receipts,
+                "http_requests": self.api.requests, "observer_requests": self.api.observer_requests, "extraction_usage": None}
+
+    def cleanup(self):
+        return self.api.cleanup()

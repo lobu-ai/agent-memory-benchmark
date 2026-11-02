@@ -1,7 +1,14 @@
 """Source attribution and ranking transformations; no model/provider required."""
 import unittest
+import json
+import os
+from pathlib import Path
+import subprocess
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from adapters.mem0_local_adapter import collapse_source_hits
+from adapters._supermemory_v5 import Client, ReadinessError, SupermemoryError
 
 
 class SourceHitTests(unittest.TestCase):
@@ -31,3 +38,160 @@ class SourceHitTests(unittest.TestCase):
     def test_empty_results_and_nonobject_metadata(self):
         self.assertEqual(collapse_source_hits([], 4), [])
         self.assertEqual(collapse_source_hits([{"id": "fallback", "metadata": None}], 1)[0]["id"], "fallback")
+
+
+class SupermemoryContractTests(unittest.TestCase):
+    """Real HTTP/JSONL boundary, with a deterministic server contract fixture.
+
+    This checks transport and lifecycle handling, not Supermemory extraction
+    quality. A live binary conformance run is required separately.
+    """
+    def setUp(self):
+        self.documents = {}
+        self.pending = {}
+        self.stuck = False
+        self.old_build = False
+        self.instrumented = False
+        self.delete_fails = False
+        self.activity = {"seq": 0, "in_flight": 0, "last_agent_final_seq": 0, "last_error_seq": 0, "errors": 0}
+        case = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *_):
+                pass
+
+            def handle_request(self):
+                body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
+                if self.headers.get("Authorization") != "Bearer synthetic-test-key":
+                    self.send(401, {"error": "credential must never be reflected"})
+                    return
+                doc_id = self.path.rsplit("/", 1)[-1]
+                if self.command == "DELETE" and self.path.endswith("/document"):
+                    if case.delete_fails:
+                        self.send(200, {"count": 0, "errors": [{"id": body["ids"][0]}]})
+                    else:
+                        for key in body["ids"]:
+                            del case.documents[key]
+                        self.send(200, {"count": len(body["ids"]), "errors": []})
+                elif self.command == "GET" and self.path == "/activity":
+                    self.send(200, case.activity)
+                elif self.command == "POST" and self.path.endswith("/document"):
+                    case.documents[body["id"]] = {**body, "system": {"status": "done", "dreamingStatus": "dreaming"}}
+                    if case.instrumented:
+                        case.activity["seq"] += 1
+                        case.activity["last_agent_final_seq"] = case.activity["seq"]
+                    self.send(200, {"id": body["id"], "status": "queued"})
+                elif self.command == "PATCH":
+                    # Deliberately expose an old done version for one read.
+                    case.pending[doc_id] = body
+                    self.send(200, {"id": doc_id, "status": "queued"})
+                elif self.command == "GET":
+                    doc = case.documents[doc_id]
+                    self.send(200, {**doc, "system": {"status": "done"}} if case.old_build else doc)
+                    if not case.stuck:
+                        doc.update(case.pending.pop(doc_id, {}))
+                        doc["system"] = {"status": "done", "dreamingStatus": "done"}
+                elif "/list/documents?" in self.path:
+                    if case.old_build and body.get("include", {}).get("content"):
+                        self.send(400, {"error": "include.content unsupported"})
+                    else:
+                        self.send(200, {"documents": [{"id": key} for key in case.documents],
+                                        "pagination": {"totalPages": 1}})
+                elif "/list/memories?" in self.path:
+                    self.send(200, {"memories": [], "pagination": {"totalPages": 1}})
+                elif self.path.endswith("/search"):
+                    # API ranking intentionally differs from similarity order.
+                    self.send(200, {"results": [{"id": "m2", "memory": "corrected", "similarity": .1,
+                        "included": {"document": case.documents["a"]}},
+                        {"id": "m1", "memory": "other", "similarity": .9,
+                         "metadata": {"benchmark_id": "other-source"}}]})
+                else:
+                    self.send(404, {})
+
+            def send(self, code, body):
+                data = json.dumps(body).encode()
+                self.send_response(code)
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            do_POST = do_GET = do_PATCH = do_DELETE = handle_request
+
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
+        self.base = f"http://127.0.0.1:{self.server.server_port}"
+        self.addCleanup(self.thread.join)
+        self.addCleanup(self.server.server_close)
+        self.addCleanup(self.server.shutdown)
+
+    def test_jsonl_document_ingest_correction_readiness_and_ranked_source_attribution(self):
+        payload = {"runId": "synthetic-run", "scenario": {"id": "synthetic-case", "steps": [
+            {"id": "a", "content": "old"}, {"id": "b", "content": "corrected", "supersedes": "a"}]}}
+        requests = [{"id": 1, "action": "ingest", "payload": payload},
+                    {"id": 2, "action": "retrieve", "payload": {**payload, "prompt": "current?", "topK": 2}}]
+        process = subprocess.run(["python3", str(Path(__file__).with_name("supermemory_v5_adapter.py"))],
+            input="\n".join(json.dumps(r) for r in requests)+"\n", capture_output=True, text=True, timeout=8,
+            env={**os.environ, "SUPERMEMORY_BASE_URL": self.base, "SUPERMEMORY_API_KEY": "synthetic-test-key",
+                 "SUPERMEMORY_READY_TIMEOUT": "3", "SUPERMEMORY_RERANK": "order"})
+        self.assertEqual(process.returncode, 0, process.stderr)
+        ingested, retrieved = [json.loads(line) for line in process.stdout.splitlines()]
+        self.assertTrue(ingested["ok"], ingested)
+        self.assertEqual(len(self.documents), 1)
+        self.assertEqual(self.documents["a"]["content"], "corrected")
+        self.assertEqual(ingested["result"]["ready"][-1]["system"]["dreamingStatus"], "done")
+        self.assertEqual([i["id"] for i in retrieved["result"]["items"]], ["b", "other-source"])
+
+    def test_missing_memory_readiness_fails_instead_of_scoring_empty_search(self):
+        self.stuck = True
+        api = Client(self.base, "synthetic-test-key", "bench_test", ready_timeout=.03)
+        with self.assertRaises(ReadinessError):
+            api.write("a", "content", {})
+
+    def test_verified_old_build_can_list_metadata_but_cannot_claim_memory_readiness(self):
+        self.old_build = True
+        api = Client(self.base, "synthetic-test-key", "bench_test", list_content=False)
+        with self.assertRaisesRegex(ReadinessError, "omits system.dreamingStatus"):
+            api.write("a", "content", {})
+        self.assertEqual(api.list()["documents"], [{"id": "a"}])
+        self.assertEqual(api.get("a")["content"], "content")
+        api.list_content = True
+        with self.assertRaises(SupermemoryError):
+            api.list()
+
+    def test_instrumented_readiness_requires_a_new_final_and_stable_public_reads(self):
+        self.old_build, self.instrumented = True, True
+        api = Client(self.base, "synthetic-test-key", "bench_test", ready_timeout=2,
+                     observer={"url": self.base+"/activity", "token": "synthetic-test-key", "settle_seconds": 0})
+        receipt = api.write("a", "content", {})
+        self.assertEqual(receipt["readiness_contract"], "instrumented quiescence (application glue)")
+        self.assertEqual(receipt["observer"]["last_agent_final_seq"], 1)
+        # An earlier final must never certify a later source write.
+        self.instrumented = False
+        api.ready_timeout = .03
+        with self.assertRaises(ReadinessError):
+            api.write("b", "other content", {})
+
+    def test_explicit_delete_reingest_checks_deletion_and_fresh_extraction(self):
+        self.old_build, self.instrumented = True, True
+        api = Client(self.base, "synthetic-test-key", "bench_test", ready_timeout=2,
+                     replacement_mode="delete_reingest",
+                     observer={"url": self.base+"/activity", "token": "synthetic-test-key", "settle_seconds": 0})
+        api.write("a", "old", {})
+        receipt = api.write("a", "new", {}, replace=True)
+        self.assertEqual(self.documents["a"]["content"], "new")
+        self.assertEqual(receipt["observer"]["last_agent_final_seq"], 2)
+        self.assertEqual(receipt["replacement_mode"], "delete_reingest")
+        self.delete_fails = True
+        with self.assertRaisesRegex(ReadinessError, "deletion was incomplete"):
+            api.write("a", "must not overwrite", {}, replace=True)
+        self.assertEqual(self.documents["a"]["content"], "new")
+
+    def test_typed_http_error_is_redacted_and_insecure_remote_origin_rejected(self):
+        api = Client(self.base, "wrong-synthetic-key", "bench_test")
+        with self.assertRaises(SupermemoryError) as error:
+            api.search("test")
+        self.assertEqual(error.exception.status, 401)
+        self.assertEqual(str(error.exception), "Supermemory HTTP 401")
+        with self.assertRaises(ValueError):
+            Client("http://remote.example", "synthetic-test-key", "bench_test")

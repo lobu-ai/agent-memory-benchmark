@@ -1,0 +1,7 @@
+{
+  "name": "graph-agent-benchmark-fixture",
+  "private": true,
+  "dependencies": {
+    "@lobu/cli": "24.4.0"
+  }
+}

@@ -142,7 +142,7 @@ or limitations of later releases. Fresh comparisons must record those again.
   Provider availability and spend caps were properties of those runs. New pilot
   runs should use the requested OpenCode/Muse setup and record the exact reader
   and judge independently; old judge availability is not permission to rerun it.
-- **Supermemory** now runs against the official self-hosted binary
+- **Historical Supermemory direct-memory board** ran against the official self-hosted binary
   (`supermemory-server` v0.0.2 from the supermemoryai/supermemory GitHub
   releases, local bge-base embeddings + embedded PGlite/pgvector engine),
   replacing the earlier hosted-API runs — so Supermemory, Lobu and Hindsight
@@ -155,7 +155,7 @@ or limitations of later releases. Fresh comparisons must record those again.
   proprietary extraction models may apply server-side; no way to verify),
   so only the self-hosted binary is benchmarked. The hosted artifacts
   remain in git history.
-  - **Supermemory rerank is non-functional self-hosted (so it stays off).**
+  - **v0.0.2 reranking failed in that historical run (so it stayed off).**
     Setting `SUPERMEMORY_RERANK=1` on the v0.0.2 binary throws
     `Reranking failed: TypeError: undefined is not an object (evaluating
     'f.AI.run')` on every query — the rerank path is wired to a Cloudflare
@@ -163,7 +163,34 @@ or limitations of later releases. Fresh comparisons must record those again.
     On a small slice it degraded answer accuracy (90%→80%) and ~3.6×'d
     latency before falling over; under concurrent load the repeated failures
     crashed the server. The plain `searchMode` is therefore the only
-    apples-to-apples self-hosted comparison, which is what these boards use.
+    comparison used for those boards. This is not evidence about newer builds.
+
+### Supermemory document-pipeline comparison
+
+`adapters/supermemory_v5_adapter.py` and the experimental graph-agent adapter
+use the v5 document ingestion pipeline, rather than direct-memory writes. They
+request memory extraction with instant processing, require both document and
+memory readiness, verify published content after replacement, and expose hybrid
+search with native related memories and source documents. See the README for
+configuration and the source contracts. Do not combine these new results with
+the historical v4 board or relabel the old 20/24 retrieval diagnostic.
+
+Source documents use only input facts and stable identifiers. The graph adapter
+groups by input order, offers complete paginated source reads to avoid treating
+search absence as proof, and never constructs a task-specific closure. Native
+extracted prose remains distinct from exact source evidence. The reader is the
+same Muse executor as Lobu; Supermemory's extraction model and any compatibility
+bridge must be recorded separately, including requests and unavailable usage.
+An explicitly configured local transport observer can establish instrumented
+quiescence when a build omits native memory status. This is application glue,
+never a native completion guarantee. Likewise, explicit delete/reingest source
+replacement is application-managed; it does not demonstrate native correction.
+Both compatibility choices, diagnostic failures, setup and update latency, and
+all extraction calls belong in the result. Exact-set certification additionally
+requires recorded public enumeration and source reads, not only correct IDs.
+This evaluates a specified self-hosted configuration, not Supermemory's hosted
+proprietary extraction pipeline. Setup/readiness failures, source-update
+failures, model failures and budget exhaustion are distinct from wrong answers.
 
 ## Honest caveats
 

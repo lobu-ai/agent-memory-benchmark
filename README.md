@@ -34,6 +34,7 @@ The shared answerer is held constant across systems so the score reflects the
 | Hindsight | `adapters/hindsight_adapter.py` | local Hindsight API server |
 | Mem0 | `adapters/mem0_local_adapter.py` | local OSS `mem0` lib + local Chroma |
 | Supermemory | `adapters/supermemory_adapter.py` | self-hosted `supermemory-server` binary (local) |
+| Supermemory v5 documents (separate board) | `adapters/supermemory_v5_adapter.py` | public namespace document + derived-memory APIs |
 
 ## Datasets
 
@@ -209,6 +210,197 @@ separate future track: importing typed records does not implement its subclass,
 inverse-property, transitive-property or restriction inference requirements.
 For product comparisons, run native graph tasks against Graphiti/Neo4j rather
 than label a text-memory score an ontology-system ranking.
+
+## Experimental native graph agent smoke
+
+`experiments/graph_agent/` is a separate agent-loop experiment, not part of
+the retrieval leaderboard. It contains two public development worlds: a
+four-edge risk path with an alternate support, and a matched world with that
+alternate edge reversed. Each has three sequential withdrawal checkpoints,
+same-name distractors, a grounded cycle, and 50 disconnected distractor edges.
+This is two base episodes, one matched pair, six correlated queries per system.
+
+The Lobu adapter uses public `entities.create`, `link`, `unlink`, `list`, and
+`listLinks` APIs on an explicit disposable loopback install. `entities.delete`
+resets only fixture-owned synthetic rows before ingestion. Typed metadata and
+directed links are mapped structurally; adapters contain no task solver. The
+PostgreSQL control exposes read-only SQL over normalized assertions and nodes,
+including recursive CTEs. SQL is a correctness and navigation-cost control,
+not a competing memory product. Graphiti is not implemented in this smoke.
+
+Muse runs through the existing authenticated OpenCode stateless endpoint with
+only the harness's JSON tool protocol. It receives neither future updates nor
+the oracle. A complete incremental withdrawal feed and snapshot bindings are
+provided by benchmark application glue; these are not native product credit.
+Limits across all three checkpoints: 10 model calls, 25 tool invocations,
+200 KB of tool responses, 360 seconds; global model-call cap 80. Responses may
+contain a prose prefix followed by one JSON object. Errors consume budget.
+Native API granularity differs from SQL; reports retain tool bytes and latency.
+
+Use isolated services you own: apply `fixtures/graph-agent` with pinned CLI
+24.4.0 to a disposable local Lobu install; initialize a separate PostgreSQL
+database `graph_bench` with owner `bench_owner` and SELECT-only login
+`bench_reader`; start `opencode serve` on loopback using its existing provider
+authorization. Supply a private service-state JSON with `lobu_port`, `pg_port`,
+`opencode_port`, and the generated OpenCode server `password`. Optional
+`prior_model_calls` charges earlier diagnostic attempts against the global cap.
+Never publish this state or point the runner at a production workspace.
+
+```bash
+python3 -m unittest discover -s experiments/graph_agent -p 'test_*.py'
+python3 experiments/graph_agent/probe.py --state <private-service-state.json> --output <storage-receipts.json>
+python3 experiments/graph_agent/run.py --state <private-service-state.json> --output <new-output-directory>
+python3 experiments/graph_agent/grade.py <output-directory>
+```
+
+The offline evaluator checks answers against an independent recursive reference,
+accepts either sufficient path, rejects stale/unread proof citations, and checks
+exact-set frontier certificates against the bounded complete source. Empty sets
+need the same coverage proof. Read grounding verifies assertion content in tool
+results; it does not prove arbitrary SQL expression lineage. This seed has one
+source and one page per reachable subject. It does not test multipage recovery,
+authorization, temporal ORG semantics, approvals, dispatch, or OWL entailment.
+Run those tracks and a graph-product comparison before making broader claims.
+Raw traces, fixed denominators (including setup failures), fixture/code hashes,
+and diagnostic attempts must accompany results. OpenCode's endpoint exposes no
+billed token/dollar usage, so none is estimated.
+Storage probes compare all persisted assertions after each withdrawal through
+fresh native API reads, and verify PostgreSQL write/file-read rejection by
+SQLSTATE. Run probes and agent trials sequentially; both own disposable data.
+
+Generate additional graph development questions with:
+
+```bash
+python3 experiments/graph_agent/generate.py --output results/graph-dev-24.json
+python3 experiments/graph_agent/run.py --state <private-service-state.json> --suite results/graph-dev-24.json --episodes graph-dev-01 graph-dev-02 --output <new-batch-directory>
+python3 experiments/graph_agent/grade.py <batch-directory> --suite results/graph-dev-24.json
+```
+
+The next product comparison focuses on Lobu versus Supermemory. Verify a pinned
+Supermemory build and its current document/derived-memory pipeline first; the
+saved 0.0.9 v4 direct-memory result is a historical retrieval diagnostic. The
+v5 document adapter is separate so old configs and scores retain their meaning.
+Use the same Muse reader,
+source facts and budgets, with supported native tools for each product. Record
+ingestion/extraction settings and readiness separately. Graphiti and Neo4j are
+deferred; PostgreSQL remains a correctness control.
+
+The new retrieval adapter uses `POST /ns/{namespace}/document` with
+`taskType: memory` and `dreaming: instant`, waits for both `system.status` and
+`system.dreamingStatus` to be `done`, and verifies the published source content.
+Explicit supersession uses `PATCH` replacement, rather than appending another
+version through `POST`. Search defaults to hybrid with related memories and
+source documents included; public ranking is retained. Retrieval overfetches up
+to four times top-K (maximum 100 facts) before collapsing to top-K source IDs,
+so multiple extracted facts from one document do not consume the source budget.
+Configure
+`SUPERMEMORY_BASE_URL`, `SUPERMEMORY_API_KEY`, and `BENCH_SYSTEM_VERSION` in a
+private environment. Reranking can be `none`, `order`, or `aggregate`; freeze it
+after development tuning. Old v4 configs are deliberately unchanged.
+
+The graph agent now accepts `--systems lobu supermemory`. Its private state
+adds this object (replace placeholders; never publish this file):
+
+```json
+{
+  "supermemory": {
+    "base_url": "http://127.0.0.1:6767",
+    "api_key": "<private disposable-server key>",
+    "version": "<verified server build>",
+    "extraction_model": "<configured extraction model>",
+    "ready_timeout": 180,
+    "list_content": true
+  }
+}
+```
+
+The Supermemory agent can search hybrid/chunks/memories with related results,
+page extracted memories, and read or enumerate source documents. Ingestion
+groups ten assertions per document in original input order; every assertion is
+rendered as a readable statement followed by its exact source JSON. This is a structural
+mapping, not answer-specific subgraph selection. Withdrawals patch only the
+affected documents. A fixed namespace extraction context explains the same
+source vocabulary, IDs and direction that the Lobu schema represents; it
+contains no expected answer or derived path. Only source records returned by public tools become exact
+citation evidence; extracted prose alone does not. Setup receipts record the
+API, build, model, readiness, source hashes and request counts; extraction usage
+is unknown unless measured by an external provider ledger. The runner cleans
+its unique synthetic namespace and records cleanup failures. A missing v5 API
+fails setup visibly without falling back to v4 or consuming reader calls.
+
+Next execution gates: live document/search/correction conformance; a paired
+six-query smoke with identical Muse budgets; all 24 development queries; then
+freeze adapters and generate structurally held-out scenarios. Keep reader
+accuracy, source proof, exact-set certificates, extraction cost and latency
+separate. Self-hosted results do not establish hosted-service quality.
+
+Live v0.0.9 conformance found that source document GET omits
+`system.dreamingStatus`, and document listing rejects `include.content`.
+Set `list_content: false` for that verified build and read source content using
+`get_document`. Default readiness still requires the native completion signal.
+For an isolated, serial, owned local engine only, the optional private
+`observer: {url: "http://127.0.0.1:<port>/activity", token: "<private>", settle_seconds: 2}`
+uses the generic `muse_bridge.py` transport ledger: a fresh successful extractor
+final, no in-flight calls, exact published content, and stable public memory
+listing. Receipts label this **instrumented quiescence (application glue)**,
+not a native completion or transaction guarantee. It never waits for a gold
+fact, expected answer, or nonempty memory count. The bridge dispatches no
+Supermemory functions; the native engine executes its own extraction tools.
+
+A live PATCH correction made no fresh extractor call within 300 seconds.
+The explicit `replacement_mode: "delete_reingest"` compatibility setting
+composes public document deletion and instant ingestion under the same source
+ID. It verifies deletion count/errors and new extraction readiness. This is
+application-managed replacement, not a native correction result or silent
+fallback. Default `replacement_mode: "patch"` remains unchanged. Keep both
+failed diagnostic attempts and compatibility receipts in any report.
+
+Exact-set grading also checks actual API coverage receipts: complete source
+enumeration plus source reads for Supermemory; node metadata plus terminal
+outgoing-link pages for Lobu. Positive proof citations alone do not establish
+absence. SQL expression lineage remains unverified in the relational control.
+Per-phase model-call caps are explicit; bridge restarts resume the extraction
+ledger and reader batches carry prior attempts forward. Billed usage is unknown.
+
+Contracts: [ingestion](https://supermemory.ai/docs/ingestion/add-memories),
+[document lifecycle](https://supermemory.ai/docs/ingestion/document-operations),
+[search](https://supermemory.ai/docs/recall/search).
+
+The generator emits eight worlds in four structural pairs: parallel branches,
+a shared choke edge, multiple risky targets, and exits from a reachable cycle.
+Each world has three sequential checkpoint queries, for 24 correlated queries.
+After adapter freeze, `experiments/graph_agent/generate_holdout.py --output <file>`
+generates a separate 24-query graph holdout: joined braids, two issuers with
+zero-hop risk, nested cycles, and irrelevant followed by relevant withdrawals.
+Its degree profiles differ from all development templates; both reference
+solvers verify every checkpoint. It remains graph-only, not the broader planned
+temporal, permission or action benchmark. Generation is not product execution.
+The separate `.reference.json` sidecar checks each answer by path enumeration
+and recursive SQL. Keep that evaluator artifact away from the executor. Each
+pair differs in one edge's direction. Seeds reproduce identifiers and order;
+changing a seed alone does not create a structural holdout. These cases expand
+graph maintenance only; they do not implement the reviewed temporal,
+authorization, pagination or governed-action tracks.
+
+Select explicit episode IDs for bounded batches. The 80-call global cap remains
+in force for a run, and `prior_model_calls` charges earlier attempts; never reset
+the counter to retry a failed batch. Evaluation checks the executed fixture hash
+and uses the selected episodes' denominator, including setup failures. A partial
+batch must not be reported as complete coverage of all 24 queries.
+
+Build a standalone question-level report from saved retrieval, native smoke and
+generated-development artifacts (no model calls):
+
+```bash
+python3 experiments/graph_agent/report.py --retrieval-dir <retrieval-artifacts> --native-summary <native-summary.json> --generated-suite results/graph-dev-24.json --output <report-directory>/index.html
+```
+
+The retrieval artifacts are `suite.json`, `comparison.json`,
+`semantic-review.json` and the source reports named by the comparison manifest.
+Their hashes must agree. The native summary is the combined smoke manifest with
+`systems`, `rows`, fixture hash and source commit. The report keeps strict versus
+same-reader semantic review separate, shows paired wins/losses and missing
+reference records for each question, and labels generated questions as not run.
 
 ## Continuous benchmarking (GitHub Actions)
 
