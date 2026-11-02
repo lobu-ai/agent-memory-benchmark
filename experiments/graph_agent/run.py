@@ -13,6 +13,7 @@ from pathlib import Path
 import time
 
 from adapters import Lobu, Postgres, post
+from supermemory import Supermemory, ReadinessError
 
 ROOT = Path(__file__).resolve().parents[2]
 MODEL = {"providerID": "opencode-go", "id": "muse-spark-1.3-contributor"}
@@ -98,9 +99,18 @@ def episode(world, adapter, executor, system):
         "task": world["task"], "invoice": world["invoice"], "inference_profile": world["inferenceProfile"],
         "tools": adapter.manifest, "coverage": world["coverage"]})}]
     results = []
-    for checkpoint in world["checkpoints"]:
+    for checkpoint_index, checkpoint in enumerate(world["checkpoints"]):
         removed = set(checkpoint["withdraw"]) - seen_withdrawals
-        adapter.withdraw(sorted(removed))
+        try:
+            adapter.withdraw(sorted(removed))
+        except Exception as exc:
+            for index, blocked in enumerate(world["checkpoints"][checkpoint_index:]):
+                row = {"system": system, "episode": world["id"], "checkpoint": blocked["id"],
+                       "status": "source_update_failed" if index == 0 else "not_attempted",
+                       "error": type(exc).__name__ + ": " + str(exc)[:300]}
+                results.append(row)
+                executor.append({"kind": "answer", **row})
+            return results
         seen_withdrawals |= removed
         visible = {k: v for k, v in checkpoint.items() if k != "withdraw"}
         visible["newly_withdrawn_assertion_ids"] = sorted(removed)
@@ -168,7 +178,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--state", type=Path, required=True, help="Private local service state; never publish")
     p.add_argument("--output", type=Path, required=True)
-    p.add_argument("--systems", nargs="+", choices=["lobu", "postgres"], default=["lobu", "postgres"])
+    p.add_argument("--systems", nargs="+", choices=["lobu", "postgres", "supermemory"], default=["lobu", "postgres"])
     p.add_argument("--suite", type=Path, default=ROOT / "fixtures/graph-agent/worlds.json")
     p.add_argument("--episodes", nargs="+", help="Explicit episode IDs for a bounded batch")
     args = p.parse_args()
@@ -188,7 +198,9 @@ def main():
     selected_ids = {w["id"] for w in worlds}
     executor = Executor(state, args.output / "trace.jsonl")
     result = {"experimental": True, "fixture_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-              "code_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in Path(__file__).parent.glob("*.py") if p.name in {"run.py", "adapters.py"}},
+              "code_sha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+                              for p in [Path(__file__), Path(__file__).with_name("adapters.py"),
+                                        Path(__file__).with_name("supermemory.py"), ROOT/"adapters/_supermemory_v5.py"]},
               "prior_diagnostic_model_calls_charged": state.get("prior_model_calls", 0),
               "model": MODEL, "base_episodes": len(worlds),
               "selected_episode_ids": [w["id"] for w in worlds],
@@ -196,18 +208,38 @@ def main():
               "matched_pairs": sum(members <= selected_ids for members in pair_members.values()),
               "usage_note": "OpenCode stateless endpoint returns no billed token or dollar usage.",
               "capability": "agent query-time directed traversal; no native OWL claim",
-              "application_glue": ["structural mappings", "complete incremental withdrawal feed", "snapshot bindings"], "rows": []}
+              "application_glue": ["structural mappings", "complete incremental withdrawal feed", "snapshot bindings"],
+              "cleanup_failures": [], "rows": []}
     for system in args.systems:
         for world in worlds:
-            adapter = Lobu("http://127.0.0.1:" + str(state["lobu_port"])) if system == "lobu" else Postgres(state["pg_port"])
+            adapter = None
             try:
+                if system == "lobu":
+                    adapter = Lobu("http://127.0.0.1:" + str(state["lobu_port"]))
+                elif system == "postgres":
+                    adapter = Postgres(state["pg_port"])
+                else:
+                    adapter = Supermemory(state["supermemory"])
                 adapter.load(world)
                 result["rows"].extend(episode(world, adapter, executor, system))
             except Exception as exc:
-                result["rows"].append({"system": system, "episode": world["id"], "status": "setup_failed", "error": str(exc)[:500]})
+                result["rows"].append({"system": system, "episode": world["id"], "status": "setup_failed",
+                                       "failure_class": "readiness_failed" if isinstance(exc, ReadinessError) else type(exc).__name__,
+                                       "error": str(exc)[:500]})
+            finally:
+                if isinstance(adapter, Supermemory):
+                    executor.append({"kind": "setup_receipt", "system": system, "episode": world["id"], **adapter.receipt()})
+                    try:
+                        adapter.cleanup()
+                        executor.append({"kind": "cleanup", "system": system, "episode": world["id"], "status": "completed"})
+                    except Exception as exc:
+                        result["cleanup_failures"].append({"system": system, "episode": world["id"], "error": str(exc)[:200]})
+                        executor.append({"kind": "cleanup", "system": system, "episode": world["id"], "status": "failed", "error": str(exc)[:200]})
             (args.output / "results.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({"output": str(args.output), "model_calls": executor.calls,
                       "statuses": [x["status"] for x in result["rows"]]}))
+    if result["cleanup_failures"] or any(row["status"] != "answered" for row in result["rows"]):
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

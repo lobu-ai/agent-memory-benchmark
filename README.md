@@ -34,6 +34,7 @@ The shared answerer is held constant across systems so the score reflects the
 | Hindsight | `adapters/hindsight_adapter.py` | local Hindsight API server |
 | Mem0 | `adapters/mem0_local_adapter.py` | local OSS `mem0` lib + local Chroma |
 | Supermemory | `adapters/supermemory_adapter.py` | self-hosted `supermemory-server` binary (local) |
+| Supermemory v5 documents (separate board) | `adapters/supermemory_v5_adapter.py` | public namespace document + derived-memory APIs |
 
 ## Datasets
 
@@ -277,11 +278,58 @@ python3 experiments/graph_agent/grade.py <batch-directory> --suite results/graph
 
 The next product comparison focuses on Lobu versus Supermemory. Verify a pinned
 Supermemory build and its current document/derived-memory pipeline first; the
-saved 0.0.9 v4 direct-memory result is a historical retrieval diagnostic. A
-native Supermemory agent adapter is still needed. Use the same Muse reader,
+saved 0.0.9 v4 direct-memory result is a historical retrieval diagnostic. The
+v5 document adapter is separate so old configs and scores retain their meaning.
+Use the same Muse reader,
 source facts and budgets, with supported native tools for each product. Record
 ingestion/extraction settings and readiness separately. Graphiti and Neo4j are
 deferred; PostgreSQL remains a correctness control.
+
+The new retrieval adapter uses `POST /ns/{namespace}/document` with
+`taskType: memory` and `dreaming: instant`, waits for both `system.status` and
+`system.dreamingStatus` to be `done`, and verifies the published source content.
+Explicit supersession uses `PATCH` replacement, rather than appending another
+version through `POST`. Search defaults to hybrid with related memories and
+source documents included; public ranking is retained. Configure
+`SUPERMEMORY_BASE_URL`, `SUPERMEMORY_API_KEY`, and `BENCH_SYSTEM_VERSION` in a
+private environment. Reranking can be `none`, `order`, or `aggregate`; freeze it
+after development tuning. Old v4 configs are deliberately unchanged.
+
+The graph agent now accepts `--systems lobu supermemory`. Its private state
+adds this object (replace placeholders; never publish this file):
+
+```json
+{
+  "supermemory": {
+    "base_url": "http://127.0.0.1:6767",
+    "api_key": "<private disposable-server key>",
+    "version": "<verified server build>",
+    "extraction_model": "<configured extraction model>",
+    "ready_timeout": 180
+  }
+}
+```
+
+The Supermemory agent can search hybrid/chunks/memories with related results,
+page extracted memories, and read or enumerate source documents. Ingestion
+groups ten assertions per document in original input order; this is a structural
+mapping, not answer-specific subgraph selection. Withdrawals patch only the
+affected documents. Only source records returned by public tools become exact
+citation evidence; extracted prose alone does not. Setup receipts record the
+API, build, model, readiness, source hashes and request counts; extraction usage
+is unknown unless measured by an external provider ledger. The runner cleans
+its unique synthetic namespace and records cleanup failures. A missing v5 API
+fails setup visibly without falling back to v4 or consuming reader calls.
+
+Next execution gates: live document/search/correction conformance; a paired
+six-query smoke with identical Muse budgets; all 24 development queries; then
+freeze adapters and generate structurally held-out scenarios. Keep reader
+accuracy, source proof, exact-set certificates, extraction cost and latency
+separate. Self-hosted results do not establish hosted-service quality.
+
+Contracts: [ingestion](https://supermemory.ai/docs/ingestion/add-memories),
+[document lifecycle](https://supermemory.ai/docs/ingestion/document-operations),
+[search](https://supermemory.ai/docs/recall/search).
 
 The generator emits eight worlds in four structural pairs: parallel branches,
 a shared choke edge, multiple risky targets, and exits from a reachable cycle.

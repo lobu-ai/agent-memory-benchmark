@@ -18,9 +18,60 @@ from reference import (worlds, path_oracle, relational_oracle, make_frontier_cer
 from run import parse_reply, episode, BudgetExhausted
 from generate import generate, verify
 from report import load_retrieval
+from supermemory import with_source_records
 
 
 class GraphAgentTests(unittest.TestCase):
+    def test_missing_v5_endpoint_is_a_redacted_setup_failure_with_zero_reader_calls(self):
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *_):
+                pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers.get("Content-Length", 0)))
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'{"error":"untrusted response body"}')
+            def do_DELETE(self):
+                self.rfile.read(int(self.headers.get("Content-Length", 0)))
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'{}')
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                folder = Path(tmp)
+                state = folder/"state.json"
+                state.write_text(json.dumps({"supermemory": {"base_url": f"http://127.0.0.1:{server.server_port}",
+                    "api_key": "synthetic-private-key", "version": "test-build", "extraction_model": "test-model"}}))
+                output = folder/"run"
+                world, _ = worlds()[0]
+                process = subprocess.run([sys.executable, str(Path(__file__).with_name("run.py")), "--state", str(state),
+                    "--systems", "supermemory", "--episodes", world["id"], "--output", str(output)], capture_output=True, text=True)
+                self.assertEqual(process.returncode, 1, process.stderr)
+                result = json.loads((output/"results.json").read_text())
+                self.assertEqual(result["rows"][0]["status"], "setup_failed")
+                self.assertEqual(result["rows"][0]["error"], "Supermemory HTTP 404")
+                trace = (output/"trace.jsonl").read_text()
+                self.assertNotIn('"kind": "model"', trace)
+                self.assertNotIn("synthetic-private-key", trace)
+                graded = subprocess.run([sys.executable, str(Path(__file__).with_name("grade.py")), str(output)], capture_output=True, text=True)
+                self.assertEqual(graded.returncode, 0, graded.stderr)
+                summary = json.loads((output/"graded.json").read_text())["summary"]["supermemory"]
+                self.assertEqual((summary["denominator"], summary["answered"]), (3, 0))
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
+    def test_only_returned_source_document_content_is_promoted_to_grounded_records(self):
+        fact = {"id": "assertion-test", "subject": "node-a", "predicate": "bench:risk", "object": "open"}
+        response = with_source_records({"documents": [{"id": "source-test", "content": json.dumps({"assertions": [fact]})}],
+                                      "memory": "assertion-unread implies node-b risk"})
+        self.assertEqual(observed_facts(response), [fact])
+        self.assertEqual(observed_facts(with_source_records({"content": "not JSON", "memory": "assertion-unread"})), [])
+
     def test_expansion_is_reproducible_and_all_24_queries_have_two_agreeing_references(self):
         suite = generate()
         self.assertEqual(suite, generate())
@@ -190,6 +241,21 @@ class GraphAgentTests(unittest.TestCase):
                 raise BudgetExhausted("global cap")
         rows = episode(world, Store(), Reader(), "budget-boundary")
         self.assertEqual([r["status"] for r in rows], ["budget_exhausted"]*3)
+
+    def test_failed_source_update_keeps_earlier_answer_and_stops_dependent_questions(self):
+        world, _ = worlds()[0]
+        class Store:
+            manifest = {}
+            def withdraw(self, ids):
+                if ids:
+                    raise RuntimeError("synthetic source update failure")
+        class Reader:
+            def append(self, value):
+                pass
+            def generate(self, messages, remaining):
+                return json.dumps({"final": {"answer": []}})
+        rows = episode(world, Store(), Reader(), "source-update-boundary")
+        self.assertEqual([r["status"] for r in rows], ["answered", "source_update_failed", "not_attempted"])
 
     def test_protocol_rejects_native_tools_and_mixed_final_calls(self):
         self.assertEqual(parse_reply('{"calls":[{"tool":"query","arguments":{"sql":"SELECT 1"}}]}')["calls"][0]["tool"], "query")
