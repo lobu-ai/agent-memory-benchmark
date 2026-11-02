@@ -146,6 +146,14 @@ This is **scripted platform conformance**, not agent reasoning, a competitive
 memory score, OWL/FIBO inference, connector synchronization, or an authorization
 audit. Keep its score separate from retrieval QA and official STATE evaluation.
 
+SQLite FTS5 is a retrieval control, not a product alternative to Lobu. Real
+comparison targets are Mem0, Supermemory and Hindsight for agent memory;
+Zep/Graphiti and Neo4j GraphRAG for typed/temporal knowledge; and Foundry or a
+composed memory/workflow stack for operational tasks. See the staged comparison
+plan in [METHODOLOGY.md](METHODOLOGY.md#product-comparisons-and-retrieval-controls).
+Native graphs and connectors are not automatically unique to Lobu; compare the
+actual editions, required application code, and successful task outcomes.
+
 The next agent-task comparison should give OpenCode + Muse the same synthetic
 facts with three access modes: text retrieval, typed records without edges, and
 typed records with relationships. Tasks ask for the invoice's controller/risk,
