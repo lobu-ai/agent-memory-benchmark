@@ -181,15 +181,22 @@ export class CommandBenchmarkAdapter implements BenchmarkAdapter {
   }
 
   async reset(ctx: TrialContext): Promise<void> {
-    await this.runCommand("reset", ctx as unknown as Record<string, unknown>);
+    await this.runCommand("reset", this.sourceContext(ctx));
   }
 
   async setup(ctx: TrialContext): Promise<void> {
-    await this.runCommand("setup", ctx as unknown as Record<string, unknown>);
+    await this.runCommand("setup", this.sourceContext(ctx));
   }
 
   async ingestScenario(ctx: ScenarioContext): Promise<void> {
-    await this.runCommand("ingest", ctx as unknown as Record<string, unknown>);
+    const { questions: _questions, ...scenario } = ctx.scenario;
+    await this.runCommand("ingest", { ...this.sourceContext(ctx), scenario });
+  }
+
+  private sourceContext(ctx: TrialContext): Record<string, unknown> {
+    // Evaluation labels and future scenarios belong exclusively to the scorer.
+    const { scenarios: _scenarios, ...suite } = ctx.suite;
+    return { runId: ctx.runId, trialIndex: ctx.trialIndex, suite };
   }
 
   async retrieve(ctx: RetrieveContext): Promise<RetrievalResult> {

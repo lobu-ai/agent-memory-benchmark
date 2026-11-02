@@ -90,6 +90,7 @@ export function scoreQuestion(args: {
   answer: string | null;
   citedIds: string[];
   retrievedIds: string[];
+  answerMatch?: "substring-proxy" | "normalized-exact";
 }): QuestionScore {
   const expectedAnswers = expandExpectedAnswers(args.expectedAnswers);
   const normalizedExpectedAnswers = dedupe(expectedAnswers.map(normalizeText).filter(Boolean));
@@ -97,48 +98,31 @@ export function scoreQuestion(args: {
   const expectedSources = new Set(args.expectedSourceStepIds);
   const citedIds = dedupe(args.citedIds);
   const retrievedIds = dedupe(args.retrievedIds);
-  const normalizedAnswer = args.answer ? normalizeText(args.answer) : null;
-  const looseAnswer = args.answer ? normalizeLooseText(args.answer) : null;
+  const normalizedAnswer = args.answer !== null ? normalizeText(args.answer) : null;
+  const looseAnswer = args.answer !== null ? normalizeLooseText(args.answer) : null;
 
-  const answerCorrect =
-    normalizedAnswer === null
-      ? null
-      : normalizedExpectedAnswers.some(
-            (expected) =>
-              normalizedAnswer === expected ||
-              normalizedAnswer.includes(expected) ||
-              expected.includes(normalizedAnswer)
-          ) ||
-          (looseAnswer !== null &&
-            looseExpectedAnswers.some(
-              (expected) =>
-                looseAnswer === expected ||
-                looseAnswer.includes(expected) ||
-                expected.includes(looseAnswer)
-            ))
-        ? 1
-        : 0;
+  function matches(answer: string, expected: string): boolean {
+    return answer.length > 0 && (answer === expected || answer.includes(expected) || expected.includes(answer));
+  }
+  let answerCorrect: number | null = null;
+  if (normalizedAnswer !== null) {
+    const correct = args.answerMatch === 'normalized-exact'
+      ? normalizedExpectedAnswers.some(expected => normalizedAnswer.replace(/\.+$/, '') === expected.replace(/\.+$/, ''))
+      : normalizedExpectedAnswers.some(expected => matches(normalizedAnswer, expected)) ||
+        (looseAnswer !== null && looseExpectedAnswers.some(expected => matches(looseAnswer, expected)));
+    answerCorrect = correct ? 1 : 0;
+  }
 
   const retrievedHits = retrievedIds.filter((id) => expectedSources.has(id)).length;
   const citedHits = citedIds.filter((id) => expectedSources.has(id)).length;
 
   return {
     answerCorrect,
-    retrievalRecall: expectedSources.size > 0 ? retrievedHits / expectedSources.size : 0,
-    citationRecall:
-      normalizedAnswer === null
-        ? null
-        : expectedSources.size > 0
-          ? citedHits / expectedSources.size
-          : 0,
-    citationPrecision:
-      normalizedAnswer === null
-        ? null
-        : citedIds.length > 0
-          ? citedHits / citedIds.length
-          : expectedSources.size === 0
-            ? 1
-            : 0,
+    retrievalRecall: expectedSources.size > 0 ? retrievedHits / expectedSources.size : null,
+    citationRecall: normalizedAnswer === null || expectedSources.size === 0
+      ? null : citedHits / expectedSources.size,
+    citationPrecision: normalizedAnswer === null || expectedSources.size === 0
+      ? null : citedIds.length > 0 ? citedHits / citedIds.length : 0,
   };
 }
 
@@ -151,7 +135,7 @@ export function summarizeQuestions(questions: QuestionResult[]): TrialSummary {
   return {
     questionCount: questions.length,
     answerAccuracy: average(questions.map((question) => question.score.answerCorrect)),
-    retrievalRecall: average(questions.map((question) => question.score.retrievalRecall)) ?? 0,
+    retrievalRecall: average(questions.map((question) => question.score.retrievalRecall)),
     citationRecall: average(questions.map((question) => question.score.citationRecall)),
     citationPrecision: average(questions.map((question) => question.score.citationPrecision)),
     averageLatencyMs: average(latencies) ?? 0,
@@ -219,12 +203,12 @@ function summarizeByCategory(questions: QuestionResult[]): CategorySummary[] {
 }
 
 function compareAggregateSystems(a: AggregateSystemResult, b: AggregateSystemResult): number {
-  const primaryA = a.summary.answerAccuracy ?? a.summary.retrievalRecall;
-  const primaryB = b.summary.answerAccuracy ?? b.summary.retrievalRecall;
+  const primaryA = a.summary.answerAccuracy ?? a.summary.retrievalRecall ?? -1;
+  const primaryB = b.summary.answerAccuracy ?? b.summary.retrievalRecall ?? -1;
 
   return (
     primaryB - primaryA ||
-    b.summary.retrievalRecall - a.summary.retrievalRecall ||
+    (b.summary.retrievalRecall ?? -1) - (a.summary.retrievalRecall ?? -1) ||
     (b.summary.citationRecall ?? -1) - (a.summary.citationRecall ?? -1) ||
     a.summary.averageLatencyMs - b.summary.averageLatencyMs
   );

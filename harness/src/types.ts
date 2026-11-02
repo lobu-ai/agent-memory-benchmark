@@ -162,6 +162,7 @@ export interface NoneAnswererConfig {
 
 export type AnswererConfig =
   | OpenAiCompatibleAnswererConfig
+  | { type: "claude-cli"; model: string; timeoutMs?: number }
   | ExtractiveAnswererConfig
   | NoneAnswererConfig;
 
@@ -194,11 +195,12 @@ export interface BenchmarkRunConfig {
   answerer?: AnswererConfig;
   systems: BenchSystemConfig[];
   parallelSystems?: boolean;
+  answerMatch?: "substring-proxy" | "normalized-exact";
 }
 
 export interface QuestionScore {
   answerCorrect: number | null;
-  retrievalRecall: number;
+  retrievalRecall: number | null;
   citationRecall: number | null;
   citationPrecision: number | null;
 }
@@ -232,7 +234,7 @@ export interface TrialResult {
 export interface TrialSummary {
   questionCount: number;
   answerAccuracy: number | null;
-  retrievalRecall: number;
+  retrievalRecall: number | null;
   citationRecall: number | null;
   citationPrecision: number | null;
   averageLatencyMs: number;
@@ -275,6 +277,7 @@ export interface BenchmarkReport {
   suiteId: string;
   suiteVersion: string;
   generatedAt: string;
+  provenance?: { suiteSha256: string; harnessRevision: string | null; harnessDirty: boolean | null; runtime: string };
   config: {
     trials: number;
     topK: number;
@@ -282,6 +285,9 @@ export interface BenchmarkReport {
     contextTokenEstimate: "chars_div_4";
     scenarioIsolation: "per-scenario";
     latencyMeasurement: "retrieval-only";
+    answerMatch?: "substring-proxy" | "normalized-exact";
   };
   systems: AggregateSystemResult[];
+  /** Failed systems are retained as diagnostics, never ranked as successful runs. */
+  failures?: Array<{ systemId: string; systemLabel: string; error: string }>;
 }

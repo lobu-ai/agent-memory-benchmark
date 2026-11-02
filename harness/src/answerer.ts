@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import type {
   AnswererConfig,
   AnswerResult,
@@ -802,11 +803,52 @@ class OpenAiCompatibleAnswerer implements BenchmarkAnswerer {
   }
 }
 
+class ClaudeCliAnswerer implements BenchmarkAnswerer {
+  constructor(private readonly config: Extract<AnswererConfig, { type: "claude-cli" }>) {}
+
+  describe(): string { return `${this.config.model} via claude CLI (tools disabled)`; }
+
+  async answer(question: string, items: RetrievedMemory[], contextPrefix?: string): Promise<AnswerResult> {
+    // A fresh no-tools process is only the shared reader, never the system under test.
+    const child = spawn("claude", ["-p", "--model", this.config.model,
+      "--output-format", "json", "--safe-mode", "--tools", "",
+      "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}',
+      "--disable-slash-commands", "--no-session-persistence",
+      "--system-prompt", "Answer using only the supplied evidence. Return strict JSON. Keep the answer to the requested name, reference, value, or recommendation, without an explanatory preamble."],
+      { stdio: ["pipe", "pipe", "pipe"] });
+    const output = await new Promise<string>((resolve, reject) => {
+      let stdout = "";
+      const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new Error("Claude reader timed out")); }, this.config.timeoutMs ?? 120_000);
+      child.stdout.on("data", chunk => { stdout += chunk; if (stdout.length > 1_000_000) { child.kill("SIGKILL"); } });
+      child.stderr.resume();
+      child.on("error", error => { clearTimeout(timer); reject(error); });
+      child.on("close", code => { clearTimeout(timer); code === 0 ? resolve(stdout) : reject(new Error(`Claude reader exited with code ${code}`)); });
+      child.stdin.on("error", error => { clearTimeout(timer); reject(error); });
+      child.stdin.end(buildPrompt(question, items, contextPrefix));
+    });
+    const result = JSON.parse(output);
+    if (result.is_error || typeof result.result !== "string") throw new Error(`Claude reader failed: ${String(result.result ?? result.subtype ?? "invalid envelope").slice(0, 300)}`);
+    const parsed = JSON.parse(stripCodeFences(result.result));
+    if (typeof parsed.answer !== "string" || !Array.isArray(parsed.cited_ids) || !parsed.cited_ids.every((id: unknown) => typeof id === "string")) {
+      throw new Error("Claude reader returned an invalid answer envelope");
+    }
+    const inputTokens = result.usage?.input_tokens;
+    const outputTokens = result.usage?.output_tokens;
+    return { answer: parsed.answer, citedIds: parsed.cited_ids,
+      usage: typeof inputTokens === "number" && typeof outputTokens === "number" ? {
+        promptTokens: inputTokens + (result.usage.cache_read_input_tokens ?? 0) + (result.usage.cache_creation_input_tokens ?? 0),
+        completionTokens: outputTokens,
+        totalTokens: inputTokens + outputTokens + (result.usage.cache_read_input_tokens ?? 0) + (result.usage.cache_creation_input_tokens ?? 0),
+      } : undefined };
+  }
+}
+
 export function createAnswerer(
   config: AnswererConfig | undefined
 ): BenchmarkAnswerer | null {
   if (!config) return new ExtractiveAnswerer();
   if (config.type === "none") return null;
   if (config.type === "extractive") return new ExtractiveAnswerer();
+  if (config.type === "claude-cli") return new ClaudeCliAnswerer(config);
   return new OpenAiCompatibleAnswerer(config);
 }
