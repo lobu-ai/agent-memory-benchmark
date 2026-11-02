@@ -97,6 +97,66 @@ that boundary. Failed systems cause a nonzero exit after diagnostic reports are
 written, including when every system fails. The credential-free `harness` CI
 workflow runs regression tests separately from paid benchmark jobs.
 
+### Native ontology conformance
+
+The text-retrieval pilot cannot establish whether a platform uses its native
+entity graph. Run the separate **model-free** suite to exercise typed records,
+allowed relationship endpoints/direction, one- and three-hop traversal, namesake
+separation, rejected patches, correction visibility, and edge withdrawal. It
+also triggers real external Automation windows, checks their extraction schema,
+rejects invalid entity/event metadata atomically, persists attributed events,
+and verifies keyed upserts keep the same record across two runs.
+
+Start a fresh, disposable local install from the synthetic fixture:
+
+```bash
+cd fixtures/ontology
+bun install --frozen-lockfile
+node_modules/.bin/lobu validate
+# Choose unused gateway/proxy ports and a NEW data directory. Explicitly unset
+# any inherited DATABASE_URL so it cannot select an existing database.
+env -u DATABASE_URL LOBU_CONTEXT=ontology-benchmark \
+  LOBU_API_URL=http://localhost:8899 LOBU_DATA_DIR="$(mktemp -d)" \
+  WORKER_PROXY_PORT=8129 node_modules/.bin/lobu run --port 8899
+```
+
+The normal local bootstrap applies the fixture to the disposable install. In
+another terminal, from the repository root:
+
+```bash
+python3 scripts/ontology-benchmark.py \
+  --base-url http://127.0.0.1:8899 --runtime-ref 24.4.0
+```
+
+The runner accepts only HTTP loopback origins, refuses redirects, initializes
+the local operator session in memory, and uses public SDK/tool endpoints. It
+never reads Postgres directly or writes a cloud workspace. Negative checks use
+the public REST tool boundary because the SDK isolate does not always retain
+an exception's HTTP status. Validation 400/422 is distinguished from permission,
+missing-resource, conflict, outage, and pending-approval results.
+
+`results/ontology-conformance.json` contains all 20 checks, actual evidence,
+failures/blocked prerequisites, API call count, duration, a frozen input hash,
+source revision, and the operator-supplied exact runtime version/commit. The
+CLI exits nonzero unless every check passes. Model calls and judge tokens are
+zero. Stop the disposable runtime and remove only its temporary data/context
+after retaining the report; never delete shared workspace history.
+
+This is **scripted platform conformance**, not agent reasoning, a competitive
+memory score, OWL/FIBO inference, connector synchronization, or an authorization
+audit. Keep its score separate from retrieval QA and official STATE evaluation.
+
+The next agent-task comparison should give OpenCode + Muse the same synthetic
+facts with three access modes: text retrieval, typed records without edges, and
+typed records with relationships. Tasks ask for the invoice's controller/risk,
+a hold/release decision before and after a correction, and a safe state update.
+Grade exact record/edge sets and saved state with a hidden deterministic oracle,
+including unsupported-action penalties; do not send expected outcomes to agents.
+Use identical model, facts, tools budget, one initial trial, distractor counts,
+and failure accounting. Report task success, unsafe writes, attribution, API
+calls, latency and recorded input/output tokens. A graph advantage needs to be
+measured across held-out generated cases; 20 scripted checks do not establish it.
+
 ## Continuous benchmarking (GitHub Actions)
 
 `.github/workflows/benchmark.yml` runs the whole thing in CI — it stands up the
