@@ -1,5 +1,53 @@
 # Methodology
 
+## Product comparisons and retrieval controls
+
+SQLite FTS5 is a lexical retrieval control, not a competing ontology or agent
+platform. Its purpose is to establish whether a more complex system improves
+the measured retrieval task over a simple implementation. A tie on a tiny QA
+slice says nothing about connectors, typed writes, authorization, or Automations.
+
+The product comparison has three distinct tracks:
+
+| Track | Relevant systems | What must be measured |
+| --- | --- | --- |
+| Agent memory | Lobu, Mem0, Supermemory, Hindsight | Answer correctness, retained corrections, source attribution, ingestion and retrieval cost, isolation |
+| Typed and temporal knowledge | Lobu, Zep/Graphiti, Neo4j GraphRAG | Identity separation, typed entities/edges, multi-hop answers, corrections, invalid writes and provenance |
+| Operational workflow | Lobu, Palantir Foundry; composed memory + workflow stacks | Connected-source update through derived state, approval, action receipt and duplicate/retry behavior |
+
+These are comparison targets, not completed measurements. An existing adapter
+does not establish that the current product version runs correctly. Pin the
+product and dependencies, verify its public API and readiness, then freeze the
+corpus and configuration before running. Self-hosted and managed editions must
+have separate rows: current Mem0 OSS does not include Platform Graph Memory,
+and Supermemory documents different extraction models for its managed service.
+See [Mem0 configuration](https://docs.mem0.ai/open-source/configuration),
+[Graphiti types](https://help.getzep.com/graphiti/core-concepts/custom-entity-and-edge-types),
+[Neo4j GraphRAG](https://neo4j.com/docs/neo4j-graphrag-python/current/),
+[Supermemory self-hosting](https://supermemory.ai/docs/self-hosting/configuration),
+and [Foundry Ontology](https://www.palantir.com/docs/foundry/architecture-center/ontology-system).
+
+Execution gates:
+
+1. One trial of the six synthetic diagnostic cases with the same reader model,
+   followed by a fixed public dataset slice. Preserve every failed setup and
+   raw answer. Do not turn a failed setup or unsupported API into an accuracy of zero.
+2. Add Graphiti and a neutral typed-task fixture. Give every system the same
+   facts, corrections, distractors and task budget. Evaluate both native features
+   and explicitly documented application code needed to complete each task.
+3. Run a connector-to-approved-action scenario using disposable sources and an
+   action sink. Assert persisted state, rejection of invalid/unauthorized writes,
+   approval enforcement, provenance and retry behavior independently of prose.
+4. Only expand to multiple trials and a leaderboard after integration checks
+   pass. Report extraction, reader and judge usage separately. Unknown provider
+   usage is unavailable, never zero. Keep scripted conformance scores separate
+   from agent task success and competitive QA results.
+
+No capability is unique to Lobu merely because it uses a graph: Graphiti exposes
+custom entity and edge schemas, and Foundry combines objects, links, actions and
+security. The hypothesis to test is whether Lobu makes the complete workflow
+easier and more reliable for agents, including the work needed to configure it.
+
 ## The fairness invariant
 
 **Every system is reached only through its public client.** A system's adapter
@@ -58,22 +106,22 @@ product a user actually gets.
 
 ## Per-system fairness notes
 
-- **Mem0 — runs fully local (OSS `mem0` lib + local Chroma).** The earlier
-  "near-0%, blame user-centric extraction" claim here was **wrong** — it was an
-  adapter bug, not a Mem0 limitation. A trace showed extraction works well and
-  captures third-party facts ("User's manager is David Chen"); the real cause was
-  ordering: mem0 + Chroma returns `score` as a **distance** (lower = more
-  relevant) and does not order hits best-first, but the harness consumes adapter
-  item *order* directly and truncates to top_k. The adapter took mem0's
-  worst-first order and kept the *least* relevant memories → ~0%. Fixed by
-  sorting hits ascending by distance before truncating
-  (`adapters/mem0_local_adapter.py`); recall jumped from ~0% to ~67% on the first
-  oracle-10 scenario. Lesson: a near-0 score for an established system is a
-  red flag for an integration bug, not a measurement — trace before publishing.
-- **Letta — hard-blocked on this machine**: self-host is a Docker image and no
-  container runtime (Docker/OrbStack/Colima) is installed. (Zep is excluded
-  entirely: it is cloud-only and can't be run locally, so it is out of scope for
-  a self-hosted benchmark.)
+Deployment anecdotes below describe historical runs with the versions stated.
+They do not establish current installation readiness, current provider quotas,
+or limitations of later releases. Fresh comparisons must record those again.
+
+- **Mem0 — OSS library + local Chroma.** Preserve the ranking returned by the
+  public `Memory.search` API. Earlier versions exposed Chroma distance scores;
+  current Mem0 2.2.1 converts them to similarity and applies its own ranking.
+  The old adapter's ascending sort reversed current results. Facts from the same
+  source must also be combined rather than discarding all but the first one.
+  Historical Mem0 results need their exact dependency versions and adapter
+  behavior audited before reuse. Never interpret a broken adapter as a product
+  limitation.
+- **Letta — historical local setup was blocked** by the absence of a container
+  runtime. This is an environment constraint, not an accuracy result. Managed
+  Zep and open-source Graphiti are distinct deployments; Graphiti is a relevant
+  self-hosted graph comparison and must not be excluded as "cloud-only."
 - **Hindsight — runs fully local, but throughput-bound by consolidation, not
   quota.** Earlier notes called this "LLM-quota blocked"; that was wrong. The
   self-hosted `hindsight-api` (0.8.2) runs entirely offline against local Ollama:
@@ -90,9 +138,10 @@ product a user actually gets.
   instance), so a fair Hindsight board number needs faster inference (GPU /
   unmetered hosted key), not a config change. Runnable-locally: **yes**;
   board-feasible on this hardware: **no**.
-- **Judges available:** claude-sonnet (via the Claude Code CLI, no key) and
-  glm-5.x (z.ai) run; the Gemini judge is currently blocked by the same monthly
-  spend cap, so its board column reflects historical runs until the cap resets.
+- **Historical judges:** some earlier reports used Claude, GLM or Gemini.
+  Provider availability and spend caps were properties of those runs. New pilot
+  runs should use the requested OpenCode/Muse setup and record the exact reader
+  and judge independently; old judge availability is not permission to rerun it.
 - **Supermemory** now runs against the official self-hosted binary
   (`supermemory-server` v0.0.2 from the supermemoryai/supermemory GitHub
   releases, local bge-base embeddings + embedded PGlite/pgvector engine),
