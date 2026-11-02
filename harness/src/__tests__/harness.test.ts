@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from 'bun:test';
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { runBenchmark } from '../runner';
@@ -73,4 +73,21 @@ test('exact pilot scoring distinguishes an affirmative recommendation from its n
   const base = { expectedAnswers: ['eligible'], expectedSourceStepIds: [], citedIds: [], retrievedIds: [], answerMatch: 'normalized-exact' as const };
   expect(scoreQuestion({ ...base, answer: 'not eligible' }).answerCorrect).toBe(0);
   expect(scoreQuestion({ ...base, answer: 'Eligible.' }).answerCorrect).toBe(1);
+});
+
+test('semantic grading retains partial verdicts but refuses to score incomplete judgments', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'memory-judge-'));
+  dirs.push(dir);
+  const reader = join(dir, 'claude');
+  writeFileSync(reader, '#!/usr/bin/env node\nconsole.log(JSON.stringify({type:"result",result:JSON.stringify([{i:0,correct:true}])}));\n');
+  chmodSync(reader, 0o755);
+  const question = { scenarioId: 'one', questionId: 'q', category: 'synthetic', prompt: 'Color?', answer: 'blue', expectedAnswers: ['blue'] };
+  const report = join(dir, 'report.json');
+  writeFileSync(report, JSON.stringify({ systems: [{ systemId: 'reference', systemLabel: 'Reference', trials: [{ questions: [question, { ...question, questionId: 'q2' }] }] }] }));
+  const child = Bun.spawn(['node', resolve('scripts/regrade-claude-judge.mjs'), report], { env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, JUDGE_MODEL: 'synthetic-judge' }, stdout: 'pipe', stderr: 'pipe' });
+  const [exitCode] = await Promise.all([child.exited, new Response(child.stdout).text(), new Response(child.stderr).text()]);
+  expect(exitCode).toBe(1);
+  const result = JSON.parse(readFileSync(join(dir, 'judges/report.judge-synthetic-judge.json'), 'utf8'));
+  expect(result.systems[0].summary).toMatchObject({ questionCount: 2, unjudgeableCount: 1, answerAccuracy: null });
+  expect(result.sourceReportSha256).toHaveLength(64);
 });
