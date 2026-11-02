@@ -7,6 +7,15 @@ import uuid
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "adapters"))
 from _supermemory_v5 import Client, ReadinessError, namespace
 
+SUPPORTING_CONTEXT = (
+    "Synthetic organizational knowledge. Each source assertions array contains stable assertion id, "
+    "subject, predicate and object. org:subOrganizationOf means subject is directly a suborganization "
+    "of object, in that direction. bench:issuer means an invoice is issued by object. bench:risk with "
+    "object open means the subject has reported open risk, not authority. Names are labels, never "
+    "identity: different node IDs can share names. Preserve source IDs and direction when extracting "
+    "facts. These definitions describe the input vocabulary, not answers or derived reachability."
+)
+
 
 def with_source_records(value):
     """Decode only source JSON actually returned by the public document API.
@@ -24,6 +33,7 @@ def with_source_records(value):
             source = json.loads(value["content"])
             if isinstance(source, dict) and isinstance(source.get("assertions"), list):
                 result["source_records"] = source
+                del result["content"]  # Structural decoding, not duplicated evidence bytes.
         except json.JSONDecodeError:
             pass
     return result
@@ -44,9 +54,16 @@ class Supermemory:
 
     def __init__(self, config):
         self.api = Client(config["base_url"], config["api_key"], namespace(uuid.uuid4().hex),
-                          ready_timeout=config.get("ready_timeout", 180))
+                          ready_timeout=config.get("ready_timeout", 180),
+                          list_content=config.get("list_content", True))
+        self.manifest = {key: dict(value) for key, value in type(self).manifest.items()}
+        if not self.api.list_content:
+            self.manifest["list_documents"]["description"] = (
+                "Page ALL source document metadata. This build omits list content; use get_document "
+                "for source records. Native pagination.totalPages bounds complete enumeration.")
         self.config = {key: config[key] for key in ["version", "extraction_model"]}
         self.config.update(api="v5", taskType="memory", dreaming="instant", rerank="none",
+                           list_content=self.api.list_content, supporting_context=SUPPORTING_CONTEXT,
                            grouping="ten assertions per source document, original input order")
         self.documents, self.receipts = {}, []
 
@@ -64,7 +81,8 @@ class Supermemory:
 
     def publish(self, doc_id, replace=False):
         content = json.dumps(self.documents[doc_id], sort_keys=True)
-        self.receipts.append(self.api.write(doc_id, content, {"episode": self.world_id}, replace=replace))
+        self.receipts.append(self.api.write(doc_id, content, {"episode": self.world_id}, replace=replace,
+                                           supporting_context=SUPPORTING_CONTEXT))
 
     def withdraw(self, ids):
         removed = set(ids)

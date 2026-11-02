@@ -46,7 +46,7 @@ def ingest(payload):
 def retrieve(payload):
     started = time.perf_counter()
     top_k = int(payload.get("topK") or 8)
-    result = client(payload).search(payload.get("prompt") or "", top_k,
+    result = client(payload).search(payload.get("prompt") or "", min(100, top_k*4),
         mode=os.environ.get("SUPERMEMORY_SEARCH_MODE", "hybrid"),
         rerank=os.environ.get("SUPERMEMORY_RERANK", "none"),
         threshold=float(os.environ.get("SUPERMEMORY_THRESHOLD", "0")))
@@ -62,7 +62,7 @@ def retrieve(payload):
             item["text"] = (item["text"] + "\n\n" + text).strip()
     # Keep the public API ranking, including rerank results. Never re-sort by
     # stale similarity or silently add related facts outside the top-K context.
-    return {"items": list(grouped.values())[:top_k], "raw": result,
+    return {"items": list(grouped.values())[:top_k], "raw": result, "requestedFactLimit": min(100, top_k*4),
             "latencyMs": (time.perf_counter()-started)*1000}
 
 

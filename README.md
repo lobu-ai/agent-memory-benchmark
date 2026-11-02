@@ -290,7 +290,10 @@ The new retrieval adapter uses `POST /ns/{namespace}/document` with
 `system.dreamingStatus` to be `done`, and verifies the published source content.
 Explicit supersession uses `PATCH` replacement, rather than appending another
 version through `POST`. Search defaults to hybrid with related memories and
-source documents included; public ranking is retained. Configure
+source documents included; public ranking is retained. Retrieval overfetches up
+to four times top-K (maximum 100 facts) before collapsing to top-K source IDs,
+so multiple extracted facts from one document do not consume the source budget.
+Configure
 `SUPERMEMORY_BASE_URL`, `SUPERMEMORY_API_KEY`, and `BENCH_SYSTEM_VERSION` in a
 private environment. Reranking can be `none`, `order`, or `aggregate`; freeze it
 after development tuning. Old v4 configs are deliberately unchanged.
@@ -305,7 +308,8 @@ adds this object (replace placeholders; never publish this file):
     "api_key": "<private disposable-server key>",
     "version": "<verified server build>",
     "extraction_model": "<configured extraction model>",
-    "ready_timeout": 180
+    "ready_timeout": 180,
+    "list_content": true
   }
 }
 ```
@@ -314,7 +318,9 @@ The Supermemory agent can search hybrid/chunks/memories with related results,
 page extracted memories, and read or enumerate source documents. Ingestion
 groups ten assertions per document in original input order; this is a structural
 mapping, not answer-specific subgraph selection. Withdrawals patch only the
-affected documents. Only source records returned by public tools become exact
+affected documents. A fixed namespace extraction context explains the same
+source vocabulary, IDs and direction that the Lobu schema represents; it
+contains no expected answer or derived path. Only source records returned by public tools become exact
 citation evidence; extracted prose alone does not. Setup receipts record the
 API, build, model, readiness, source hashes and request counts; extraction usage
 is unknown unless measured by an external provider ledger. The runner cleans
@@ -326,6 +332,16 @@ six-query smoke with identical Muse budgets; all 24 development queries; then
 freeze adapters and generate structurally held-out scenarios. Keep reader
 accuracy, source proof, exact-set certificates, extraction cost and latency
 separate. Self-hosted results do not establish hosted-service quality.
+
+Live v0.0.9 conformance found that source document GET omits
+`system.dreamingStatus`, and document listing rejects `include.content`.
+Set `list_content: false` for that verified build and read source content using
+`get_document`. The missing memory-completion signal remains a scoring gate:
+the adapter fails readiness explicitly instead of assuming extraction is done.
+Extracted memories and hybrid search work in the live diagnostic; that does not
+certify completion or supply a new accuracy score. Before the scored smoke, use
+a verified build/service that exposes the completion signal, or validate a
+different public completion contract and record it explicitly.
 
 Contracts: [ingestion](https://supermemory.ai/docs/ingestion/add-memories),
 [document lifecycle](https://supermemory.ai/docs/ingestion/document-operations),

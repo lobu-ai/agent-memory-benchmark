@@ -50,6 +50,7 @@ class SupermemoryContractTests(unittest.TestCase):
         self.documents = {}
         self.pending = {}
         self.stuck = False
+        self.old_build = False
         case = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -71,10 +72,16 @@ class SupermemoryContractTests(unittest.TestCase):
                     self.send(200, {"id": doc_id, "status": "queued"})
                 elif self.command == "GET":
                     doc = case.documents[doc_id]
-                    self.send(200, doc)
+                    self.send(200, {**doc, "system": {"status": "done"}} if case.old_build else doc)
                     if not case.stuck:
                         doc.update(case.pending.pop(doc_id, {}))
                         doc["system"] = {"status": "done", "dreamingStatus": "done"}
+                elif "/list/documents?" in self.path:
+                    if case.old_build and body.get("include", {}).get("content"):
+                        self.send(400, {"error": "include.content unsupported"})
+                    else:
+                        self.send(200, {"documents": [{"id": key} for key in case.documents],
+                                        "pagination": {"totalPages": 1}})
                 elif self.path.endswith("/search"):
                     # API ranking intentionally differs from similarity order.
                     self.send(200, {"results": [{"id": "m2", "memory": "corrected", "similarity": .1,
@@ -123,6 +130,17 @@ class SupermemoryContractTests(unittest.TestCase):
         api = Client(self.base, "synthetic-test-key", "bench_test", ready_timeout=.03)
         with self.assertRaises(ReadinessError):
             api.write("a", "content", {})
+
+    def test_verified_old_build_can_list_metadata_but_cannot_claim_memory_readiness(self):
+        self.old_build = True
+        api = Client(self.base, "synthetic-test-key", "bench_test", list_content=False)
+        with self.assertRaisesRegex(ReadinessError, "omits system.dreamingStatus"):
+            api.write("a", "content", {})
+        self.assertEqual(api.list()["documents"], [{"id": "a"}])
+        self.assertEqual(api.get("a")["content"], "content")
+        api.list_content = True
+        with self.assertRaises(SupermemoryError):
+            api.list()
 
     def test_typed_http_error_is_redacted_and_insecure_remote_origin_rejected(self):
         api = Client(self.base, "wrong-synthetic-key", "bench_test")

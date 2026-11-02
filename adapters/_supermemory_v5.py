@@ -32,7 +32,7 @@ def namespace(*parts):
 
 
 class Client:
-    def __init__(self, base, key, scope, timeout=30, ready_timeout=180):
+    def __init__(self, base, key, scope, timeout=30, ready_timeout=180, list_content=True):
         url = urllib.parse.urlsplit(base)
         if (url.scheme not in {"http", "https"} or not url.hostname or url.username or url.password
                 or url.path not in {"", "/"} or url.query or url.fragment):
@@ -43,6 +43,7 @@ class Client:
             raise ValueError("Explicit key and namespace required")
         self.base, self.key, self.scope = base.rstrip("/"), key, scope
         self.timeout, self.ready_timeout = timeout, ready_timeout
+        self.list_content = list_content
         self.opener = urllib.request.build_opener(NoRedirect())
         self.requests = 0
 
@@ -56,30 +57,36 @@ class Client:
             with self.opener.open(req, timeout=timeout or self.timeout) as response:
                 return json.load(response)
         except urllib.error.HTTPError as exc:
-            raise SupermemoryError(exc.code) from None
+            status = exc.code
+            exc.close()
+            raise SupermemoryError(status) from None
         except urllib.error.URLError:
             raise RuntimeError("Supermemory transport failed") from None
 
     def get(self, doc_id, timeout=None):
         return self.request("GET", "/document/" + urllib.parse.quote(doc_id, safe=""), timeout=timeout)
 
-    def write(self, doc_id, content, metadata, replace=False):
+    def write(self, doc_id, content, metadata, replace=False, supporting_context=None):
         if replace:
             self.request("PATCH", "/document/" + urllib.parse.quote(doc_id, safe=""),
                          {"content": content, "metadata": metadata})
         else:
-            self.request("POST", "/document", {"id": doc_id, "content": content,
-                "metadata": metadata, "dreaming": "instant", "taskType": "memory"})
+            body = {"id": doc_id, "content": content,
+                    "metadata": metadata, "dreaming": "instant", "taskType": "memory"}
+            if supporting_context:
+                body["supportingContext"] = supporting_context
+            self.request("POST", "/document", body)
         return self.wait_ready(doc_id, content)
 
     def wait_ready(self, doc_id, expected_content):
         deadline = time.monotonic() + self.ready_timeout
-        last = {}
         while time.monotonic() < deadline:
             doc = self.get(doc_id, timeout=min(self.timeout, max(.01, deadline-time.monotonic())))
             last = doc.get("system") or {}
             if last.get("status") == "failed":
                 raise ReadinessError("Supermemory document processing failed")
+            if last.get("status") == "done" and "dreamingStatus" not in last:
+                raise ReadinessError("This build omits system.dreamingStatus; memory completion is unverifiable")
             # Published old content can survive a replacement. Neither a stale
             # 'done' nor chunk readiness alone establishes fresh memory readiness.
             if (last.get("status") == "done" and last.get("dreamingStatus") == "done"
@@ -106,7 +113,7 @@ class Client:
         if type(limit) is not int or not 1 <= limit <= 100:
             raise ValueError("Limit out of bounds")
         return self.request("POST", f"/list/{kind}?page={page}&limit={limit}&order=asc",
-                            {"include": {"content": True}} if kind == "documents" else {})
+                            {"include": {"content": True}} if kind == "documents" and self.list_content else {})
 
     def cleanup(self):
         if not self.scope.startswith("bench_"):
