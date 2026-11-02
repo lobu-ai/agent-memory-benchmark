@@ -49,21 +49,27 @@ def main():
                          "assertion_count": len(actual), "withdrawn": sorted(withdrawn)})
     pg = Postgres(state["pg_port"])
     pg.load(worlds[0])
-    rejected = 0
-    for sql in ["WITH removed AS (DELETE FROM assertions RETURNING *) SELECT * FROM removed",
-                "SELECT pg_read_file('/etc/passwd')"]:
+    rejections = []
+    probes = [
+        ("wrapped_data_modification", lambda: pg.invoke("query", {"sql": "WITH removed AS (DELETE FROM assertions RETURNING *) SELECT * FROM removed"}), {"0A000", "25006"}),
+        ("reader_write_privilege", lambda: pg.sql("DELETE FROM assertions", reader=True), {"42501"}),
+        ("read_only_transaction", lambda: pg.sql("BEGIN READ ONLY; DELETE FROM assertions; ROLLBACK", reader=True), {"25006"}),
+        ("server_file_privilege", lambda: pg.invoke("query", {"sql": "SELECT pg_read_file('/etc/passwd')"}), {"42501"}),
+    ]
+    for name, invoke, expected_codes in probes:
         try:
-            pg.invoke("query", {"sql": sql})
+            invoke()
         except SqlError as exc:
-            if exc.sqlstate not in {"25006", "42501"}:
+            if exc.sqlstate not in expected_codes:
                 raise
-            rejected += 1
+            rejections.append({"probe": name, "sqlstate": exc.sqlstate})
         else:
             raise AssertionError("Read-only role accepted a prohibited query")
     count = pg.invoke("query", {"sql": "SELECT count(*)::int AS count FROM assertions"})["rows"][0]["count"]
     if count != 72:
         raise AssertionError("Read-only probes changed persisted assertions")
-    report = {"native_storage_checkpoints": rows, "postgres_prohibited_queries_rejected": rejected,
+    report = {"native_storage_checkpoints": rows, "postgres_prohibited_queries_rejected": len(rejections),
+              "postgres_rejections": rejections,
               "postgres_assertions_after_rejected_writes": count, "model_calls": 0,
               "note": "Scripted storage conformance only; never a reader-model score."}
     args.output.write_text(json.dumps(report, indent=2)+"\n")
