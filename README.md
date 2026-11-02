@@ -78,6 +78,17 @@ steps are stored as text by this adapter, so it does **not** measure native grap
 constraints, Automation execution, or authorization. No business action runs.
 Six authored examples are a smoke test, not a publishable ranking.
 
+Exact matching can reject correct explanations or grammatical variants. Keep
+that strict score and run a separate semantic judge on the unchanged answers:
+
+```bash
+JUDGE_MODEL=claude-opus-4-6 node scripts/regrade-claude-judge.mjs results/<report>.json
+```
+
+The sidecar records the source report hash and per-question verdicts; unavailable
+judgments make the semantic score incomplete. Opus and Sonnet share a vendor,
+so this is a diagnostic review rather than an independent quality ranking.
+
 Reports include the suite hash, harness revision, dirty-tree flag, system
 versions, raw question answers, and failed systems. Missing source annotations
 produce n/a attribution metrics. Gold answers and source labels are never sent
