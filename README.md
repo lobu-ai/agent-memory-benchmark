@@ -275,6 +275,14 @@ python3 experiments/graph_agent/run.py --state <private-service-state.json> --su
 python3 experiments/graph_agent/grade.py <batch-directory> --suite results/graph-dev-24.json
 ```
 
+The next product comparison focuses on Lobu versus Supermemory. Verify a pinned
+Supermemory build and its current document/derived-memory pipeline first; the
+saved 0.0.9 v4 direct-memory result is a historical retrieval diagnostic. A
+native Supermemory agent adapter is still needed. Use the same Muse reader,
+source facts and budgets, with supported native tools for each product. Record
+ingestion/extraction settings and readiness separately. Graphiti and Neo4j are
+deferred; PostgreSQL remains a correctness control.
+
 The generator emits eight worlds in four structural pairs: parallel branches,
 a shared choke edge, multiple risky targets, and exits from a reachable cycle.
 Each world has three sequential checkpoint queries, for 24 correlated queries.
