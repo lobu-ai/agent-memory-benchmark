@@ -15,6 +15,7 @@ jobs:
       - run: bun test
       - run: python3 -m unittest scripts/test_ontology_benchmark.py
       - run: python3 -m unittest adapters/test_adapters.py
+      - run: python3 -m unittest scripts/test_prepare_kqapro.py
       - run: bun install --cwd fixtures/ontology --frozen-lockfile
       - run: bunx tsc --noEmit --skipLibCheck --moduleResolution bundler --module esnext --target es2022 fixtures/ontology/lobu.config.ts
       - run: cd fixtures/ontology && node_modules/.bin/lobu validate

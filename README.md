@@ -165,6 +165,51 @@ and failure accounting. Report task success, unsafe writes, attribution, API
 calls, latency and recorded input/output tokens. A graph advantage needs to be
 measured across held-out generated cases; 20 scripted checks do not establish it.
 
+## Public knowledge-graph diagnostic
+
+The authored pilot and native conformance fixture do not use a public ontology.
+For harder public questions, prepare a bounded **KQA Pro** validation sample:
+
+```bash
+python3 scripts/prepare-kqapro.py --download
+```
+
+This verifies pinned input hashes and executes the upstream reference programs
+against the complete public KB (16,960 entities and 794 concepts). It exports
+24 reference-verified questions: six each for multi-hop, set, comparison and
+qualifier reasoning, with at least six program steps. The audit records original
+validation indexes, reference programs, rejected candidates, source hashes and
+the frozen suite hash. Point an existing benchmark config's `suitePath` at
+`results/kqapro-suite.json` to run the same adapters and shared reader.
+
+This is an **oracle-subgraph diagnostic**, not an official KQA Pro score. Gold
+programs select complete visited records; eight deterministic unrelated records
+are added per case. Neither programs, answer choices nor gold labels are sent
+to adapters. Records are shuffled with neutral source IDs. Oversized cases are
+skipped rather than truncated, and the audit reports this selection bias.
+Source recall means visited-record coverage, not minimal-proof recall. Current
+memory adapters flatten the graph, so this does not measure native graph
+navigation, OWL entailment, permissions or actions. Keep any full-context reader
+control separate from product retrieval scores.
+
+Source and attribution: [KQA Pro](https://github.com/shijx12/KQAPro_Baselines),
+Cao et al., *KQA Pro: A Dataset with Explicit Compositional Programs for Complex
+Question Answering over Knowledge Base*. The upstream declares dataset
+CC-BY-SA-4.0 and reference code MIT; dataset mirrors may label this differently.
+Generated data stays under ignored `results/` and carries the upstream license
+in its audit. Hash-pinned mirrors are used because the original download link
+is unavailable; the reference executor checks selected answers against the KB.
+The mirror's concept `subclassOf` field is exposed to the older executor as
+`instanceOf`, and edge `relation` as `predicate`; no edges or facts are added.
+The normalized KB hash is recorded and conflicting aliases are rejected.
+
+For ontology entailment, [LUBM](https://swat.cse.lehigh.edu/projects/lubm/)
+provides a public university OWL ontology and 14 query templates. It is a
+separate future track: importing typed records does not implement its subclass,
+inverse-property, transitive-property or restriction inference requirements.
+For product comparisons, run native graph tasks against Graphiti/Neo4j rather
+than label a text-memory score an ontology-system ranking.
+
 ## Continuous benchmarking (GitHub Actions)
 
 `.github/workflows/benchmark.yml` runs the whole thing in CI — it stands up the
