@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import pathlib
+import subprocess
 import tempfile
 import unittest
 
@@ -10,6 +11,20 @@ spec.loader.exec_module(prepare)
 
 
 class PublicGraphBoundary(unittest.TestCase):
+    def test_exported_records_pass_the_real_harness_boundary(self):
+        records = {"A": {"name": "Source"}, "B": {"name": "Other source"}}
+        question = {"question": "What color?", "answer": "blue", "program": []}
+        scenario, _ = prepare.export_scenario(0, "synthetic", question, ["B", "A"], ["A"], records,
+                                               lambda ref: json.dumps({"id": ref, "fact": "blue"}))
+        suite = prepare.export_suite([scenario])
+        repo = pathlib.Path(__file__).resolve().parents[1]
+        result = subprocess.run(["bun", "-e",
+            "import {validateBenchmarkSuite} from './harness/src/suite.ts'; "
+            "validateBenchmarkSuite(await Bun.stdin.json()); console.log('valid');"],
+            cwd=repo, input=json.dumps(suite), capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "valid")
+
     def test_concept_parent_normalization_preserves_edges_and_refuses_ambiguity(self):
         kb = {"concepts": {"C": {"name": "Class", "subclassOf": ["D"]}}}
         normalized = prepare.normalize_kb(kb)

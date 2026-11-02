@@ -117,6 +117,29 @@ def record_text(ref, kb, records=None):
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
+def export_scenario(index, key, question, refs, support, records, text):
+    source_ids = {ref: f"record-{position + 1}" for position, ref in enumerate(refs)}
+    scenario_id = f"kqapro-val-{index}"
+    scenario = {
+        "id": scenario_id, "category": key,
+        "description": "Public KQA Pro oracle-subgraph diagnostic; whole visited records and distractors",
+        "entities": [{"ref": ref, "entityType": "kg-record", "name": records[ref]["name"]} for ref in refs],
+        "steps": [{"kind": "memory", "id": source_ids[ref], "entityRefs": [ref],
+                   "semanticType": "fact", "content": text(ref)} for ref in refs],
+        "questions": [{"id": scenario_id, "prompt": question["question"],
+                       "expectedAnswers": [question["answer"]],
+                       "expectedSourceStepIds": [source_ids[ref] for ref in support],
+                       "tags": ["public", "oracle-subgraph", f"program-steps-{len(question['program'])}"]}],
+    }
+    return scenario, source_ids
+
+
+def export_suite(scenarios):
+    return {"id": "kqapro-oracle-subgraph", "version": "1",
+            "entityTypes": [{"slug": "kg-record", "name": "Public knowledge-graph record"}],
+            "scenarios": scenarios}
+
+
 def build_suite(questions, kb, executor, per_category=6, seed=20261102, distractors=8):
     groups = collections.defaultdict(list)
     for index, question in enumerate(questions):
@@ -165,27 +188,16 @@ def build_suite(questions, kb, executor, per_category=6, seed=20261102, distract
             refs = support + noise
             random.Random(f"{seed}:{index}:order").shuffle(refs)
             # Neutral randomized IDs do not reveal support/distractor status.
-            source_ids = {ref: f"record-{position + 1}" for position, ref in enumerate(refs)}
-            scenario_id = f"kqapro-val-{index}"
-            scenarios.append({
-                "id": scenario_id, "category": key,
-                "description": "Public KQA Pro oracle-subgraph diagnostic; whole visited records and distractors",
-                "entities": [],
-                "steps": [{"kind": "memory", "id": source_ids[ref], "entityRefs": [],
-                           "semanticType": "fact", "content": text(ref)} for ref in refs],
-                "questions": [{"id": scenario_id, "prompt": question["question"],
-                               "expectedAnswers": [question["answer"]],
-                               "expectedSourceStepIds": [source_ids[ref] for ref in support],
-                               "tags": ["public", "oracle-subgraph", f"program-steps-{len(question['program'])}"]}],
-            })
-            audit.append({"questionId": scenario_id, "validationIndex": index, "category": key,
+            scenario, source_ids = export_scenario(index, key, question, refs, support, records, text)
+            scenarios.append(scenario)
+            audit.append({"questionId": scenario["id"], "validationIndex": index, "category": key,
                           "referenceAnswer": answer, "program": question["program"],
                           "visitedRefs": support, "distractorRefs": noise,
                           "stepRefs": {source_ids[ref]: ref for ref in refs}})
             selected += 1
         if selected != per_category:
             raise ValueError(f"Only {selected} bounded reference-verified cases in {key}")
-    suite = {"id": "kqapro-oracle-subgraph", "version": "1", "entityTypes": [], "scenarios": scenarios}
+    suite = export_suite(scenarios)
     return suite, {"cases": audit, "rejectedCandidates": dict(rejected)}
 
 
