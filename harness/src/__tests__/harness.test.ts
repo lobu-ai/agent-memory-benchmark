@@ -104,3 +104,36 @@ test('semantic grading retains partial verdicts but refuses to score incomplete 
   expect(result.systems[0].summary).toMatchObject({ questionCount: 2, unjudgeableCount: 1, answerAccuracy: null });
   expect(result.sourceReportSha256).toHaveLength(64);
 });
+
+
+test('semantic grading hashes the report snapshot even if the file changes during the judge call', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'memory-judge-snapshot-'));
+  dirs.push(dir);
+  const reader = join(dir, 'claude');
+  writeFileSync(reader, '#!/usr/bin/env node\n' +
+    'require("node:fs").writeFileSync(process.env.MUTATE_REPORT, JSON.stringify({changed:true}));\n' +
+    'console.log(JSON.stringify({type:"result",result:JSON.stringify([{i:0,correct:true}])}));\n');
+  chmodSync(reader, 0o755);
+  const question = { scenarioId: 'one', questionId: 'q', category: 'synthetic', prompt: 'Color?', answer: 'blue', expectedAnswers: ['blue'] };
+  const report = join(dir, 'report.json');
+  const original = JSON.stringify({ systems: [{ systemId: 'reference', systemLabel: 'Reference', trials: [{ questions: [question] }] }] });
+  writeFileSync(report, original);
+  const child = Bun.spawn(['node', resolve('scripts/regrade-claude-judge.mjs'), report], {
+    env: { ...process.env, PATH: dir + ':' + process.env.PATH, JUDGE_MODEL: 'synthetic-judge', MUTATE_REPORT: report },
+    stdout: 'pipe', stderr: 'pipe',
+  });
+  const [exitCode, stdout, stderr] = await Promise.all([child.exited, new Response(child.stdout).text(), new Response(child.stderr).text()]);
+  if (exitCode !== 0) throw new Error(stdout + stderr);
+  expect(readFileSync(report, 'utf8')).not.toBe(original);
+  const result = JSON.parse(readFileSync(join(dir, 'judges/report.judge-synthetic-judge.json'), 'utf8'));
+  expect(result.sourceReportSha256).toBe(createHash('sha256').update(original).digest('hex'));
+  expect(result.systems[0].summary.answerAccuracy).toBe(1);
+});
+
+test('pilot prose contains no dangling renamed source label', () => {
+  const suite = readFileSync(resolve('suites/correction-relationships-pilot.json'), 'utf8');
+  expect(suite).not.toContain('stale-record-001');
+  const parsed = JSON.parse(suite);
+  const steps = parsed.scenarios.flatMap((scenario: { steps: Array<{ id: string; supersedes?: string }> }) => scenario.steps);
+  expect(steps.find((step: { id: string }) => step.id === 'record-019')?.supersedes).toBe('record-017');
+});

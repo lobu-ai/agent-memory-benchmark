@@ -114,7 +114,8 @@ const pct = (xs) => {
 };
 
 for (const file of process.argv.slice(2)) {
-  const data = JSON.parse(readFileSync(file, "utf8"));
+  const sourceBytes = readFileSync(file);
+  const data = JSON.parse(sourceBytes.toString("utf8"));
   const judgedSystems = [];
   for (const sys of data.systems) {
     const tasks = [];
@@ -190,7 +191,7 @@ for (const file of process.argv.slice(2)) {
     JSON.stringify(
       {
         judgeModel: MODEL,
-        sourceReportSha256: createHash('sha256').update(readFileSync(file)).digest('hex'),
+        sourceReportSha256: createHash('sha256').update(sourceBytes).digest('hex'),
         judgedAt: process.env.JUDGED_AT || new Date().toISOString(),
         systems: judgedSystems,
       },

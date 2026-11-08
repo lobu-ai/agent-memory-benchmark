@@ -372,7 +372,7 @@
         {
           "kind": "memory",
           "id": "record-018",
-          "content": "The stored recommendation for order SYN-ORDER-004 is eligible and cites fact stale-record-001.",
+          "content": "The stored recommendation for order SYN-ORDER-004 is eligible and cites the earlier bank fact.",
           "entityRefs": [
             "subject"
           ],
@@ -384,7 +384,7 @@
         {
           "kind": "memory",
           "id": "record-019",
-          "content": "The bank fact for order SYN-ORDER-004 is corrected to SYN-BANK-NEW, superseding stale-record-001.",
+          "content": "The bank fact for order SYN-ORDER-004 is corrected to SYN-BANK-NEW, superseding the earlier bank fact.",
           "entityRefs": [
             "subject"
           ],
