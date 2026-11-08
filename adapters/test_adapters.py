@@ -28,6 +28,14 @@ class SourceHitTests(unittest.TestCase):
         self.assertEqual(result[0]["text"], "parent owns plant\n\nparent is approved")
         self.assertEqual(len(result), 1)
 
+    def test_substring_facts_are_not_silently_discarded(self):
+        hits = [
+            {"id": "a", "memory": "The supplier is not approved", "metadata": {"benchmark_id": "source"}},
+            {"id": "b", "memory": "approved", "metadata": {"benchmark_id": "source"}},
+            {"id": "c", "memory": "approved", "metadata": {"benchmark_id": "source"}},
+        ]
+        self.assertEqual(collapse_source_hits(hits, 1)[0]["text"], "The supplier is not approved\n\napproved")
+
     def test_empty_results_and_nonobject_metadata(self):
         self.assertEqual(collapse_source_hits([], 4), [])
         self.assertEqual(collapse_source_hits([{"id": "fallback", "metadata": None}], 1)[0]["id"], "fallback")

@@ -168,6 +168,7 @@ def collapse_source_hits(hits: List[Dict[str, Any]], top_k: int) -> List[Dict[st
     # here reverses relevance. Backend score conventions are not an adapter API.
 
     grouped: Dict[str, Dict[str, Any]] = {}
+    source_texts: Dict[str, set[str]] = {}
     order: List[str] = []
     for h in hits or []:
         meta = h.get("metadata") if isinstance(h.get("metadata"), dict) else {}
@@ -181,8 +182,10 @@ def collapse_source_hits(hits: List[Dict[str, Any]], top_k: int) -> List[Dict[st
                 "metadata": meta,
             }
             order.append(bid)
-        elif h.get("memory") and h["memory"] not in grouped[bid]["text"]:
+            source_texts[bid] = {grouped[bid]["text"]}
+        elif h.get("memory") and h["memory"] not in source_texts[bid]:
             grouped[bid]["text"] += "\n\n" + h["memory"]
+            source_texts[bid].add(h["memory"])
     return [grouped[b] for b in order][:top_k]
 
 
