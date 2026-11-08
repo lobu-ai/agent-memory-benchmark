@@ -205,6 +205,9 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
             saved_ids[str(step['id'])] = saved['id']
         created += 1
 
+    if created == 0:
+        return {"created": 0}
+
     # Wait for search visibility in this scope. Full-text hits can appear before
     # async embeddings finish, so this is not an embedding-readiness assertion.
     deadline = time.time() + EMBED_WAIT_S
@@ -214,6 +217,10 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
         if _has_scenario_hit(res, scenario.get("id"), run_id):
             break
         time.sleep(2)
+    else:
+        raise RuntimeError(
+            f"Lobu memories for scenario {scenario.get('id')!r} were not searchable within {EMBED_WAIT_S}s"
+        )
     return {"created": created}
 
 
