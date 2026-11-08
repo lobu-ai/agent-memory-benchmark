@@ -33,10 +33,6 @@ from _bench_protocol import serve, set_output  # noqa: E402
 # Keep a private dup of the real stdout for protocol writes and route ALL other
 # stdout (Python + C-level fd 1) to stderr.
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
-_PROTO = os.fdopen(os.dup(1), "w", buffering=1)
-os.dup2(2, 1)
-sys.stdout = sys.stderr
-set_output(_PROTO)
 
 _LLM_KEY = os.environ.get("Z_AI_API_KEY") or os.environ.get("OPENAI_API_KEY")
 if _LLM_KEY:
@@ -163,19 +159,16 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
     latency_ms = (time.perf_counter() - started) * 1000
     hits = res.get("results") if isinstance(res, dict) else res
 
-    # mem0 + Chroma returns `score` as a DISTANCE (lower = more relevant) and does
-    # NOT order hits best-first. The harness consumes adapter item ORDER directly
-    # (retrievedIds = items.map(id); answerer context is built in this order, then
-    # truncated to top_k), so we must sort best-first here. Without this the
-    # adapter kept the LEAST relevant memories and scored ~0% — which was wrongly
-    # attributed to Mem0's extraction rather than this ordering bug.
-    def _dist(h: Dict[str, Any]) -> float:
-        s = h.get("score")
-        return s if isinstance(s, (int, float)) else float("inf")
+    return {"items": collapse_source_hits(hits or [], top_k), "latencyMs": latency_ms}
 
-    hits = sorted(hits or [], key=_dist)
+
+def collapse_source_hits(hits: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
+    # Preserve the public search API's ranking. Current Mem0 normalizes Chroma
+    # distances into similarity and applies its own ranking; sorting ascending
+    # here reverses relevance. Backend score conventions are not an adapter API.
 
     grouped: Dict[str, Dict[str, Any]] = {}
+    source_texts: Dict[str, set[str]] = {}
     order: List[str] = []
     for h in hits or []:
         meta = h.get("metadata") if isinstance(h.get("metadata"), dict) else {}
@@ -189,8 +182,11 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
                 "metadata": meta,
             }
             order.append(bid)
-    items = [grouped[b] for b in order][:top_k]
-    return {"items": items, "latencyMs": latency_ms}
+            source_texts[bid] = {grouped[bid]["text"]}
+        elif h.get("memory") and h["memory"] not in source_texts[bid]:
+            grouped[bid]["text"] += "\n\n" + h["memory"]
+            source_texts[bid].add(h["memory"])
+    return [grouped[b] for b in order][:top_k]
 
 
 ACTIONS = {
@@ -201,4 +197,8 @@ ACTIONS = {
 }
 
 if __name__ == "__main__":
+    _PROTO = os.fdopen(os.dup(1), "w", buffering=1)
+    os.dup2(2, 1)
+    sys.stdout = sys.stderr
+    set_output(_PROTO)
     raise SystemExit(serve(ACTIONS))
