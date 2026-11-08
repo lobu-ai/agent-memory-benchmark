@@ -1,0 +1,139 @@
+import { afterEach, expect, test } from 'bun:test';
+import { chmodSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { runBenchmark } from '../runner';
+import { scoreQuestion } from '../scoring';
+import type { BenchmarkRunConfig } from '../types';
+
+const dirs: string[] = [];
+afterEach(() => { for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true }); });
+
+function fixture(fail = false): BenchmarkRunConfig {
+  const dir = mkdtempSync(join(tmpdir(), 'memory-bench-'));
+  dirs.push(dir);
+  const suitePath = join(dir, 'suite.json');
+  writeFileSync(suitePath, JSON.stringify({ id: 'synthetic', version: '1', entityTypes: [{ slug: 'subject', name: 'Subject' }], scenarios: [{
+    id: 'one', category: 'correction', entities: [{ ref: 'subject', entityType: 'subject', name: 'Synthetic subject' }], steps: [{ kind: 'memory', id: 'fact', content: 'The answer is blue.', entityRefs: ['subject'], semanticType: 'fact' }],
+    questions: [{ id: 'q', prompt: 'What color?', expectedAnswers: ['blue'], expectedSourceStepIds: ['fact'] }],
+  }] }));
+  const adapter = join(dir, 'adapter.mjs');
+  writeFileSync(adapter, `import readline from 'node:readline';
+import {readFileSync,writeFileSync} from 'node:fs';
+for await (const line of readline.createInterface({input:process.stdin})) {
+ const {id,action,payload}=JSON.parse(line);
+ if(action==='ingest' && process.env.MUTATE_SUITE) {
+  const path=process.env.MUTATE_SUITE;const source=JSON.parse(readFileSync(path,'utf8'));source.description='changed while benchmark was running';writeFileSync(path,JSON.stringify(source));
+ }
+ const leaked=JSON.stringify(payload).includes('expectedAnswers') || JSON.stringify(payload).includes('expectedSourceStepIds');
+ const failed=leaked || (process.env.FAIL==='1' && action==='retrieve');
+ console.log(JSON.stringify({id,ok:!failed,error:leaked?'gold labels exposed':'synthetic outage',result:action==='retrieve'?{items:[{id:'fact',text:'The answer is blue.'}],latencyMs:1}:null}));
+}`);
+  return { suitePath, outputDir: join(dir, 'reports'), answerer: { type: 'none' }, systems: [
+    { id: 'working', label: 'Working', type: 'command', argv: [process.execPath, adapter] },
+    ...(fail ? [{ id: 'failed', label: 'Failed', type: 'command' as const, argv: [process.execPath, adapter], env: { FAIL: '1' } }] : []),
+  ] };
+}
+
+test('gold labels never cross the real subprocess boundary', async () => {
+  const report = await runBenchmark(fixture());
+  expect(report.systems[0]?.summary.retrievalRecall).toBe(1);
+});
+
+test('suite provenance hashes the input snapshot rather than a file modified during execution', async () => {
+  const config = fixture();
+  const hash = createHash('sha256').update(readFileSync(config.suitePath)).digest('hex');
+  config.systems[0]!.env = { MUTATE_SUITE: config.suitePath };
+  const report = await runBenchmark(config);
+  expect(report.provenance?.suiteSha256).toBe(hash);
+});
+
+test('CLI writes a partial report and fails visibly when one system is unavailable', async () => {
+  const config = fixture(true);
+  const path = join(dirs.at(-1)!, 'config.json');
+  writeFileSync(path, JSON.stringify(config));
+  const child = Bun.spawn([process.execPath, resolve('scripts/run.ts'), '--config', path], { stdout: 'pipe', stderr: 'pipe' });
+  const [exitCode] = await Promise.all([child.exited, new Response(child.stdout).text(), new Response(child.stderr).text()]);
+  expect(exitCode).toBe(1);
+  const reportPath = readdirSync(config.outputDir!).find(name => name.endsWith('.json'));
+  expect(reportPath).toBeDefined();
+  const report = JSON.parse(readFileSync(join(config.outputDir!, reportPath!), 'utf8'));
+  expect(report.systems.map((s: { systemId: string }) => s.systemId)).toEqual(['working']);
+  expect(report.failures).toEqual([{ systemId: 'failed', systemLabel: 'Failed', error: "Command adapter 'failed' action 'retrieve' failed: synthetic outage" }]);
+});
+
+test('all-system failure still leaves a diagnostic report', async () => {
+  const config = fixture(true);
+  config.systems = config.systems.slice(1);
+  const report = await runBenchmark(config);
+  expect(report.systems).toEqual([]);
+  expect(report.failures).toHaveLength(1);
+});
+
+test('missing gold is unscored and empty normalized answers cannot pass', () => {
+  const base = { expectedAnswers: ['blue'], expectedSourceStepIds: ['fact'], answer: '!!!', citedIds: [], retrievedIds: [] };
+  expect(scoreQuestion(base).answerCorrect).toBe(0);
+  expect(scoreQuestion({ ...base, answer: 'the' }).answerCorrect).toBe(0);
+  expect(scoreQuestion({ ...base, answer: '' }).answerCorrect).toBe(0);
+  const noGold = scoreQuestion({ ...base, expectedSourceStepIds: [], answer: 'blue' });
+  expect(noGold.retrievalRecall).toBeNull();
+  expect(noGold.citationRecall).toBeNull();
+  expect(noGold.citationPrecision).toBeNull();
+});
+
+test('exact pilot scoring distinguishes an affirmative recommendation from its negation', () => {
+  const base = { expectedAnswers: ['eligible'], expectedSourceStepIds: [], citedIds: [], retrievedIds: [], answerMatch: 'normalized-exact' as const };
+  expect(scoreQuestion({ ...base, answer: 'not eligible' }).answerCorrect).toBe(0);
+  expect(scoreQuestion({ ...base, answer: 'Eligible.' }).answerCorrect).toBe(1);
+});
+
+test('semantic grading retains partial verdicts but refuses to score incomplete judgments', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'memory-judge-'));
+  dirs.push(dir);
+  const reader = join(dir, 'claude');
+  writeFileSync(reader, '#!/usr/bin/env node\nconsole.log(JSON.stringify({type:"result",result:JSON.stringify([{i:0,correct:true}])}));\n');
+  chmodSync(reader, 0o755);
+  const question = { scenarioId: 'one', questionId: 'q', category: 'synthetic', prompt: 'Color?', answer: 'blue', expectedAnswers: ['blue'] };
+  const report = join(dir, 'report.json');
+  writeFileSync(report, JSON.stringify({ systems: [{ systemId: 'reference', systemLabel: 'Reference', trials: [{ questions: [question, { ...question, questionId: 'q2' }] }] }] }));
+  const child = Bun.spawn(['node', resolve('scripts/regrade-claude-judge.mjs'), report], { env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, JUDGE_MODEL: 'synthetic-judge' }, stdout: 'pipe', stderr: 'pipe' });
+  const [exitCode] = await Promise.all([child.exited, new Response(child.stdout).text(), new Response(child.stderr).text()]);
+  expect(exitCode).toBe(1);
+  const result = JSON.parse(readFileSync(join(dir, 'judges/report.judge-synthetic-judge.json'), 'utf8'));
+  expect(result.systems[0].summary).toMatchObject({ questionCount: 2, unjudgeableCount: 1, answerAccuracy: null });
+  expect(result.sourceReportSha256).toHaveLength(64);
+});
+
+
+test('semantic grading hashes the report snapshot even if the file changes during the judge call', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'memory-judge-snapshot-'));
+  dirs.push(dir);
+  const reader = join(dir, 'claude');
+  writeFileSync(reader, '#!/usr/bin/env node\n' +
+    'require("node:fs").writeFileSync(process.env.MUTATE_REPORT, JSON.stringify({changed:true}));\n' +
+    'console.log(JSON.stringify({type:"result",result:JSON.stringify([{i:0,correct:true}])}));\n');
+  chmodSync(reader, 0o755);
+  const question = { scenarioId: 'one', questionId: 'q', category: 'synthetic', prompt: 'Color?', answer: 'blue', expectedAnswers: ['blue'] };
+  const report = join(dir, 'report.json');
+  const original = JSON.stringify({ systems: [{ systemId: 'reference', systemLabel: 'Reference', trials: [{ questions: [question] }] }] });
+  writeFileSync(report, original);
+  const child = Bun.spawn(['node', resolve('scripts/regrade-claude-judge.mjs'), report], {
+    env: { ...process.env, PATH: dir + ':' + process.env.PATH, JUDGE_MODEL: 'synthetic-judge', MUTATE_REPORT: report },
+    stdout: 'pipe', stderr: 'pipe',
+  });
+  const [exitCode, stdout, stderr] = await Promise.all([child.exited, new Response(child.stdout).text(), new Response(child.stderr).text()]);
+  if (exitCode !== 0) throw new Error(stdout + stderr);
+  expect(readFileSync(report, 'utf8')).not.toBe(original);
+  const result = JSON.parse(readFileSync(join(dir, 'judges/report.judge-synthetic-judge.json'), 'utf8'));
+  expect(result.sourceReportSha256).toBe(createHash('sha256').update(original).digest('hex'));
+  expect(result.systems[0].summary.answerAccuracy).toBe(1);
+});
+
+test('pilot prose contains no dangling renamed source label', () => {
+  const suite = readFileSync(resolve('suites/correction-relationships-pilot.json'), 'utf8');
+  expect(suite).not.toContain('stale-record-001');
+  const parsed = JSON.parse(suite);
+  const steps = parsed.scenarios.flatMap((scenario: { steps: Array<{ id: string; supersedes?: string }> }) => scenario.steps);
+  expect(steps.find((step: { id: string }) => step.id === 'record-019')?.supersedes).toBe('record-017');
+});

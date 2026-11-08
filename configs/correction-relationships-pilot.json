@@ -1,0 +1,53 @@
+{
+  "suitePath": "suites/correction-relationships-pilot.json",
+  "outputDir": "results",
+  "trials": 3,
+  "topK": 4,
+  "parallelSystems": true,
+  "answerer": {
+    "type": "claude-cli",
+    "model": "claude-sonnet-4-6"
+  },
+  "systems": [
+    {
+      "id": "lobu",
+      "label": "Lobu memory (explicit supersession)",
+      "type": "command",
+      "mode": "self-hosted",
+      "argv": [
+        "python3",
+        "adapters/lobu_adapter.py"
+      ],
+      "env": {
+        "LOBU_BASE_URL": "$LOBU_BASE_URL",
+        "LOBU_ORG_SLUG": "$LOBU_ORG_SLUG",
+        "LOBU_API_TOKEN": "$LOBU_API_TOKEN",
+        "BENCH_SYSTEM_VERSION": "$LOBU_VERSION"
+      }
+    },
+    {
+      "id": "fts",
+      "label": "SQLite FTS5 BM25 reference",
+      "type": "command",
+      "mode": "local reference",
+      "argv": [
+        "python3",
+        "adapters/sqlite_fts_adapter.py"
+      ]
+    },
+    {
+      "id": "none",
+      "label": "No-memory control",
+      "type": "command",
+      "mode": "control",
+      "argv": [
+        "python3",
+        "adapters/sqlite_fts_adapter.py"
+      ],
+      "env": {
+        "REFERENCE_MODE": "empty"
+      }
+    }
+  ],
+  "answerMatch": "normalized-exact"
+}

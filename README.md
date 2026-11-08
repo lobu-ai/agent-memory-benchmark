@@ -55,6 +55,48 @@ ANSWERER_MAX_CONCURRENCY=3 Z_AI_API_KEY=... \
 
 Reports (JSON + Markdown leaderboard) land in `results/`.
 
+### Small correction pilot
+
+For a bounded first run, start a **disposable** local Lobu install, then run:
+
+```bash
+python3 scripts/run-local-pilot.py --base-url http://127.0.0.1:8787
+```
+
+This uses six synthetic cases, three trials, top-K four, and a fresh
+`claude-sonnet-4-6` reader with tools and MCP disabled. The Claude CLI must
+already be authenticated. It compares Lobu's public memory API with an explicit
+SQLite FTS5 BM25 reference and a no-memory control. These controls do not
+represent competing products. Model errors fail the run visibly; the helper
+passes the local bootstrap credential only through the child environment.
+
+Cases cover corrections, withdrawn claims, separate identities with the same
+name, relationship evidence, unresolved conflicts, and stale recommendations.
+The pilot uses normalized exact answer matching, reported separately from the
+older substring proxy. It tests evidence retrieval and answering: relationship
+steps are stored as text by this adapter, so it does **not** measure native graph
+constraints, Automation execution, or authorization. No business action runs.
+Six authored examples are a smoke test, not a publishable ranking.
+
+Exact matching can reject correct explanations or grammatical variants. Keep
+that strict score and run a separate semantic judge on the unchanged answers:
+
+```bash
+JUDGE_MODEL=claude-opus-4-6 node scripts/regrade-claude-judge.mjs results/<report>.json
+```
+
+The sidecar records the source report hash and per-question verdicts; unavailable
+judgments make the semantic score incomplete. Opus and Sonnet share a vendor,
+so this is a diagnostic review rather than an independent quality ranking.
+
+Reports include the suite hash, harness revision, dirty-tree flag, system
+versions, raw question answers, and failed systems. Missing source annotations
+produce n/a attribution metrics. Gold answers and source labels are never sent
+to command adapters; only source data and the current retrieval question cross
+that boundary. Failed systems cause a nonzero exit after diagnostic reports are
+written, including when every system fails. The credential-free `harness` CI
+workflow runs regression tests separately from paid benchmark jobs.
+
 ## Continuous benchmarking (GitHub Actions)
 
 `.github/workflows/benchmark.yml` runs the whole thing in CI — it stands up the

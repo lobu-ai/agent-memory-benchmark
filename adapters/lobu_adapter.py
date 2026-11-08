@@ -12,12 +12,9 @@ Env:
   LOBU_API_TOKEN   OAuth/API bearer token with mcp:read/write/admin (required)
   LOBU_EMBED_WAIT  Max seconds to wait for async embeddings after ingest (default 60)
 
-Per-scenario isolation: the harness resets between scenarios. Without a bulk
-wipe on the public API, each scenario tags its writes with a unique
-`benchmark_scenario_id` and retrieval filters to the current scenario
-client-side (with over-fetch). Content from prior scenarios is superseded via
-tombstones on reset where possible. This is the honest API-only behavior; see
-METHODOLOGY.md "Isolation".
+Per-scenario isolation: each scenario tags writes with a unique agent_id.
+The public read API applies this scope before retrieval. Reset retains the
+append-only history; use a disposable install for benchmark runs.
 """
 from __future__ import annotations
 
@@ -172,6 +169,7 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
     steps = scenario.get("steps") or []
     run_id = scenario_tag(payload)
     created = 0
+    saved_ids: Dict[str, int] = {}
     turns_per_chunk = int(os.environ.get("LOBU_CHUNK_TURNS", "0"))
     for step in steps:
         content = step.get("content")
@@ -185,6 +183,7 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
                 # built-in Lobu event kind; store as a generic "fact".
                 "semantic_type": "fact",
                 "metadata": {
+                    "agent_id": run_id,
                     "benchmark_step_id": str(step.get("id")),
                     "benchmark_scenario_id": scenario.get("id"),
                     "benchmark_run_id": run_id,
@@ -196,29 +195,42 @@ def action_ingest(payload: Dict[str, Any]) -> Any:
             # fact was stated, not when it happened to be ingested.
             if iso:
                 args["occurred_at"] = iso
-            call_tool("save_memory", args)
+            if step.get("supersedes"):
+                if turns_per_chunk > 0:
+                    raise ValueError('Explicit supersession requires whole-memory ingestion')
+                args['supersedes_event_id'] = saved_ids[step['supersedes']]
+            saved = call_tool("save_memory", args)
+            if not isinstance(saved, dict) or not isinstance(saved.get('id'), int):
+                raise RuntimeError('Lobu save_memory did not return a durable event id')
+            saved_ids[str(step['id'])] = saved['id']
         created += 1
 
-    # Wait for the real async embedding pipeline to make these searchable, the
-    # same way an SDK user would poll before querying. We probe search_memory
-    # until it returns scenario hits or the budget is exhausted.
+    if created == 0:
+        return {"created": 0}
+
+    # Wait for search visibility in this scope. Full-text hits can appear before
+    # async embeddings finish, so this is not an embedding-readiness assertion.
     deadline = time.time() + EMBED_WAIT_S
     probe = (steps[0] or {}).get("content", "")[:80] if steps else ""
     while time.time() < deadline:
-        res = call_tool("read_knowledge", {"query": probe or "memory", "limit": 4})
-        if _has_scenario_hit(res, scenario.get("id")):
+        res = call_tool("read_knowledge", {"query": probe or "memory", "limit": 4, "agent_id": run_id})
+        if _has_scenario_hit(res, scenario.get("id"), run_id):
             break
         time.sleep(2)
+    else:
+        raise RuntimeError(
+            f"Lobu memories for scenario {scenario.get('id')!r} were not searchable within {EMBED_WAIT_S}s"
+        )
     return {"created": created}
 
 
-def _has_scenario_hit(res: Any, scenario_id: Any) -> bool:
+def _has_scenario_hit(res: Any, scenario_id: Any, run_id: str) -> bool:
     items = (res or {}).get("content") or []
     for it in items:
         meta = it.get("metadata") if isinstance(it, dict) else None
-        if isinstance(meta, dict) and meta.get("benchmark_scenario_id") == scenario_id:
+        if isinstance(meta, dict) and meta.get("benchmark_scenario_id") == scenario_id and meta.get("benchmark_run_id") == run_id:
             return True
-    return bool(items)
+    return False
 
 
 def action_retrieve(payload: Dict[str, Any]) -> Any:
@@ -246,7 +258,7 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
     for q in queries:
         # Generous socket timeout: an over-fetch read over a grown multi-scenario
         # corpus can exceed the 120s default (one did, killing a whole trial).
-        res = call_tool("read_knowledge", {"query": q, "limit": overfetch}, timeout=300)
+        res = call_tool("read_knowledge", {"query": q, "limit": overfetch, "agent_id": run_id}, timeout=300)
         for row in (res or {}).get("content") or []:
             meta = row.get("metadata") if isinstance(row.get("metadata"), dict) else {}
             if meta.get("benchmark_run_id") != run_id:
@@ -264,7 +276,8 @@ def action_retrieve(payload: Dict[str, Any]) -> Any:
                 "text": text,
                 "score": row.get("combined_score") or row.get("similarity") or 0.5,
                 "sourceType": "memory",
-                "metadata": meta,
+                # Do not charge the shared reader for adapter bookkeeping.
+                "metadata": {"session_date": meta.get("session_date") or ""},
             }
             order.append(step_id)
     latency_ms = (time.perf_counter() - started) * 1000

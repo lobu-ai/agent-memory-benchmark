@@ -13,6 +13,7 @@
  * format as the other judge scripts; build-data.mjs discovers it as a board).
  */
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 
@@ -32,7 +33,9 @@ function claudeCall(prompt) {
   return new Promise((resolve, reject) => {
     execFile(
       "claude",
-      ["-p", prompt, "--model", MODEL, "--output-format", "json"],
+      ["-p", prompt, "--model", MODEL, "--output-format", "json",
+       "--safe-mode", "--tools", "", "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}',
+       "--disable-slash-commands", "--no-session-persistence"],
       { maxBuffer: 16 * 1024 * 1024, timeout: 300_000 },
       (err, stdout) => {
         if (err) return reject(err);
@@ -111,7 +114,8 @@ const pct = (xs) => {
 };
 
 for (const file of process.argv.slice(2)) {
-  const data = JSON.parse(readFileSync(file, "utf8"));
+  const sourceBytes = readFileSync(file);
+  const data = JSON.parse(sourceBytes.toString("utf8"));
   const judgedSystems = [];
   for (const sys of data.systems) {
     const tasks = [];
@@ -157,17 +161,20 @@ for (const file of process.argv.slice(2)) {
       systemLabel: sys.systemLabel,
       trials: outTrials,
       summary: {
-        answerAccuracy: frac(allNew),
+        answerAccuracy: nullN > 0 ? null : frac(allNew),
+        questionCount: allNew.length,
+        unjudgeableCount: nullN,
         perCategory: Object.fromEntries(
           Object.keys(cat)
             .sort()
-            .map((c) => [c, frac(cat[c])])
+            .map((c) => [c, cat[c].some(v => v == null) ? null : frac(cat[c])])
         ),
       },
     });
     console.log(`\n## ${sys.systemLabel}  (${file.split("/").pop()})`);
     console.log(`  trials=${sys.trials.length}  unjudgeable=${nullN}`);
-    console.log(`  OVERALL claude-judge: ${pct(allNew)?.toFixed(1)}%`);
+    console.log(`  OVERALL claude-judge: ${nullN ? 'incomplete' : pct(allNew)?.toFixed(1) + '%'}`);
+    if (nullN) process.exitCode = 1;
     for (const c of Object.keys(cat).sort())
       console.log(
         `    ${c.padEnd(28)} ${pct(cat[c])?.toFixed(0).padStart(4)}%`
@@ -184,6 +191,7 @@ for (const file of process.argv.slice(2)) {
     JSON.stringify(
       {
         judgeModel: MODEL,
+        sourceReportSha256: createHash('sha256').update(sourceBytes).digest('hex'),
         judgedAt: process.env.JUDGED_AT || new Date().toISOString(),
         systems: judgedSystems,
       },
