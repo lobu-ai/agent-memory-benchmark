@@ -34,6 +34,7 @@ The shared answerer is held constant across systems so the score reflects the
 | Hindsight | `adapters/hindsight_adapter.py` | local Hindsight API server |
 | Mem0 | `adapters/mem0_local_adapter.py` | local OSS `mem0` lib + local Chroma |
 | Supermemory | `adapters/supermemory_adapter.py` | self-hosted `supermemory-server` binary (local) |
+| Tree Ring Memory | `adapters/tree_ring_adapter.py` | local `tree-ring` CLI |
 
 ## Datasets
 
@@ -51,6 +52,14 @@ bun install
 # then:
 ANSWERER_MAX_CONCURRENCY=3 Z_AI_API_KEY=... \
   bun run scripts/run.ts --config configs/longmemeval-oracle-10.hindsight.json
+```
+
+Tree Ring Memory can be smoke-tested without external services once the CLI is
+installed or built locally:
+
+```bash
+TREE_RING_BIN=/path/to/tree-ring \
+  bun run scripts/run.ts --config configs/longmemeval-oracle-10.tree-ring.json
 ```
 
 Reports (JSON + Markdown leaderboard) land in `results/`.
